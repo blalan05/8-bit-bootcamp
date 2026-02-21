@@ -1,0 +1,34 @@
+{
+  "tileSize": 10,
+  "maps": [
+    {
+      "name": "Footprints",
+      "width": 50,
+      "height": 40,
+      "objects": [
+        {
+          "name": "Admin Building",
+          "type": "building",
+          "size": { "x": 4, "y": 6, "z": 1.5 },
+          "x": 2,
+          "y": 2,
+          "z": 0.75
+        },
+        {
+          "name": "Gate Guard",
+          "type": "npc",
+          "x": 12,
+          "y": 0,
+          "z": 5
+        },
+        {
+          "name": "Training Ground",
+          "type": "activity",
+          "x": 5,
+          "y": 0,
+          "z": 12
+        }
+      ]
+    }
+  ]
+}
