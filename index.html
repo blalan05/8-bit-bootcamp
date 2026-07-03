@@ -9,9 +9,302 @@
         margin: 0;
         padding: 0;
         overflow: hidden;
+        font-family: system-ui, -apple-system, sans-serif;
+        background: #0f0f1a;
+        color: #e8e8f0;
       }
-      canvas {
+      canvas { display: block; }
+
+      .menu-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(8, 8, 20, 0.95);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+      }
+
+      .menu-panel {
+        background: #1e1e32;
+        border: 2px solid #3d3d5c;
+        border-radius: 8px;
+        padding: 24px;
+        max-height: 90vh;
+        overflow-y: auto;
+      }
+
+      .menu-title {
+        margin: 0 0 8px;
+        font-size: 1.75rem;
+        letter-spacing: 0.05em;
+        text-align: center;
+      }
+
+      .menu-subtitle {
+        margin: 0 0 20px;
+        text-align: center;
+        color: #9898b0;
+      }
+
+      .menu-hint {
+        margin: 16px 0 0;
+        font-size: 0.8rem;
+        color: #686880;
+        text-align: center;
+      }
+
+      .slot-panel { width: min(420px, 92vw); }
+
+      .slot-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .slot-card {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+        padding: 14px 16px;
+        background: #282840;
+        border: 2px solid #3d3d5c;
+        border-radius: 6px;
+        color: inherit;
+        cursor: pointer;
+        text-align: left;
+        width: 100%;
+        font: inherit;
+      }
+
+      .slot-card:hover,
+      .slot-card--focused,
+      .slot-card:focus {
+        border-color: #6a8cff;
+        outline: none;
+      }
+
+      .slot-card--empty .slot-name { color: #9898b0; font-style: italic; }
+
+      .slot-label { font-size: 0.75rem; color: #686880; text-transform: uppercase; }
+      .slot-name { font-size: 1.1rem; font-weight: 600; }
+      .slot-meta { font-size: 0.85rem; color: #9898b0; }
+
+      .builder-panel {
+        display: grid;
+        grid-template-columns: 240px 1fr;
+        gap: 24px;
+        width: min(820px, 96vw);
+        max-height: 92vh;
+      }
+
+      .builder-preview {
+        background: #12122a;
+        border-radius: 6px;
+        min-height: 320px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .builder-form { min-width: 0; }
+
+      .builder-form h2 { margin-top: 0; text-align: left; font-size: 1.25rem; }
+
+      .field {
         display: block;
+        margin-bottom: 14px;
+        border: none;
+        padding: 0;
+      }
+
+      .field > span:first-child,
+      .field legend {
+        display: block;
+        font-size: 0.8rem;
+        color: #9898b0;
+        margin-bottom: 6px;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+
+      .field legend { margin-bottom: 8px; }
+
+      .field label { margin-right: 12px; cursor: pointer; }
+
+      .name-row { display: flex; gap: 8px; }
+      .name-row input { flex: 1; }
+
+      input[type="text"],
+      input[type="range"] { width: 100%; }
+
+      input[type="text"] {
+        padding: 8px 10px;
+        background: #282840;
+        border: 1px solid #3d3d5c;
+        border-radius: 4px;
+        color: inherit;
+        font: inherit;
+      }
+
+      .field-error {
+        display: block;
+        color: #ff6b6b;
+        font-size: 0.8rem;
+        min-height: 1.2em;
+        margin-top: 4px;
+      }
+
+      .swatch-row, .outfit-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .swatch {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        border: 2px solid #3d3d5c;
+        cursor: pointer;
+        padding: 0;
+      }
+
+      .swatch--selected { border-color: #6a8cff; box-shadow: 0 0 0 2px #6a8cff; }
+
+      .background-list { display: flex; flex-direction: column; gap: 6px; }
+
+      .background-option {
+        display: block;
+        padding: 8px 10px;
+        background: #282840;
+        border: 1px solid #3d3d5c;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+
+      .background-option--selected { border-color: #6a8cff; }
+
+      .background-option input { margin-right: 8px; }
+
+      .background-name { font-weight: 600; display: block; }
+      .background-desc { font-size: 0.85rem; color: #9898b0; display: block; margin-top: 2px; }
+
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 6px;
+      }
+
+      .stat-row {
+        background: #282840;
+        padding: 6px 8px;
+        border-radius: 4px;
+        text-align: center;
+        cursor: help;
+      }
+
+      .stat--str { border: 1px solid #6a8cff; }
+
+      .stat-label { display: block; font-size: 0.7rem; color: #9898b0; }
+      .stat-value { display: block; font-weight: 700; font-size: 1.1rem; }
+
+      .hint { font-size: 0.7rem; color: #686880; text-transform: none; font-weight: normal; }
+
+      .outfit-btn {
+        padding: 6px 10px;
+        background: #282840;
+        border: 1px solid #3d3d5c;
+        border-radius: 4px;
+        color: inherit;
+        cursor: pointer;
+        font-size: 0.8rem;
+      }
+
+      .outfit-btn--selected { border-color: #6a8cff; background: #323258; }
+
+      .builder-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 16px;
+      }
+
+      .btn {
+        padding: 10px 16px;
+        border-radius: 4px;
+        border: none;
+        cursor: pointer;
+        font: inherit;
+        font-weight: 600;
+      }
+
+      .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+      .btn-primary { background: #4a6cff; color: #fff; flex: 1; }
+      .btn-primary:hover:not(:disabled) { background: #5a7cff; }
+
+      .btn-secondary { background: #3d3d5c; color: #e8e8f0; }
+      .btn-secondary:hover { background: #4d4d6c; }
+
+      .btn-danger { background: #c0392b; color: #fff; }
+      .btn-danger:hover { background: #e74c3c; }
+
+      .confirm-overlay { z-index: 10001; }
+
+      .confirm-box {
+        background: #1e1e32;
+        border: 2px solid #3d3d5c;
+        border-radius: 8px;
+        padding: 24px;
+        max-width: 360px;
+        text-align: center;
+      }
+
+      .confirm-actions { display: flex; gap: 10px; justify-content: center; margin-top: 16px; }
+
+      .recruit-hud {
+        position: fixed;
+        top: 12px;
+        left: 12px;
+        background: rgba(20, 20, 40, 0.88);
+        border: 1px solid #3d3d5c;
+        border-radius: 6px;
+        padding: 10px 14px;
+        z-index: 9999;
+        min-width: 160px;
+      }
+
+      .recruit-hud-name { font-weight: 700; font-size: 1rem; margin-bottom: 2px; }
+      .recruit-hud-meta { font-size: 0.75rem; color: #9898b0; margin-bottom: 8px; }
+
+      .recruit-hud-stats {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 4px;
+      }
+
+      .recruit-stat {
+        text-align: center;
+        cursor: help;
+        padding: 2px 4px;
+        background: rgba(40, 40, 64, 0.8);
+        border-radius: 3px;
+      }
+
+      .recruit-stat-label { display: block; font-size: 0.65rem; color: #9898b0; }
+      .recruit-stat-value { display: block; font-size: 0.9rem; font-weight: 600; }
+
+      .location-hud {
+        position: fixed;
+        bottom: 8px;
+        left: 8px;
+        color: #9898b0;
+        font: 12px monospace;
+        background: rgba(20, 20, 40, 0.75);
+        padding: 4px 8px;
+        border-radius: 4px;
+        z-index: 9999;
       }
     </style>
 </head>

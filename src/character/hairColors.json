@@ -1,0 +1,10 @@
+[
+  { "id": "black", "name": "Black", "color": 1710618 },
+  { "id": "dark_brown", "name": "Dark Brown", "color": 2894892 },
+  { "id": "brown", "name": "Brown", "color": 6040119 },
+  { "id": "auburn", "name": "Auburn", "color": 9127187 },
+  { "id": "red", "name": "Red", "color": 9109504 },
+  { "id": "blonde", "name": "Blonde", "color": 13808703 },
+  { "id": "gray", "name": "Gray", "color": 8421504 },
+  { "id": "white", "name": "White", "color": 14079702 }
+]

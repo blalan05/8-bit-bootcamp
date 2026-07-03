@@ -9,7 +9,7 @@ import { getTileBounds } from './mapParser.js';
 /**
  * @typedef {Object} MapObject
  * @property {string} name
- * @property {string} type - 'building' | 'npc' | 'activity'
+ * @property {string} type - 'building' | 'npc' | 'activity' | 'road'
  * @property {Object} [size]
  * @property {number} x
  * @property {number} y
@@ -94,6 +94,16 @@ export class MapTile extends THREE.Group {
           new THREE.MeshStandardMaterial({ color: 0x00aaff })
         );
         mesh.position.set(localX, 0.05, localZ);
+        mesh.userData.object = obj;
+        return mesh;
+      }
+      case 'road': {
+        const mesh = new THREE.Mesh(
+          new THREE.PlaneGeometry(this.tileSize, this.tileSize),
+          new THREE.MeshStandardMaterial({ color: 0x444444 })
+        );
+        mesh.rotation.x = -Math.PI / 2;
+        mesh.position.set(localX, 0.01, localZ);
         mesh.userData.object = obj;
         return mesh;
       }

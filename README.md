@@ -6,7 +6,7 @@
  - Game Map: MCRD San Deigo
 
 ## Features
-- Character Stats / Classes
+- Character Stats / Backgrounds
 - Skills/Button Mini Games
 - Inventory?
 - NPCs

@@ -1,19 +1,28 @@
 import * as THREE from 'three';
+import { createCharacterMesh, applyAppearanceToMesh } from '../character/appearance.js';
 
-export class Player extends THREE.Mesh {
+export class Player extends THREE.Group {
   raycaster = new THREE.Raycaster();
 
-  constructor(camera, map, bounds = { width: 50, height: 40 }) {
+  constructor(camera, map, character, bounds = { width: 50, height: 40 }) {
     super();
 
-    this.geometry = new THREE.CapsuleGeometry(0.25, 0.5);
-    this.material = new THREE.MeshStandardMaterial({ color: 0x0000ff });
-    this.position.set(5, 0.5, 5);
+    this.character = character;
+    this.characterMesh = createCharacterMesh();
+    this.characterMesh.position.y = 0.28;
+    this.add(this.characterMesh);
+    applyAppearanceToMesh(this.characterMesh, character);
+
+    this.position.set(5, 0, 5);
 
     this.camera = camera;
     this.map = map;
     this.bounds = bounds;
     window.addEventListener('mousedown', this.onMouseDown.bind(this));
+  }
+
+  updateAppearance() {
+    applyAppearanceToMesh(this.characterMesh, this.character);
   }
 
   onMouseDown(event) {
@@ -29,10 +38,7 @@ export class Player extends THREE.Mesh {
       const { x, z } = intersects[0].point;
       const clampedX = Math.max(0, Math.min(this.bounds.width, x));
       const clampedZ = Math.max(0, Math.min(this.bounds.height, z));
-      this.position.set(clampedX, 0.5, clampedZ);
+      this.position.set(clampedX, 0, clampedZ);
     }
   }
 }
-
-
-

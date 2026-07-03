@@ -1,0 +1,80 @@
+[
+  {
+    "id": "high_school_athlete",
+    "name": "High School Athlete",
+    "description": "Varsity sports. Strong and durable, but bookwork was never your priority.",
+    "modifiers": {
+      "strength": 2,
+      "dexterity": 1,
+      "intelligence": -2,
+      "endurance": 2,
+      "leadership": -1
+    },
+    "defaultOutfitId": "tshirt_jeans"
+  },
+  {
+    "id": "team_captain",
+    "name": "Team Captain",
+    "description": "Led a team or club. Natural leader with quick feet, but the long haul wears on you.",
+    "modifiers": {
+      "strength": 0,
+      "dexterity": 2,
+      "intelligence": 0,
+      "endurance": -2,
+      "leadership": 2
+    },
+    "defaultOutfitId": "polo_khakis"
+  },
+  {
+    "id": "honor_student",
+    "name": "Honor Student",
+    "description": "Strong academics. Sharp mind, but you skipped gym more than you'd admit.",
+    "modifiers": {
+      "strength": -2,
+      "dexterity": 0,
+      "intelligence": 3,
+      "endurance": -1,
+      "leadership": 0
+    },
+    "defaultOutfitId": "polo_khakis"
+  },
+  {
+    "id": "jrotc",
+    "name": "JROTC",
+    "description": "Prior drill exposure. Disciplined and coordinated, light on classroom edge.",
+    "modifiers": {
+      "strength": 0,
+      "dexterity": 2,
+      "intelligence": -1,
+      "endurance": 0,
+      "leadership": 2
+    },
+    "defaultOutfitId": "polo_khakis"
+  },
+  {
+    "id": "manual_labor",
+    "name": "Manual Labor",
+    "description": "Physical job background. Built tough from work, not from giving orders.",
+    "modifiers": {
+      "strength": 2,
+      "dexterity": 0,
+      "intelligence": -1,
+      "endurance": 2,
+      "leadership": -2
+    },
+    "defaultOutfitId": "flannel_workboots"
+  },
+  {
+    "id": "student_council",
+    "name": "Student Council",
+    "description": "Organized peers and ran meetings. Smart and persuasive, not the most athletic.",
+    "modifiers": {
+      "strength": -1,
+      "dexterity": -1,
+      "intelligence": 2,
+      "endurance": 0,
+      "leadership": 2
+    },
+    "defaultOutfitId": "polo_khakis"
+  }
+]

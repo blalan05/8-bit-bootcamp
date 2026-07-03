@@ -1,0 +1,26 @@
+[
+  {
+    "id": "tshirt_jeans",
+    "name": "T-shirt & Jeans",
+    "topColor": 8886705,
+    "bottomColor": 2829615
+  },
+  {
+    "id": "hoodie_joggers",
+    "name": "Hoodie & Joggers",
+    "topColor": 3355443,
+    "bottomColor": 5592405
+  },
+  {
+    "id": "polo_khakis",
+    "name": "Polo & Khakis",
+    "topColor": 9127187,
+    "bottomColor": 12045528
+  },
+  {
+    "id": "flannel_workboots",
+    "name": "Flannel & Work Pants",
+    "topColor": 9127187,
+    "bottomColor": 2829615
+  }
+]

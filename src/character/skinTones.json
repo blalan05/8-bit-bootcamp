@@ -1,0 +1,10 @@
+[
+  { "id": "fair", "name": "Fair", "color": 16764080 },
+  { "id": "light", "name": "Light", "color": 15587128 },
+  { "id": "medium", "name": "Medium", "color": 12095058 },
+  { "id": "olive", "name": "Olive", "color": 9132587 },
+  { "id": "tan", "name": "Tan", "color": 10254648 },
+  { "id": "brown", "name": "Brown", "color": 6700590 },
+  { "id": "dark", "name": "Dark", "color": 4637373 },
+  { "id": "deep", "name": "Deep", "color": 2894892 }
+]
