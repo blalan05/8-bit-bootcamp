@@ -11,6 +11,10 @@ import { showRecruiterVisit } from './recruiter/recruiterVisitUI.js';
 import { saveSlot } from './character/saveSlots.js';
 import { createRecruitHUD } from './character/recruitHUD.js';
 import { ISO_PITCH } from './art/assetLoader.js';
+import { CampaignController } from './campaign/campaignController.js';
+import { SandboxController } from './campaign/sandboxController.js';
+import { HydrationSystem } from './campaign/hydration.js';
+import { ensureCampaign, isSandbox } from './campaign/campaignState.js';
 
 /** Internal render resolution divisor — bigger = chunkier pixels */
 const PIXEL_SCALE = 3;
@@ -26,15 +30,18 @@ let tileLoader;
 let recruitHUD;
 let debugTileEl;
 let perfStats;
+let gameController;
+let hydrationSystem;
 const clock = new THREE.Clock();
+let sessionEndCallback = null;
 
 async function boot() {
   while (true) {
     const result = await showSlotSelect();
 
     if (result.type === 'continue') {
-      startGame(result.character);
-      return;
+      await runGameSession(result.character);
+      continue;
     }
 
     if (result.type === 'create') {
@@ -48,13 +55,62 @@ async function boot() {
         alert('Could not save character. Check browser storage settings.');
         continue;
       }
-      startGame(cleared);
-      return;
+      await runGameSession(cleared);
     }
   }
 }
 
+function runGameSession(character) {
+  return new Promise(resolve => {
+    sessionEndCallback = resolve;
+    startGame(character);
+  });
+}
+
+function endGameSession() {
+  renderer?.setAnimationLoop(null);
+
+  gameController?.dispose();
+  gameController = null;
+
+  hydrationSystem?.dispose();
+  hydrationSystem = null;
+
+  player?.dispose();
+  player = null;
+
+  tileLoader = null;
+  controls?.dispose();
+  controls = null;
+
+  recruitHUD?.element?.remove();
+  recruitHUD = null;
+
+  debugTileEl?.remove();
+  debugTileEl = null;
+
+  perfStats?.dom?.remove();
+  perfStats = null;
+
+  if (renderer) {
+    renderer.domElement.remove();
+    renderer.dispose();
+    renderer = null;
+  }
+
+  scene = null;
+  camera = null;
+
+  window.removeEventListener('resize', onResize);
+
+  const done = sessionEndCallback;
+  sessionEndCallback = null;
+  done?.();
+}
+
 function startGame(character) {
+  character = ensureCampaign(character);
+
   perfStats = new Stats();
   document.body.appendChild(perfStats.dom);
 
@@ -98,15 +154,17 @@ function startGame(character) {
   const mapContainer = new THREE.Group();
   scene.add(mapContainer);
 
-  const parsedMap = mapsConfig.maps?.find(m => m.name === 'mcrdsd');
-  player = new Player(camera, mapContainer, character, {
-    width: parsedMap?.width ?? 60,
-    height: parsedMap?.height ?? 50
-  });
+  const mapDef = mapsConfig.maps?.find(m => m.name === 'mcrdsd');
+  const bounds = {
+    width: mapDef?.width ?? 60,
+    height: mapDef?.height ?? 50
+  };
+
+  player = new Player(camera, mapContainer, character, bounds);
   scene.add(player);
 
-  const startX = (parsedMap?.width ?? 60) / 2;
-  const startZ = (parsedMap?.height ?? 50) / 2;
+  const startX = bounds.width / 2;
+  const startZ = bounds.height / 2;
   player.position.set(startX, 0, startZ);
 
   tileLoader = new TileLoader(mapsConfig, mapContainer, {
@@ -115,7 +173,40 @@ function startGame(character) {
   });
   tileLoader.setMap('mcrdsd');
 
-  // Fixed 2:1 dimetric angle: yaw 45deg, height = horizontal distance * tan(ISO_PITCH)
+  const parsedMap = tileLoader.getParsedMap();
+  const slotIndex = character.slotIndex ?? 0;
+
+  if (isSandbox(character)) {
+    gameController = new SandboxController({
+      character,
+      slotIndex,
+      player,
+      parsedMap,
+      recruitHUD
+    });
+  } else {
+    gameController = new CampaignController({
+      character,
+      slotIndex,
+      player,
+      parsedMap,
+      recruitHUD,
+      onRunEnd: () => endGameSession()
+    });
+
+    hydrationSystem = new HydrationSystem({
+      character,
+      player,
+      mapContainer,
+      bounds,
+      onCharacterUpdate: (c) => gameController.updateCharacter(c),
+      onRunFailure: (reason) => gameController.handleRunFailure(reason)
+    });
+    gameController.hydrationSystem = hydrationSystem;
+  }
+
+  gameController.start();
+
   const horizontal = 40;
   const offset = horizontal * Math.SQRT1_2;
   controls.target.set(startX, 0, startZ);
@@ -123,13 +214,14 @@ function startGame(character) {
   controls.update();
 
   renderer.setAnimationLoop(animate);
-
   window.addEventListener('resize', onResize);
 }
 
 function animate() {
   const dt = clock.getDelta();
   player.update(dt);
+  hydrationSystem?.update(dt);
+  gameController?.updateProximity();
   tileLoader.update();
   controls.update();
   perfStats.update();

@@ -3,12 +3,98 @@ import { getAllBackgrounds, createDraftCharacter, createCharacter, validateChara
 import { getAllOutfits, getAllSkinTones, getAllHairColors } from './appearance.js';
 import { getRandomName } from './randomNames.js';
 import { STAT_KEYS, formatStatLabel, STAT_TOOLTIPS, rollCoreStats, getFinalStats, getStatTotal, canDecreaseCoreStat, canIncreaseCoreStat } from './stats.js';
+import { hasPerk } from '../campaign/metaProgress.js';
+
+/**
+ * Mode / difficulty selection step.
+ * @returns {Promise<{ mode: string, difficulty: string, perkStat: string | null } | null>}
+ */
+function showModeSelect() {
+  return new Promise(resolve => {
+    let selected = { mode: 'campaign', difficulty: 'story', perkStat: null };
+    const showPooleePicker = hasPerk('pooleePrep');
+
+    const overlay = document.createElement('div');
+    overlay.className = 'menu-overlay';
+
+    function render() {
+      const pooleeSection = showPooleePicker && selected.mode !== 'sandbox'
+        ? `<fieldset class="field perk-stat-field">
+            <legend>Poolee Prep — +1 stat</legend>
+            <div class="perk-stat-row">${STAT_KEYS.map(key =>
+              `<button type="button" class="btn btn-secondary perk-stat-btn${selected.perkStat === key ? ' perk-stat-btn--selected' : ''}" data-stat="${key}">${formatStatLabel(key)}</button>`
+            ).join('')}</div>
+          </fieldset>`
+        : '';
+
+      overlay.innerHTML = `
+        <div class="menu-panel mode-panel">
+          <h2 class="menu-title">Select Mode</h2>
+          <p class="menu-subtitle">How do you want to train?</p>
+          <div class="mode-cards">
+            <button type="button" class="mode-card${selected.mode === 'campaign' && selected.difficulty === 'story' ? ' mode-card--selected' : ''}" data-mode="campaign" data-difficulty="story">
+              <span class="mode-card-title">Story Campaign</span>
+              <span class="mode-card-desc">Forgiving 13-week schedule. Failed activities cost readiness. Hydration penalties, not death.</span>
+            </button>
+            <button type="button" class="mode-card${selected.mode === 'campaign' && selected.difficulty === 'ironman' ? ' mode-card--selected' : ''}" data-mode="campaign" data-difficulty="ironman">
+              <span class="mode-card-title">Ironman Campaign</span>
+              <span class="mode-card-desc">Rogue-lite rules. Unsat grades or dehydration end the run. Earn grit for The Locker. Recycle tokens forgive one failure.</span>
+            </button>
+            <button type="button" class="mode-card${selected.mode === 'sandbox' ? ' mode-card--selected' : ''}" data-mode="sandbox" data-difficulty="story">
+              <span class="mode-card-title">Sandbox Free Play</span>
+              <span class="mode-card-desc">Roam the depot and replay any activity at its location. No scheduler, no hydration.</span>
+            </button>
+          </div>
+          ${pooleeSection}
+          <div class="builder-actions">
+            <button type="button" class="btn btn-secondary" id="mode-back">Back</button>
+            <button type="button" class="btn btn-primary" id="mode-continue">Continue</button>
+          </div>
+        </div>
+      `;
+
+      overlay.querySelector('#mode-back').addEventListener('click', () => {
+        overlay.remove();
+        resolve(null);
+      }, { once: true });
+
+      overlay.querySelector('#mode-continue').addEventListener('click', () => {
+        if (showPooleePicker && selected.mode !== 'sandbox' && !selected.perkStat) {
+          selected.perkStat = 'leadership';
+        }
+        overlay.remove();
+        resolve({ ...selected });
+      }, { once: true });
+
+      overlay.querySelectorAll('.mode-card').forEach(card => {
+        card.addEventListener('click', () => {
+          selected.mode = card.dataset.mode;
+          selected.difficulty = card.dataset.difficulty;
+          render();
+        });
+      });
+
+      overlay.querySelectorAll('.perk-stat-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          selected.perkStat = btn.dataset.stat;
+          render();
+        });
+      });
+    }
+
+    render();
+    document.body.appendChild(overlay);
+  });
+}
 
 /**
  * @param {number} slotIndex
  * @returns {Promise<object | null>} character or null if back
  */
-export function showCharacterCreation(slotIndex) {
+export async function showCharacterCreation(slotIndex) {
+  const modeConfig = await showModeSelect();
+  if (!modeConfig) return null;
+
   return new Promise(resolve => {
     const backgrounds = getAllBackgrounds();
     const outfits = getAllOutfits();
@@ -26,6 +112,7 @@ export function showCharacterCreation(slotIndex) {
         <div class="builder-preview" id="builder-preview"></div>
         <div class="builder-form">
           <h2 class="menu-title">New Recruit</h2>
+          <p class="menu-subtitle mode-badge-label">${modeConfig.mode === 'sandbox' ? 'Sandbox' : modeConfig.difficulty === 'ironman' ? 'Ironman' : 'Story'} mode</p>
           <label class="field">
             <span>Name</span>
             <div class="name-row">
@@ -278,7 +365,12 @@ export function showCharacterCreation(slotIndex) {
         draft.backgroundId,
         draft.appearance,
         slotIndex,
-        draft.coreStats
+        draft.coreStats,
+        {
+          mode: modeConfig.mode,
+          difficulty: modeConfig.difficulty,
+          perkStat: modeConfig.perkStat
+        }
       );
       cleanup(character);
     });

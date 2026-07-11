@@ -12,6 +12,7 @@
         {"name": "Receiving Barracks","type": "building","spriteId": "building/barracks","size": {"x": 4,"y": 3,"z": 4},"x": 35,"y": 1.5,"z": 5},
         {"name": "Lecture Hall","type": "building","spriteId": "building/office","size": {"x": 4,"y": 3,"z": 4},"x": 45,"y": 1.5,"z": 5},
         {"name": "Dental","type": "building","spriteId": "building/office","size": {"x": 4,"y": 3,"z": 4},"x": 55,"y": 1.5,"z": 5},
+        {"name": "Rifle Range","type": "activity","spriteId": "activity/training","x": 45,"y": 0,"z": 5},
         {"name": "Road","type": "road","spriteId": "ground/road","x": 5,"y": 0,"z": 15},
         {"name": "Road","type": "road","spriteId": "ground/road","x": 15,"y": 0,"z": 15},
         {"name": "Road","type": "road","spriteId": "ground/road","x": 25,"y": 0,"z": 15},
@@ -35,7 +36,9 @@
         {"name": "400m track","type": "activity","spriteId": "activity/track","x": 25,"y": 0,"z": 45},
         {"name": "MCMAP Pit","type": "activity","spriteId": "activity/training","x": 35,"y": 0,"z": 45},
         {"name": "Logs","type": "activity","spriteId": "activity/training","x": 45,"y": 0,"z": 45},
-        {"name": "Thunderdown","type": "activity","spriteId": "activity/training","x": 55,"y": 0,"z": 45}
+        {"name": "Thunderdown","type": "activity","spriteId": "activity/training","x": 55,"y": 0,"z": 45},
+        {"name": "Crucible Trail","type": "activity","spriteId": "activity/track","x": 55,"y": 0,"z": 40},
+        {"name": "Gas Chamber","type": "activity","spriteId": "activity/training","x": 5,"y": 0,"z": 40}
       ]
     }
   ]

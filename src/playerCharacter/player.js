@@ -24,6 +24,7 @@ export class Player extends THREE.Group {
     this.map = map;
     this.bounds = bounds;
     this.target = null;
+    this.inputEnabled = true;
 
     this._onMouseDown = this.onMouseDown.bind(this);
     window.addEventListener('mousedown', this._onMouseDown);
@@ -43,7 +44,7 @@ export class Player extends THREE.Group {
    * @param {number} dt - elapsed seconds since last frame
    */
   update(dt) {
-    if (!this.target) return;
+    if (!this.inputEnabled || !this.target) return;
 
     const dx = this.target.x - this.position.x;
     const dz = this.target.z - this.position.z;
@@ -62,7 +63,7 @@ export class Player extends THREE.Group {
   }
 
   onMouseDown(event) {
-    if (event.button !== 0) return;
+    if (!this.inputEnabled || event.button !== 0) return;
 
     const coords = new THREE.Vector2(
       (event.clientX / window.innerWidth) * 2 - 1,
@@ -78,5 +79,9 @@ export class Player extends THREE.Group {
       const clampedZ = Math.max(0, Math.min(this.bounds.height, z));
       this.target = new THREE.Vector3(clampedX, 0, clampedZ);
     }
+  }
+
+  dispose() {
+    window.removeEventListener('mousedown', this._onMouseDown);
   }
 }

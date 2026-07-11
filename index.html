@@ -913,6 +913,459 @@
       }
 
       .pullup-phase-hint b { color: #ffd94a; }
+
+      /* --- Campaign schedule & proximity --- */
+      .schedule-panel { width: min(520px, 94vw); }
+      .schedule-body { margin-bottom: 16px; }
+      .schedule-assignment {
+        font-family: var(--pixel-font);
+        font-size: 0.75rem;
+        color: #ffd94a;
+        margin: 0 0 12px;
+      }
+      .schedule-location {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        margin: 16px 0;
+        padding: 12px;
+        background: #1e1e32;
+        border: 2px solid var(--panel-border);
+      }
+      .schedule-label {
+        font-family: var(--pixel-font);
+        font-size: 0.45rem;
+        color: #686880;
+        text-transform: uppercase;
+      }
+      .schedule-value {
+        font-family: var(--pixel-font);
+        font-size: 0.65rem;
+        color: #e8e8f0;
+      }
+      .schedule-actions {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+      }
+
+      .activity-prompt {
+        position: fixed;
+        bottom: 24px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: none;
+        align-items: center;
+        gap: 12px;
+        background: rgba(20, 20, 40, 0.95);
+        border: 3px solid var(--accent);
+        box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.5);
+        padding: 12px 16px;
+        z-index: 9998;
+      }
+      .activity-prompt-text {
+        font-family: var(--pixel-font);
+        font-size: 0.55rem;
+        color: #e8e8f0;
+      }
+      .activity-prompt-btn { padding: 8px 14px; font-size: 0.5rem; }
+
+      .grade-badge {
+        font-family: var(--pixel-font);
+        font-size: 0.55rem;
+        padding: 4px 8px;
+        border: 2px solid var(--panel-border);
+      }
+      .grade-badge--honor { color: #ffd94a; background: #3a3020; }
+      .grade-badge--passing { color: #6dff8a; background: #1a3020; }
+      .grade-badge--unsat { color: #ff6b6b; background: #301a1a; }
+
+      .campaign-panel { width: min(620px, 94vw); }
+
+      /* --- Drill cadence mini-game --- */
+      .drill-scene { width: 100%; text-align: center; }
+      .drill-deck {
+        height: 80px;
+        background: linear-gradient(180deg, #7a8f4a 0%, #5f7539 100%);
+        border: 3px solid var(--panel-border);
+        margin-bottom: 16px;
+      }
+      .drill-command {
+        font-family: var(--pixel-font);
+        font-size: 1rem;
+        color: #ffd94a;
+        margin: 16px 0;
+        min-height: 2em;
+      }
+      .drill-beat {
+        width: 24px;
+        height: 24px;
+        margin: 0 auto 16px;
+        background: #3d3d5c;
+        border: 2px solid var(--panel-border);
+        border-radius: 50%;
+      }
+      .drill-beat--pulse { background: #ffd94a; transform: scale(1.2); transition: transform 0.1s; }
+      .drill-hud {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 16px;
+        font-family: var(--pixel-font);
+        font-size: 0.55rem;
+        margin-bottom: 12px;
+      }
+      .drill-flash { font-size: 0.6rem; min-width: 48px; }
+      .drill-flash--hit { color: #6dff8a; }
+      .drill-flash--miss { color: #ff6b6b; }
+      .drill-flash--show { animation: drill-flash 0.4s ease; }
+      @keyframes drill-flash {
+        0% { opacity: 0; transform: scale(0.8); }
+        50% { opacity: 1; transform: scale(1.1); }
+        100% { opacity: 0; transform: scale(1); }
+      }
+      .drill-keys {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 12px;
+        font-family: var(--pixel-font);
+        font-size: 0.45rem;
+        color: #9898b0;
+      }
+      .drill-keys kbd {
+        background: #282840;
+        border: 2px solid var(--panel-border);
+        padding: 2px 6px;
+        margin-right: 4px;
+      }
+
+      /* --- Core values mini-game --- */
+      .corevalues-scene { width: 100%; }
+      .corevalues-trait {
+        font-family: var(--pixel-font);
+        font-size: 0.85rem;
+        color: #ffd94a;
+        text-align: center;
+        margin-bottom: 16px;
+        padding: 12px;
+        background: #1e1e32;
+        border: 2px solid var(--panel-border);
+      }
+      .corevalues-choices {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .corevalues-choices .cv-choice {
+        text-align: left;
+        font-size: 0.5rem;
+        line-height: 1.5;
+        white-space: normal;
+      }
+      .corevalues-progress {
+        margin-top: 12px;
+        font-family: var(--pixel-font);
+        font-size: 0.45rem;
+        color: #686880;
+        text-align: center;
+      }
+
+      /* --- Shared mini-game kit (weeks 2–13) --- */
+      .mg-scene { width: 100%; text-align: center; }
+      .mg-title {
+        font-family: var(--pixel-font);
+        font-size: 0.65rem;
+        color: #ffd94a;
+        margin-bottom: 12px;
+      }
+      .mg-main {
+        min-height: 120px;
+        margin-bottom: 12px;
+        position: relative;
+      }
+      .mg-hud {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 16px;
+        font-family: var(--pixel-font);
+        font-size: 0.55rem;
+        margin-bottom: 8px;
+      }
+      .mg-flash { font-size: 0.6rem; min-width: 48px; }
+      .mg-flash--hit { color: #6dff8a; }
+      .mg-flash--miss { color: #ff6b6b; }
+      .mg-flash--show { animation: drill-flash 0.4s ease; }
+      .mg-meter-track {
+        height: 10px;
+        background: #1e1e32;
+        border: 2px solid var(--panel-border);
+        margin-bottom: 8px;
+      }
+      .mg-meter-bar {
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(90deg, #ff6b6b 0%, #ffd94a 50%, #6dff8a 100%);
+        transition: width 0.1s linear;
+      }
+      .mg-hint {
+        font-family: var(--pixel-font);
+        font-size: 0.45rem;
+        color: #9898b0;
+        line-height: 1.5;
+      }
+      .mg-prompt {
+        font-family: var(--pixel-font);
+        font-size: 0.7rem;
+        color: #e8e8f0;
+        margin-bottom: 12px;
+      }
+      .mg-key-hint, .mg-wind {
+        font-family: var(--pixel-font);
+        font-size: 0.5rem;
+        color: #9898b0;
+      }
+      .mg-key-hint kbd, .mg-wind kbd {
+        background: #282840;
+        border: 2px solid var(--panel-border);
+        padding: 2px 6px;
+      }
+      .mg-choices, .mg-seq-btns {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .mg-choice, .mg-seq-btn {
+        text-align: left;
+        font-size: 0.5rem;
+        line-height: 1.4;
+        white-space: normal;
+      }
+      .mg-aim-ring {
+        position: relative;
+        width: 200px;
+        height: 200px;
+        margin: 0 auto;
+        border: 3px solid #6dff8a;
+        border-radius: 50%;
+        background: radial-gradient(circle, #1a3020 30%, #0e1a10 70%);
+      }
+      .mg-reticle {
+        position: absolute;
+        width: 12px;
+        height: 12px;
+        background: #ff6b6b;
+        border: 2px solid #fff;
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        top: 50%;
+        left: 50%;
+      }
+      .mg-log-lane {
+        display: flex;
+        justify-content: space-around;
+        align-items: flex-end;
+        height: 80px;
+        background: #3d3020;
+        border: 2px solid var(--panel-border);
+        margin-bottom: 8px;
+      }
+      .mg-log-marker {
+        width: 20px;
+        height: 20px;
+        background: #8b6914;
+        border: 2px solid #5a4510;
+        transition: height 0.05s linear;
+      }
+      .mg-log-zone {
+        height: 8px;
+        background: #6dff8a;
+        opacity: 0.4;
+        margin-top: 4px;
+      }
+      .mg-inspect-board {
+        position: relative;
+        width: 100%;
+        height: 160px;
+        background: linear-gradient(180deg, #2a2a48 0%, #1e1e32 100%);
+        border: 3px solid var(--panel-border);
+      }
+      .mg-inspect-spot {
+        position: absolute;
+        width: 24px;
+        height: 24px;
+        background: transparent;
+        border: 2px dashed transparent;
+        cursor: pointer;
+        transform: translate(-50%, -50%);
+      }
+      .mg-inspect-spot:hover { border-color: #ffd94a; }
+      .mg-inspect-found {
+        background: rgba(109, 255, 138, 0.3);
+        border-color: #6dff8a;
+        cursor: default;
+      }
+      .mg-night-bar, .mg-hike-bar {
+        height: 16px;
+        background: #1e1e32;
+        border: 2px solid var(--panel-border);
+        margin-bottom: 8px;
+      }
+      .mg-night-fill, .mg-hike-fill {
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(90deg, #3d5a80, #6dff8a);
+        transition: width 0.1s linear;
+      }
+      .mg-flare {
+        position: absolute;
+        inset: 0;
+        background: rgba(255, 220, 100, 0);
+        pointer-events: none;
+        transition: background 0.15s;
+      }
+      .mg-flare--on {
+        background: rgba(255, 220, 100, 0.85);
+      }
+
+      /* --- Graduation ceremony --- */
+      .graduation-panel { width: min(480px, 94vw); }
+      .graduation-stats {
+        margin: 16px 0;
+        padding: 12px;
+        background: #1e1e32;
+        border: 2px solid var(--panel-border);
+      }
+
+      /* --- Mode select --- */
+      .mode-panel { width: min(520px, 94vw); }
+      .mode-cards { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+      .mode-card {
+        text-align: left;
+        padding: 14px;
+        background: #1e1e32;
+        border: 3px solid var(--panel-border);
+        cursor: pointer;
+        font-family: var(--pixel-font);
+      }
+      .mode-card:hover { border-color: var(--accent); }
+      .mode-card--selected { border-color: #ffd94a; background: #2a2a40; }
+      .mode-card-title { display: block; font-size: 0.65rem; color: #ffd94a; margin-bottom: 6px; }
+      .mode-card-desc { display: block; font-size: 0.45rem; color: #9898b0; line-height: 1.5; }
+      .perk-stat-row { display: flex; flex-wrap: wrap; gap: 6px; }
+      .perk-stat-btn { font-size: 0.45rem; padding: 6px 10px; }
+      .perk-stat-btn--selected { border-color: #ffd94a; color: #ffd94a; }
+      .mode-badge-label { color: #9898b0; margin-top: -8px; }
+
+      /* --- Slot badges & grit --- */
+      .slot-grit {
+        font-family: var(--pixel-font);
+        font-size: 0.5rem;
+        color: #9898b0;
+        margin-bottom: 12px;
+        text-align: center;
+      }
+      .slot-footer-actions { display: flex; justify-content: center; margin: 12px 0; }
+      .slot-badge {
+        font-size: 0.4rem;
+        padding: 2px 5px;
+        border: 1px solid var(--panel-border);
+        margin-left: 6px;
+      }
+      .slot-badge--ironman { color: #ff6b6b; background: #301a1a; }
+      .slot-badge--sandbox { color: #6db8e8; background: #1a2a3a; }
+
+      /* --- Locker shop --- */
+      .locker-panel { width: min(480px, 94vw); }
+      .locker-grit-balance {
+        font-family: var(--pixel-font);
+        font-size: 0.55rem;
+        color: #ffd94a;
+        margin-bottom: 16px;
+        text-align: center;
+      }
+      .locker-perk-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+      .locker-perk {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 10px;
+        background: #1e1e32;
+        border: 2px solid var(--panel-border);
+      }
+      .locker-perk--owned { opacity: 0.7; }
+      .locker-perk-info { flex: 1; }
+      .locker-perk-name { display: block; font-family: var(--pixel-font); font-size: 0.55rem; color: #e8e8f0; }
+      .locker-perk-desc { display: block; font-family: var(--pixel-font); font-size: 0.4rem; color: #9898b0; margin-top: 4px; }
+      .locker-owned-badge { font-family: var(--pixel-font); font-size: 0.45rem; color: #6dff8a; }
+      .locker-buy-btn { font-size: 0.45rem; white-space: nowrap; }
+
+      /* --- Hydration HUD --- */
+      .recruit-hydration {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 8px;
+      }
+      .recruit-hydration-label {
+        font-family: var(--pixel-font);
+        font-size: 0.4rem;
+        color: #6db8e8;
+        min-width: 32px;
+      }
+      .recruit-hydration-track {
+        flex: 1;
+        height: 8px;
+        background: #1e1e32;
+        border: 1px solid var(--panel-border);
+      }
+      .recruit-hydration-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #3d6b8a, #6db8e8);
+        transition: width 0.2s linear;
+      }
+      .recruit-hydration-value {
+        font-family: var(--pixel-font);
+        font-size: 0.4rem;
+        color: #9898b0;
+        min-width: 28px;
+        text-align: right;
+      }
+      .recruit-mode-badge {
+        font-size: 0.4rem;
+        padding: 1px 4px;
+        border: 1px solid var(--panel-border);
+        vertical-align: middle;
+      }
+      .recruit-mode-badge--ironman { color: #ff6b6b; }
+      .recruit-mode-badge--sandbox { color: #6db8e8; }
+      .recruit-token-badge {
+        font-family: var(--pixel-font);
+        font-size: 0.4rem;
+        color: #ffd94a;
+        margin-left: 4px;
+      }
+
+      /* --- Run end / ironman --- */
+      .runend-panel { width: min(460px, 94vw); }
+
+      /* --- Sandbox prompt --- */
+      .sandbox-prompt { flex-direction: column; align-items: stretch; }
+      .sandbox-activity-btns {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        justify-content: center;
+      }
+      .sandbox-activity-btns .activity-prompt-btn { font-size: 0.45rem; }
+      .mg-countdown {
+        font-family: var(--pixel-font);
+        font-size: 1.2rem;
+        color: #ff6b6b;
+        margin: 8px 0;
+      }
     </style>
 </head>
 <body>

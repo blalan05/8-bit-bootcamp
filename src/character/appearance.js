@@ -5,7 +5,7 @@ import outfits from './civilianOutfits.json';
 import skinTones from './skinTones.json';
 import hairColors from './hairColors.json';
 
-export const SCHEMA_VERSION = 1;
+export const SCHEMA_VERSION = 3;
 
 export const HEIGHT_SCALE_MIN = 0.85;
 export const HEIGHT_SCALE_MAX = 1.15;

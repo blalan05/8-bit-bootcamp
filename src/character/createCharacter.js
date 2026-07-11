@@ -1,6 +1,8 @@
 import backgrounds from './backgrounds.json';
 import { createBaseStats, applyBackgroundModifiers, getFinalStats } from './stats.js';
 import { createDefaultAppearance, SCHEMA_VERSION } from './appearance.js';
+import { createInitialCampaign } from '../campaign/campaignState.js';
+import { applyPerksToCharacter } from '../campaign/metaProgress.js';
 
 export function getBackgroundById(id) {
   return backgrounds.find(b => b.id === id) ?? backgrounds[0];
@@ -21,15 +23,22 @@ export function previewStatsForBackground(backgroundId, coreStats = null) {
  * @param {object} appearance
  * @param {number} slotIndex
  * @param {object} [coreStats] - player-allocated stats before background modifiers
+ * @param {{ mode?: string, difficulty?: string, perkStat?: string }} [options]
  */
-export function createCharacter(name, backgroundId, appearance, slotIndex = 0, coreStats = null) {
+export function createCharacter(name, backgroundId, appearance, slotIndex = 0, coreStats = null, options = {}) {
+  const { mode = 'campaign', difficulty = 'story', perkStat = null } = options;
   const background = getBackgroundById(backgroundId);
   const stats = applyBackgroundModifiers(coreStats ?? createBaseStats(), background.modifiers);
   const defaults = createDefaultAppearance();
 
-  return {
+  const campaignOverrides = mode === 'sandbox'
+    ? {}
+    : { difficulty };
+
+  let character = {
     schemaVersion: SCHEMA_VERSION,
     name: name.trim(),
+    mode,
     backgroundId: background.id,
     stats,
     appearance: {
@@ -40,9 +49,16 @@ export function createCharacter(name, backgroundId, appearance, slotIndex = 0, c
       civilianOutfitId: appearance?.civilianOutfitId ?? background.defaultOutfitId ?? defaults.civilianOutfitId
     },
     bootDay: 0,
+    campaign: createInitialCampaign(campaignOverrides),
     createdAt: new Date().toISOString(),
     slotIndex
   };
+
+  if (mode !== 'sandbox') {
+    character = applyPerksToCharacter(character, { perkStat });
+  }
+
+  return character;
 }
 
 export function createDraftCharacter(backgroundId, appearanceOverrides = {}, coreStats = null) {

@@ -1,5 +1,6 @@
 import { STAT_KEYS, formatStatLabel, STAT_TOOLTIPS } from './stats.js';
 import { getBackgroundById } from './createCharacter.js';
+import { isSandbox } from '../campaign/campaignState.js';
 
 export function createRecruitHUD(character) {
   const el = document.createElement('div');
@@ -19,9 +20,41 @@ export function createRecruitHUD(character) {
       </div>
     `).join('');
 
+    const campaign = character.campaign;
+    const sandbox = isSandbox(character);
+    const ironman = campaign?.difficulty === 'ironman';
+    const weekMeta = campaign?.phase === 'graduated'
+      ? `Graduated · ${character.honorsTitle ?? 'Marine'}`
+      : sandbox
+        ? 'Sandbox · Free Play'
+        : campaign
+          ? `Week ${campaign.week} · Day ${campaign.dayInWeek} · Ready ${campaign.readiness}%`
+          : `Day ${character.bootDay ?? 0}`;
+
+    const hydration = campaign?.hydration ?? 100;
+    const tokens = campaign?.recycleTokens ?? 0;
+    const hydrationBar = !sandbox && campaign?.phase !== 'graduated'
+      ? `<div class="recruit-hydration">
+          <span class="recruit-hydration-label">Water</span>
+          <div class="recruit-hydration-track"><div class="recruit-hydration-fill" style="width:${hydration}%"></div></div>
+          <span class="recruit-hydration-value">${Math.round(hydration)}%</span>
+        </div>`
+      : '';
+
+    const tokenBadge = ironman && tokens > 0
+      ? `<span class="recruit-token-badge" title="Recycle tokens">${tokens} recycle</span>`
+      : '';
+
+    const modeBadge = sandbox
+      ? '<span class="recruit-mode-badge recruit-mode-badge--sandbox">SANDBOX</span>'
+      : ironman
+        ? '<span class="recruit-mode-badge recruit-mode-badge--ironman">IRONMAN</span>'
+        : '';
+
     el.innerHTML = `
-      <div class="recruit-hud-name">${character.name}</div>
-      <div class="recruit-hud-meta">Day ${character.bootDay ?? 0} · ${bg.name}</div>
+      <div class="recruit-hud-name">${character.name} ${modeBadge}</div>
+      <div class="recruit-hud-meta">${weekMeta} · ${bg.name} ${tokenBadge}</div>
+      ${hydrationBar}
       <div class="recruit-hud-stats">${statRows}</div>
     `;
   }
