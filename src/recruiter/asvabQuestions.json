@@ -1,0 +1,116 @@
+{
+  "easy": [
+    {
+      "id": "easy_1",
+      "prompt": "How many push-ups are in a single push-up?",
+      "choices": ["1", "10", "50", "100"],
+      "answer": 0
+    },
+    {
+      "id": "easy_2",
+      "prompt": "Boot camp training happens on land, not in the ___. ",
+      "choices": ["ocean", "sky", "desert", "forest"],
+      "answer": 0
+    },
+    {
+      "id": "easy_3",
+      "prompt": "What does “left face” tell a formation to do?",
+      "choices": ["Turn left", "Turn right", "About face", "Fall out"],
+      "answer": 0
+    },
+    {
+      "id": "easy_4",
+      "prompt": "2 + 3 = ?",
+      "choices": ["4", "5", "6", "7"],
+      "answer": 1
+    },
+    {
+      "id": "easy_5",
+      "prompt": "Which meal is served in the chow hall?",
+      "choices": ["Breakfast", "Only snacks", "Only dessert", "None"],
+      "answer": 0
+    },
+    {
+      "id": "easy_6",
+      "prompt": "A week has how many days?",
+      "choices": ["5", "6", "7", "8"],
+      "answer": 2
+    }
+  ],
+  "medium": [
+    {
+      "id": "med_1",
+      "prompt": "A squad has 13 recruits. Two fall out. How many remain?",
+      "choices": ["10", "11", "12", "15"],
+      "answer": 1
+    },
+    {
+      "id": "med_2",
+      "prompt": "Military time 1400 is the same as:",
+      "choices": ["2:00 PM", "4:00 PM", "2:00 AM", "12:00 PM"],
+      "answer": 0
+    },
+    {
+      "id": "med_3",
+      "prompt": "If you run 2 laps on a 400 m track, how far did you run?",
+      "choices": ["400 m", "600 m", "800 m", "1600 m"],
+      "answer": 2
+    },
+    {
+      "id": "med_4",
+      "prompt": "Which order is correct for a typical training day?",
+      "choices": ["Wake → PT → Chow", "Chow → Sleep → PT", "Liberty → Wake → PT", "PT → Sleep → Wake"],
+      "answer": 0
+    },
+    {
+      "id": "med_5",
+      "prompt": "A gear locker holds 6 canteens per recruit. For 5 recruits, how many canteens?",
+      "choices": ["11", "25", "30", "36"],
+      "answer": 2
+    },
+    {
+      "id": "med_6",
+      "prompt": "Which word is closest in meaning to “discipline”?",
+      "choices": ["Chaos", "Self-control", "Laziness", "Confusion"],
+      "answer": 1
+    }
+  ],
+  "hard": [
+    {
+      "id": "hard_1",
+      "prompt": "A ruck march covers 12 km in 3 hours. What is the average speed in km/h?",
+      "choices": ["3", "4", "5", "6"],
+      "answer": 1
+    },
+    {
+      "id": "hard_2",
+      "prompt": "If 3 squads of 13 link up, how many recruits total?",
+      "choices": ["26", "36", "39", "42"],
+      "answer": 2
+    },
+    {
+      "id": "hard_3",
+      "prompt": "A right triangle has legs 3 and 4. How long is the hypotenuse?",
+      "choices": ["5", "6", "7", "8"],
+      "answer": 0
+    },
+    {
+      "id": "hard_4",
+      "prompt": "Convert 2500 meters to kilometers.",
+      "choices": ["0.25 km", "2.5 km", "25 km", "250 km"],
+      "answer": 1
+    },
+    {
+      "id": "hard_5",
+      "prompt": "A platoon loses 15% of 40 recruits to medical. How many remain (whole recruits)?",
+      "choices": ["32", "34", "35", "36"],
+      "answer": 1
+    },
+    {
+      "id": "hard_6",
+      "prompt": "Which sequence shows proper escalation of command?",
+      "choices": ["Fire team → Squad → Platoon", "Platoon → Fire team → Squad", "Squad → Fire team → Platoon", "Fire team → Platoon → Squad"],
+      "answer": 0
+    }
+  ]
+}

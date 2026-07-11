@@ -1,0 +1,24 @@
+{
+  "id": "ground/road",
+  "category": "ground",
+  "width": 16,
+  "height": 16,
+  "pixels": [
+    "rrrrRrrrrrrrrrrr",
+    "rrrrrrrrrRrrrrrr",
+    "rRrrrrrrrrrrrrRr",
+    "rrrrrrRrrrrrrrrr",
+    "rrrrrrrrrrrRrrrr",
+    "rrRrrrrrrrrrrrrr",
+    "rrrrrrrrrRrrrrrr",
+    "yyyyrrrryyyyrrrr",
+    "rryyyyrrrryyyyrr",
+    "rrrrrRrrrrrrrrrr",
+    "rrrrrrrrrrrrRrrr",
+    "rRrrrrrrrrrrrrrr",
+    "rrrrrrrRrrrrrrrr",
+    "rrrrrrrrrrrrrrRr",
+    "rrrRrrrrrrrrrrrr",
+    "rrrrrrrrrRrrrrrr"
+  ]
+}

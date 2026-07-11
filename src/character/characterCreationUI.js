@@ -2,7 +2,7 @@ import { CharacterPreview } from './characterPreview.js';
 import { getAllBackgrounds, createDraftCharacter, createCharacter, validateCharacterName, getBackgroundById } from './createCharacter.js';
 import { getAllOutfits, getAllSkinTones, getAllHairColors } from './appearance.js';
 import { getRandomName } from './randomNames.js';
-import { STAT_KEYS, formatStatLabel, STAT_TOOLTIPS } from './stats.js';
+import { STAT_KEYS, formatStatLabel, STAT_TOOLTIPS, rollCoreStats, getFinalStats, getStatTotal, canDecreaseCoreStat, canIncreaseCoreStat } from './stats.js';
 
 /**
  * @param {number} slotIndex
@@ -16,6 +16,7 @@ export function showCharacterCreation(slotIndex) {
     const hairColors = getAllHairColors();
 
     let draft = createDraftCharacter(backgrounds[0].id);
+    let freePoints = 0;
     let preview = null;
 
     const overlay = document.createElement('div');
@@ -51,7 +52,13 @@ export function showCharacterCreation(slotIndex) {
             <div class="background-list" id="background-list"></div>
           </fieldset>
           <fieldset class="field">
-            <legend>Stats <span class="hint">STR drives muscle build</span></legend>
+            <legend>Stats</legend>
+            <div class="stat-toolbar">
+              <button type="button" class="btn btn-secondary btn-compact" id="btn-roll-stats">Roll Stats</button>
+              <span class="stat-meta" id="stat-total">Total: 50</span>
+              <span class="stat-meta stat-meta--points" id="stat-points">Points: 0</span>
+            </div>
+            <p class="stat-hint">Lower a stat (−) to earn a point, then raise another (+). Background bonuses apply on top.</p>
             <div class="stats-grid" id="stats-grid"></div>
           </fieldset>
           <label class="field">
@@ -64,7 +71,7 @@ export function showCharacterCreation(slotIndex) {
           </fieldset>
           <div class="builder-actions">
             <button type="button" class="btn btn-secondary" id="btn-back">Back</button>
-            <button type="button" class="btn btn-primary" id="btn-enter" disabled>Enter Boot Camp</button>
+            <button type="button" class="btn btn-primary" id="btn-enter" disabled>Visit Recruiter</button>
           </div>
         </div>
       </div>
@@ -83,6 +90,8 @@ export function showCharacterCreation(slotIndex) {
     const hairSwatches = overlay.querySelector('#hair-swatches');
     const backgroundList = overlay.querySelector('#background-list');
     const statsGrid = overlay.querySelector('#stats-grid');
+    const statTotalEl = overlay.querySelector('#stat-total');
+    const statPointsEl = overlay.querySelector('#stat-points');
     const outfitRow = overlay.querySelector('#outfit-row');
 
     function renderSwatches(container, items, selectedId, dataAttr, colorKey = 'color') {
@@ -108,15 +117,40 @@ export function showCharacterCreation(slotIndex) {
       `).join('');
     }
 
+    function syncDraftStats() {
+      const bg = getBackgroundById(draft.backgroundId);
+      draft.stats = getFinalStats(draft.coreStats, bg.modifiers);
+    }
+
     function renderStats() {
+      const bg = getBackgroundById(draft.backgroundId);
+      const final = getFinalStats(draft.coreStats, bg.modifiers);
+
       statsGrid.innerHTML = STAT_KEYS.map(key => {
+        const core = draft.coreStats[key];
+        const value = final[key];
+        const mod = value - core;
+        const modHtml = mod !== 0
+          ? `<span class="stat-bg-mod">${mod > 0 ? '+' : ''}${mod}</span>`
+          : '';
         const highlight = key === 'strength' ? ' stat--str' : '';
+        const canDown = canDecreaseCoreStat(draft.coreStats, key);
+        const canUp = canIncreaseCoreStat(draft.coreStats, key, freePoints);
+
         return `
           <div class="stat-row${highlight}" title="${STAT_TOOLTIPS[key]}">
             <span class="stat-label">${formatStatLabel(key)}</span>
-            <span class="stat-value">${draft.stats[key]}</span>
+            <div class="stat-controls">
+              <button type="button" class="stat-btn" data-stat="${key}" data-delta="-1" ${canDown ? '' : 'disabled'} aria-label="Decrease ${formatStatLabel(key)}">−</button>
+              <span class="stat-value">${value}</span>
+              <button type="button" class="stat-btn" data-stat="${key}" data-delta="1" ${canUp ? '' : 'disabled'} aria-label="Increase ${formatStatLabel(key)}">+</button>
+            </div>
+            ${modHtml}
           </div>`;
       }).join('');
+
+      statTotalEl.textContent = `Total: ${getStatTotal(draft.coreStats)}`;
+      statPointsEl.textContent = `Points: ${freePoints}`;
     }
 
     function renderOutfits() {
@@ -137,7 +171,7 @@ export function showCharacterCreation(slotIndex) {
 
     function refreshUI() {
       syncDraftFromForm();
-      draft.stats = createDraftCharacter(draft.backgroundId, draft.appearance).stats;
+      syncDraftStats();
       renderSwatches(skinSwatches, skinTones, draft.appearance.skinToneId, 'skin');
       renderSwatches(hairSwatches, hairColors, draft.appearance.hairColorId, 'hair');
       renderBackgrounds();
@@ -200,6 +234,33 @@ export function showCharacterCreation(slotIndex) {
       refreshUI();
     });
 
+    overlay.querySelector('#btn-roll-stats').addEventListener('click', () => {
+      draft.coreStats = rollCoreStats();
+      freePoints = 0;
+      refreshUI();
+    });
+
+    statsGrid.addEventListener('click', (e) => {
+      const btn = e.target.closest('.stat-btn');
+      if (!btn || btn.disabled) return;
+
+      const key = btn.dataset.stat;
+      const delta = Number(btn.dataset.delta);
+
+      if (delta < 0 && canDecreaseCoreStat(draft.coreStats, key)) {
+        draft.coreStats = { ...draft.coreStats, [key]: draft.coreStats[key] - 1 };
+        freePoints++;
+        refreshUI();
+        return;
+      }
+
+      if (delta > 0 && canIncreaseCoreStat(draft.coreStats, key, freePoints)) {
+        draft.coreStats = { ...draft.coreStats, [key]: draft.coreStats[key] + 1 };
+        freePoints--;
+        refreshUI();
+      }
+    });
+
     outfitRow.addEventListener('click', (e) => {
       const btn = e.target.closest('[data-outfit]');
       if (!btn) return;
@@ -216,7 +277,8 @@ export function showCharacterCreation(slotIndex) {
         nameInput.value,
         draft.backgroundId,
         draft.appearance,
-        slotIndex
+        slotIndex,
+        draft.coreStats
       );
       cleanup(character);
     });

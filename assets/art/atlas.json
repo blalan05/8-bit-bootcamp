@@ -1,0 +1,72 @@
+{
+  "width": 128,
+  "height": 72,
+  "frames": {
+    "npc/nco": {
+      "x": 0,
+      "y": 0,
+      "w": 32,
+      "h": 48
+    },
+    "recruit/civilian": {
+      "x": 32,
+      "y": 0,
+      "w": 24,
+      "h": 36
+    },
+    "building/barracks": {
+      "x": 56,
+      "y": 0,
+      "w": 24,
+      "h": 24
+    },
+    "building/chapel": {
+      "x": 80,
+      "y": 0,
+      "w": 24,
+      "h": 24
+    },
+    "building/chow": {
+      "x": 104,
+      "y": 0,
+      "w": 24,
+      "h": 24
+    },
+    "building/office": {
+      "x": 0,
+      "y": 48,
+      "w": 24,
+      "h": 24
+    },
+    "activity/pool": {
+      "x": 24,
+      "y": 48,
+      "w": 16,
+      "h": 16
+    },
+    "activity/track": {
+      "x": 40,
+      "y": 48,
+      "w": 16,
+      "h": 16
+    },
+    "activity/training": {
+      "x": 56,
+      "y": 48,
+      "w": 16,
+      "h": 16
+    },
+    "ground/grass": {
+      "x": 72,
+      "y": 48,
+      "w": 16,
+      "h": 16
+    },
+    "ground/road": {
+      "x": 88,
+      "y": 48,
+      "w": 16,
+      "h": 16
+    }
+  }
+}

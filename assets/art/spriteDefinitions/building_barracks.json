@@ -1,0 +1,32 @@
+{
+  "id": "building/barracks",
+  "category": "building",
+  "width": 24,
+  "height": 24,
+  "pixels": [
+    "........bbbbbbbb........",
+    ".......bbbbbbbbbb.......",
+    "......bbbbbbbbbbbb......",
+    ".....bbbbbbbbbbbbbb.....",
+    "....bbbbbbbbbbbbbbbb....",
+    "...bbbbbbbbbbbbbbbbbb...",
+    "..bbbbbbbbbbbbbbbbbbbb..",
+    ".bbbbbbbbbbbbbbbbbbbbbb.",
+    "BBBBBBBBBBBBBBBBBBBBBBBB",
+    ".tttttttttttttttttttttt.",
+    ".tttttttttttttttttttttt.",
+    ".tttfffttttttttttfffttt.",
+    ".tttfffttttttttttfffttt.",
+    ".tttfffttttttttttfffttt.",
+    ".tttfffttttttttttfffttt.",
+    ".tttttttttttttttttttttt.",
+    ".ttttttttttTTTTtttttttt.",
+    ".ttttttttttTTTTtttttttt.",
+    ".ttttttttttTTTTtttttttt.",
+    ".ttttttttttTTTTtttttttt.",
+    ".ttttttttttTTTTtttttttt.",
+    ".ttttttttttTTTTtttttttt.",
+    ".ttttttttttTTTTtttttttt.",
+    ".oooooooooooooooooooooo."
+  ]
+}

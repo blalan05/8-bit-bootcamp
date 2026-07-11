@@ -1,5 +1,5 @@
 import backgrounds from './backgrounds.json';
-import { createBaseStats, applyBackgroundModifiers } from './stats.js';
+import { createBaseStats, applyBackgroundModifiers, getFinalStats } from './stats.js';
 import { createDefaultAppearance, SCHEMA_VERSION } from './appearance.js';
 
 export function getBackgroundById(id) {
@@ -10,9 +10,9 @@ export function getAllBackgrounds() {
   return backgrounds;
 }
 
-export function previewStatsForBackground(backgroundId) {
+export function previewStatsForBackground(backgroundId, coreStats = null) {
   const background = getBackgroundById(backgroundId);
-  return applyBackgroundModifiers(createBaseStats(), background.modifiers);
+  return getFinalStats(coreStats ?? createBaseStats(), background.modifiers);
 }
 
 /**
@@ -20,10 +20,11 @@ export function previewStatsForBackground(backgroundId) {
  * @param {string} backgroundId
  * @param {object} appearance
  * @param {number} slotIndex
+ * @param {object} [coreStats] - player-allocated stats before background modifiers
  */
-export function createCharacter(name, backgroundId, appearance, slotIndex = 0) {
+export function createCharacter(name, backgroundId, appearance, slotIndex = 0, coreStats = null) {
   const background = getBackgroundById(backgroundId);
-  const stats = applyBackgroundModifiers(createBaseStats(), background.modifiers);
+  const stats = applyBackgroundModifiers(coreStats ?? createBaseStats(), background.modifiers);
   const defaults = createDefaultAppearance();
 
   return {
@@ -44,15 +45,17 @@ export function createCharacter(name, backgroundId, appearance, slotIndex = 0) {
   };
 }
 
-export function createDraftCharacter(backgroundId, appearanceOverrides = {}) {
+export function createDraftCharacter(backgroundId, appearanceOverrides = {}, coreStats = null) {
   const background = getBackgroundById(backgroundId);
   const defaults = createDefaultAppearance();
+  const baseCore = coreStats ?? createBaseStats();
 
   return {
     schemaVersion: SCHEMA_VERSION,
     name: '',
     backgroundId: background.id,
-    stats: previewStatsForBackground(backgroundId),
+    coreStats: { ...baseCore },
+    stats: getFinalStats(baseCore, background.modifiers),
     appearance: {
       ...defaults,
       civilianOutfitId: background.defaultOutfitId ?? defaults.civilianOutfitId,

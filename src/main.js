@@ -7,8 +7,15 @@ import { getTileKeyAtPosition } from './maps/mapParser.js';
 import { Player } from './playerCharacter/player.js';
 import { showSlotSelect } from './character/slotSelectUI.js';
 import { showCharacterCreation } from './character/characterCreationUI.js';
+import { showRecruiterVisit } from './recruiter/recruiterVisitUI.js';
 import { saveSlot } from './character/saveSlots.js';
 import { createRecruitHUD } from './character/recruitHUD.js';
+import { ISO_PITCH } from './art/assetLoader.js';
+
+/** Internal render resolution divisor — bigger = chunkier pixels */
+const PIXEL_SCALE = 3;
+/** Vertical world units visible on screen */
+const FRUSTUM_SIZE = 24;
 
 let renderer;
 let scene;
@@ -19,6 +26,7 @@ let tileLoader;
 let recruitHUD;
 let debugTileEl;
 let perfStats;
+const clock = new THREE.Clock();
 
 async function boot() {
   while (true) {
@@ -32,11 +40,15 @@ async function boot() {
     if (result.type === 'create') {
       const character = await showCharacterCreation(result.slotIndex);
       if (!character) continue;
-      if (!saveSlot(result.slotIndex, character)) {
+
+      const cleared = await showRecruiterVisit(character);
+      if (!cleared) continue;
+
+      if (!saveSlot(result.slotIndex, cleared)) {
         alert('Could not save character. Check browser storage settings.');
         continue;
       }
-      startGame(character);
+      startGame(cleared);
       return;
     }
   }
@@ -54,12 +66,23 @@ function startGame(character) {
   document.body.appendChild(recruitHUD.element);
 
   renderer = new THREE.WebGLRenderer();
-  renderer.setSize(window.innerWidth, window.innerHeight);
-  renderer.setPixelRatio(devicePixelRatio);
+  renderer.setPixelRatio(1);
+  renderer.setSize(window.innerWidth / PIXEL_SCALE, window.innerHeight / PIXEL_SCALE, false);
+  renderer.domElement.classList.add('game-canvas');
   document.body.appendChild(renderer.domElement);
 
   scene = new THREE.Scene();
-  camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+  scene.background = new THREE.Color(0x2e3b28);
+
+  const aspect = window.innerWidth / window.innerHeight;
+  camera = new THREE.OrthographicCamera(
+    (-FRUSTUM_SIZE * aspect) / 2,
+    (FRUSTUM_SIZE * aspect) / 2,
+    FRUSTUM_SIZE / 2,
+    -FRUSTUM_SIZE / 2,
+    0.1,
+    200
+  );
   controls = new OrbitControls(camera, renderer.domElement);
   controls.enableRotate = false;
 
@@ -92,8 +115,11 @@ function startGame(character) {
   });
   tileLoader.setMap('mcrdsd');
 
-  controls.target.set(startX, 0.5, startZ);
-  camera.position.set(startX - 5, 15, startZ - 5);
+  // Fixed 2:1 dimetric angle: yaw 45deg, height = horizontal distance * tan(ISO_PITCH)
+  const horizontal = 40;
+  const offset = horizontal * Math.SQRT1_2;
+  controls.target.set(startX, 0, startZ);
+  camera.position.set(startX + offset, horizontal * Math.tan(ISO_PITCH), startZ + offset);
   controls.update();
 
   renderer.setAnimationLoop(animate);
@@ -102,6 +128,8 @@ function startGame(character) {
 }
 
 function animate() {
+  const dt = clock.getDelta();
+  player.update(dt);
   tileLoader.update();
   controls.update();
   perfStats.update();
@@ -120,9 +148,13 @@ function animate() {
 }
 
 function onResize() {
-  camera.aspect = window.innerWidth / window.innerHeight;
+  const aspect = window.innerWidth / window.innerHeight;
+  camera.left = (-FRUSTUM_SIZE * aspect) / 2;
+  camera.right = (FRUSTUM_SIZE * aspect) / 2;
+  camera.top = FRUSTUM_SIZE / 2;
+  camera.bottom = -FRUSTUM_SIZE / 2;
   camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setSize(window.innerWidth / PIXEL_SCALE, window.innerHeight / PIXEL_SCALE, false);
 }
 
 boot();

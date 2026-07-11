@@ -1,0 +1,10 @@
+{
+  "defaults": {
+    "ground": "ground/grass",
+    "road": "ground/road",
+    "building": "building/office",
+    "activity": "activity/training",
+    "recruit": "recruit/civilian",
+    "npc": "npc/nco"
+  }
+}

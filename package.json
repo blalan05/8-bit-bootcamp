@@ -5,6 +5,8 @@
   "main": "index.js",
   "scripts": {
     "dev": "vite",
+    "generate:art": "node scripts/generateAtlas.mjs",
+    "generate:nco": "node scripts/buildNcoSprite.mjs",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

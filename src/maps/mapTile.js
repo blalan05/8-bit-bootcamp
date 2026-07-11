@@ -1,15 +1,25 @@
 /**
  * MapTile - Renders a single map tile with buildings, NPCs, and activities.
  * Coordinates: bottom-left to top-right. Each tile is positioned in world space.
+ *
+ * Visuals use the 8-bit sprite pipeline: ground and activities are flat planes
+ * with repeated pixel textures, buildings are camera-facing billboard sprites.
  */
 
 import * as THREE from 'three';
 import { getTileBounds } from './mapParser.js';
+import { getTileMaterial, getBillboardMaterial, getManifestDefault, ISO_YAW } from '../art/assetLoader.js';
+
+/** World units covered by one texture repetition (matches artBible.worldUnitsPerTexture) */
+const TEXTURE_WORLD_UNITS = 2;
+const ACTIVITY_PATCH_SIZE = 6;
+const BUILDING_SPRITE_SIZE = 4;
 
 /**
  * @typedef {Object} MapObject
  * @property {string} name
  * @property {string} type - 'building' | 'npc' | 'activity' | 'road'
+ * @property {string} [spriteId] - sprite override; falls back to type default from the manifest
  * @property {Object} [size]
  * @property {number} x
  * @property {number} y
@@ -43,7 +53,7 @@ export class MapTile extends THREE.Group {
     // Ground plane for this tile
     const ground = new THREE.Mesh(
       new THREE.PlaneGeometry(this.tileSize, this.tileSize),
-      new THREE.MeshStandardMaterial({ color: 0x00aa00 })
+      getTileMaterial(getManifestDefault('ground'), this.tileSize / TEXTURE_WORLD_UNITS)
     );
     ground.rotation.x = -Math.PI / 2;
     ground.position.y = 0;
@@ -62,7 +72,7 @@ export class MapTile extends THREE.Group {
    * @returns {THREE.Mesh | null}
    */
   createObjectMesh(obj) {
-    const { type, x, y, z } = obj;
+    const { type, x, z } = obj;
 
     // Object position is in world space; convert to local (relative to tile center)
     const localX = x - this.position.x;
@@ -70,12 +80,14 @@ export class MapTile extends THREE.Group {
 
     switch (type) {
       case 'building': {
-        const size = obj.size ?? { x: 2, y: 2, z: 2 };
+        const size = obj.size ?? { x: BUILDING_SPRITE_SIZE, y: BUILDING_SPRITE_SIZE, z: BUILDING_SPRITE_SIZE };
+        const height = Math.max(size.x, size.y);
         const mesh = new THREE.Mesh(
-          new THREE.BoxGeometry(size.x, size.y, size.z), // Three.js: width(X), height(Y), depth(Z)
-          new THREE.MeshStandardMaterial({ color: 0xff0000 })
+          new THREE.PlaneGeometry(size.x, height),
+          getBillboardMaterial(obj.spriteId ?? getManifestDefault('building'))
         );
-        mesh.position.set(localX, size.y / 2, localZ);
+        mesh.rotation.y = ISO_YAW;
+        mesh.position.set(localX, height / 2, localZ);
         mesh.userData.object = obj;
         return mesh;
       }
@@ -84,23 +96,28 @@ export class MapTile extends THREE.Group {
           new THREE.CapsuleGeometry(0.2, 0.5),
           new THREE.MeshStandardMaterial({ color: 0xffff00 })
         );
+        mesh.userData.ownMaterial = true;
         mesh.position.set(localX, 0.35, localZ);
         mesh.userData.object = obj;
         return mesh;
       }
       case 'activity': {
         const mesh = new THREE.Mesh(
-          new THREE.CylinderGeometry(0.5, 0.5, 0.1),
-          new THREE.MeshStandardMaterial({ color: 0x00aaff })
+          new THREE.PlaneGeometry(ACTIVITY_PATCH_SIZE, ACTIVITY_PATCH_SIZE),
+          getTileMaterial(
+            obj.spriteId ?? getManifestDefault('activity'),
+            ACTIVITY_PATCH_SIZE / TEXTURE_WORLD_UNITS
+          )
         );
-        mesh.position.set(localX, 0.05, localZ);
+        mesh.rotation.x = -Math.PI / 2;
+        mesh.position.set(localX, 0.02, localZ);
         mesh.userData.object = obj;
         return mesh;
       }
       case 'road': {
         const mesh = new THREE.Mesh(
           new THREE.PlaneGeometry(this.tileSize, this.tileSize),
-          new THREE.MeshStandardMaterial({ color: 0x444444 })
+          getTileMaterial(obj.spriteId ?? getManifestDefault('road'), this.tileSize / TEXTURE_WORLD_UNITS)
         );
         mesh.rotation.x = -Math.PI / 2;
         mesh.position.set(localX, 0.01, localZ);
@@ -115,7 +132,8 @@ export class MapTile extends THREE.Group {
   dispose() {
     this.traverse(child => {
       if (child.geometry) child.geometry.dispose();
-      if (child.material) {
+      // Sprite materials are cached and shared across tiles - only dispose owned ones
+      if (child.material && child.userData.ownMaterial) {
         if (Array.isArray(child.material)) {
           child.material.forEach(m => m.dispose());
         } else {

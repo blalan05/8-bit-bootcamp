@@ -1,5 +1,11 @@
 import * as THREE from 'three';
-import { createCharacterMesh, applyAppearanceToMesh } from '../character/appearance.js';
+import { createRecruitSprite, applyAppearanceToSprite } from '../character/appearance.js';
+import { BASE_STAT, dexterityToWalkSpeedMultiplier } from '../character/stats.js';
+import { ISO_YAW } from '../art/assetLoader.js';
+
+/** Base world units per second at average dexterity (10) */
+const BASE_WALK_SPEED = 14;/** Stop moving when within this distance of the target */
+const ARRIVAL_THRESHOLD = 0.05;
 
 export class Player extends THREE.Group {
   raycaster = new THREE.Raycaster();
@@ -8,24 +14,56 @@ export class Player extends THREE.Group {
     super();
 
     this.character = character;
-    this.characterMesh = createCharacterMesh();
-    this.characterMesh.position.y = 0.28;
-    this.add(this.characterMesh);
-    applyAppearanceToMesh(this.characterMesh, character);
+    this.sprite = createRecruitSprite(character);
+    this.sprite.rotation.y = ISO_YAW; // billboard faces the fixed isometric camera
+    this.add(this.sprite);
 
     this.position.set(5, 0, 5);
 
     this.camera = camera;
     this.map = map;
     this.bounds = bounds;
-    window.addEventListener('mousedown', this.onMouseDown.bind(this));
+    this.target = null;
+
+    this._onMouseDown = this.onMouseDown.bind(this);
+    window.addEventListener('mousedown', this._onMouseDown);
   }
 
   updateAppearance() {
-    applyAppearanceToMesh(this.characterMesh, this.character);
+    applyAppearanceToSprite(this.sprite, this.character);
+  }
+
+  getWalkSpeed() {
+    const dex = this.character?.stats?.dexterity ?? BASE_STAT;
+    return BASE_WALK_SPEED * dexterityToWalkSpeedMultiplier(dex);
+  }
+
+  /**
+   * Move toward the clicked target each frame.
+   * @param {number} dt - elapsed seconds since last frame
+   */
+  update(dt) {
+    if (!this.target) return;
+
+    const dx = this.target.x - this.position.x;
+    const dz = this.target.z - this.position.z;
+    const dist = Math.hypot(dx, dz);
+
+    if (dist <= ARRIVAL_THRESHOLD) {
+      this.position.set(this.target.x, 0, this.target.z);
+      this.target = null;
+      return;
+    }
+
+    const step = this.getWalkSpeed() * dt;
+    const t = Math.min(1, step / dist);
+    this.position.x += dx * t;
+    this.position.z += dz * t;
   }
 
   onMouseDown(event) {
+    if (event.button !== 0) return;
+
     const coords = new THREE.Vector2(
       (event.clientX / window.innerWidth) * 2 - 1,
       -(event.clientY / window.innerHeight) * 2 + 1
@@ -38,7 +76,7 @@ export class Player extends THREE.Group {
       const { x, z } = intersects[0].point;
       const clampedX = Math.max(0, Math.min(this.bounds.width, x));
       const clampedZ = Math.max(0, Math.min(this.bounds.height, z));
-      this.position.set(clampedX, 0, clampedZ);
+      this.target = new THREE.Vector3(clampedX, 0, clampedZ);
     }
   }
 }

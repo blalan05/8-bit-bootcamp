@@ -1,0 +1,24 @@
+{
+  "id": "activity/track",
+  "category": "activity",
+  "width": 16,
+  "height": 16,
+  "pixels": [
+    "kkkkKkkkkkkkkkkk",
+    "kkkkkkkkkKkkkkkk",
+    "kKkkkkkkkkkkkkKk",
+    "kkkkkkKkkkkkkkkk",
+    "wkkwkkwkkwkkwkkw",
+    "kkKkkkkkkkkkkkkk",
+    "kkkkkkkkkKkkkkkk",
+    "kkkkKkkkkkkkkkkk",
+    "kKkkkkkkkkkkKkkk",
+    "kkkkkkkKkkkkkkkk",
+    "kkkkkkkkkkkkkkKk",
+    "wkkwkkwkkwkkwkkw",
+    "kkKkkkkkkkKkkkkk",
+    "kkkkkkkkkkkkkkkk",
+    "kkkKkkkkkkkkkKkk",
+    "kkkkkkkkkKkkkkkk"
+  ]
+}

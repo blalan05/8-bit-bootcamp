@@ -1,33 +1,57 @@
 import * as THREE from 'three';
-import { createCharacterMesh, applyAppearanceToMesh } from './appearance.js';
+import { createRecruitSprite, applyAppearanceToSprite } from './appearance.js';
 
+/** World units the recruit rises from full hang to chin-over-bar. */
+const PULL_RANGE = 0.9;
+
+/**
+ * Live recruit sprite preview for the character builder.
+ * Renders at low internal resolution and upscales with hard pixels
+ * to match the in-game 8-bit look.
+ *
+ * @param {HTMLElement} container
+ * @param {{ width?: number, height?: number, background?: number | null, pixelScale?: number }} [options]
+ */
 export class CharacterPreview {
-  constructor(container) {
+  constructor(container, options = {}) {
     this.container = container;
-    this.width = 220;
-    this.height = 320;
+    this.width = options.width ?? 220;
+    this.height = options.height ?? 320;
+    const pixelScale = options.pixelScale ?? 4;
 
-    this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    this.renderer.setSize(this.width, this.height);
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    this.renderer = new THREE.WebGLRenderer({ alpha: true });
+    this.renderer.setPixelRatio(1);
+    this.renderer.setSize(this.width / pixelScale, this.height / pixelScale, false);
+    this.renderer.domElement.style.width = `${this.width}px`;
+    this.renderer.domElement.style.height = `${this.height}px`;
+    this.renderer.domElement.style.imageRendering = 'pixelated';
     container.appendChild(this.renderer.domElement);
 
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color(0x1a1a2e);
+    if (options.background === null) {
+      this.scene.background = null;
+    } else {
+      this.scene.background = new THREE.Color(options.background ?? 0x1a1a2e);
+    }
 
-    this.camera = new THREE.PerspectiveCamera(40, this.width / this.height, 0.1, 100);
-    this.camera.position.set(1.2, 0.9, 1.8);
-    this.camera.lookAt(0, 0.45, 0);
+    const aspect = this.width / this.height;
+    const viewHeight = 2;
+    this.camera = new THREE.OrthographicCamera(
+      (-viewHeight * aspect) / 2,
+      (viewHeight * aspect) / 2,
+      viewHeight / 2,
+      -viewHeight / 2,
+      0.1,
+      10
+    );
+    this.camera.position.set(0, 0.85, 3);
+    this.camera.lookAt(0, 0.85, 0);
 
-    const sun = new THREE.DirectionalLight(0xffffff, 2);
-    sun.position.set(2, 3, 2);
-    this.scene.add(sun);
-
-    const ambient = new THREE.AmbientLight(0xffffff, 0.6);
-    this.scene.add(ambient);
-
-    this.mesh = createCharacterMesh();
+    this.mesh = createRecruitSprite({ stats: {}, appearance: {} });
     this.scene.add(this.mesh);
+
+    this._baseY = this.mesh.position.y;
+    this._pullT = 0;
 
     this._boundAnimate = this._animate.bind(this);
     this._animating = true;
@@ -35,12 +59,26 @@ export class CharacterPreview {
   }
 
   update(character) {
-    applyAppearanceToMesh(this.mesh, character);
+    applyAppearanceToSprite(this.mesh, character);
+    this._baseY = this.mesh.position.y;
+    this._applyPull();
+  }
+
+  /**
+   * Vertical pull-up motion. 0 = full hang (arms extended), 1 = chin over the bar.
+   * @param {number} t
+   */
+  setPullHeight(t) {
+    this._pullT = Math.max(0, Math.min(1, t));
+    this._applyPull();
+  }
+
+  _applyPull() {
+    this.mesh.position.y = this._baseY + this._pullT * PULL_RANGE;
   }
 
   _animate() {
     if (!this._animating) return;
-    this.mesh.rotation.y += 0.008;
     this.renderer.render(this.scene, this.camera);
     requestAnimationFrame(this._boundAnimate);
   }

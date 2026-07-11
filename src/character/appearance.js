@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { MIN_STAT, MAX_STAT } from './stats.js';
+import { createRecruitMaterial, updateRecruitMaterial } from '../art/assetLoader.js';
 import outfits from './civilianOutfits.json';
 import skinTones from './skinTones.json';
 import hairColors from './hairColors.json';
@@ -65,68 +66,59 @@ export function createDefaultAppearance() {
   };
 }
 
-/** @returns {THREE.Group} */
-export function createCharacterMesh() {
-  const group = new THREE.Group();
-  group.name = 'characterMesh';
+/** Base sprite plane size in world units (24x36 px source at 2x, 2:3 aspect) */
+export const RECRUIT_SPRITE_WIDTH = 0.9;
+export const RECRUIT_SPRITE_HEIGHT = 1.35;
 
-  const head = new THREE.Mesh(
-    new THREE.SphereGeometry(0.14, 12, 12),
-    new THREE.MeshStandardMaterial({ color: 0xffffff })
-  );
-  head.name = 'head';
-  head.position.y = 0.72;
-
-  const hair = new THREE.Mesh(
-    new THREE.SphereGeometry(0.15, 12, 8, 0, Math.PI * 2, 0, Math.PI / 2),
-    new THREE.MeshStandardMaterial({ color: 0xffffff })
-  );
-  hair.name = 'hair';
-  hair.position.y = 0.78;
-
-  const torso = new THREE.Mesh(
-    new THREE.CapsuleGeometry(0.22, 0.35, 4, 8),
-    new THREE.MeshStandardMaterial({ color: 0xffffff })
-  );
-  torso.name = 'torso';
-  torso.position.y = 0.38;
-
-  const legs = new THREE.Mesh(
-    new THREE.CapsuleGeometry(0.2, 0.18, 4, 8),
-    new THREE.MeshStandardMaterial({ color: 0xffffff })
-  );
-  legs.name = 'legs';
-  legs.position.y = 0.12;
-
-  group.add(head, hair, torso, legs);
-  return group;
+/**
+ * Map character appearance to recruit sprite palette swaps.
+ * Palette chars: s = skin, h = hair, c = top, j = bottom (see artBible.json).
+ */
+function recruitPaletteOverrides(character) {
+  const appearance = character?.appearance ?? {};
+  const outfit = getOutfitById(appearance.civilianOutfitId ?? DEFAULT_OUTFIT_ID);
+  const skin = getSkinToneById(appearance.skinToneId ?? DEFAULT_SKIN_TONE_ID);
+  const hair = getHairColorById(appearance.hairColorId ?? DEFAULT_HAIR_COLOR_ID);
+  return {
+    s: skin.color,
+    h: hair.color,
+    c: outfit.topColor,
+    j: outfit.bottomColor
+  };
 }
 
 /**
- * @param {THREE.Group} meshGroup
+ * Create the recruit billboard sprite (flat plane with pixel texture).
+ * Caller sets rotation.y to face the camera (ISO_YAW in-game, 0 in the preview).
+ * @returns {THREE.Mesh}
+ */
+export function createRecruitSprite(character) {
+  const sprite = new THREE.Mesh(
+    new THREE.PlaneGeometry(RECRUIT_SPRITE_WIDTH, RECRUIT_SPRITE_HEIGHT),
+    createRecruitMaterial(recruitPaletteOverrides(character))
+  );
+  sprite.name = 'recruitSprite';
+  applyAppearanceToSprite(sprite, character);
+  return sprite;
+}
+
+/**
+ * Apply height/muscle scaling and palette swaps to an existing recruit sprite.
+ * @param {THREE.Mesh} sprite
  * @param {{ stats: object, appearance: object }} character
  */
-export function applyAppearanceToMesh(meshGroup, character) {
-  if (!meshGroup || !character) return;
+export function applyAppearanceToSprite(sprite, character) {
+  if (!sprite || !character) return;
 
   const appearance = character.appearance ?? {};
   const heightScale = heightToScale(appearance.height ?? DEFAULT_HEIGHT);
   const genderMod = genderHeightModifier(appearance.gender ?? DEFAULT_GENDER);
   const muscleScale = strengthToMuscleScale(character.stats?.strength ?? 10);
+  const yScale = heightScale * genderMod;
 
-  const outfit = getOutfitById(appearance.civilianOutfitId ?? DEFAULT_OUTFIT_ID);
-  const skin = getSkinToneById(appearance.skinToneId ?? DEFAULT_SKIN_TONE_ID);
-  const hair = getHairColorById(appearance.hairColorId ?? DEFAULT_HAIR_COLOR_ID);
+  sprite.scale.set(muscleScale, yScale, 1);
+  // Keep feet on the ground as the sprite grows/shrinks
+  sprite.position.y = (RECRUIT_SPRITE_HEIGHT * yScale) / 2;
 
-  meshGroup.scale.set(muscleScale, heightScale * genderMod, muscleScale);
-
-  const head = meshGroup.getObjectByName('head');
-  const hairMesh = meshGroup.getObjectByName('hair');
-  const torso = meshGroup.getObjectByName('torso');
-  const legs = meshGroup.getObjectByName('legs');
-
-  if (head?.material) head.material.color.setHex(skin.color);
-  if (hairMesh?.material) hairMesh.material.color.setHex(hair.color);
-  if (torso?.material) torso.material.color.setHex(outfit.topColor);
-  if (legs?.material) legs.material.color.setHex(outfit.bottomColor);
+  updateRecruitMaterial(sprite.material, recruitPaletteOverrides(character));
 }

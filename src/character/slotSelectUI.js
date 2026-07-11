@@ -1,7 +1,7 @@
 import { getAllSlots, deleteSlot, getSlotCount } from './saveSlots.js';
 import { getBackgroundById } from './createCharacter.js';
 
-function createConfirmDialog(message) {
+function createConfirmDialog(message, { confirmLabel = 'Confirm', cancelLabel = 'Cancel' } = {}) {
   return new Promise(resolve => {
     const overlay = document.createElement('div');
     overlay.className = 'menu-overlay confirm-overlay';
@@ -9,8 +9,8 @@ function createConfirmDialog(message) {
       <div class="confirm-box">
         <p>${message}</p>
         <div class="confirm-actions">
-          <button type="button" class="btn btn-danger" data-action="yes">Delete</button>
-          <button type="button" class="btn btn-secondary" data-action="no">Cancel</button>
+          <button type="button" class="btn btn-danger" data-action="yes">${confirmLabel}</button>
+          <button type="button" class="btn btn-secondary" data-action="no">${cancelLabel}</button>
         </div>
       </div>
     `;
@@ -48,7 +48,6 @@ function createConfirmDialog(message) {
 export function showSlotSelect() {
   return new Promise(resolve => {
     let focusedSlot = 0;
-    const slots = getAllSlots();
 
     const overlay = document.createElement('div');
     overlay.className = 'menu-overlay';
@@ -57,7 +56,7 @@ export function showSlotSelect() {
         <h1 class="menu-title">8-BIT BOOTCAMP</h1>
         <p class="menu-subtitle">Select a save slot</p>
         <div class="slot-list" role="listbox"></div>
-        <p class="menu-hint">Press 1–3 to select · Enter to confirm · Delete to remove save</p>
+        <p class="menu-hint">Press 1–3 to select · Enter to confirm · Delete to reset focused slot</p>
       </div>
     `;
 
@@ -66,28 +65,33 @@ export function showSlotSelect() {
     function renderSlots() {
       const current = getAllSlots();
       slotList.innerHTML = current.map((char, i) => {
-        const selected = i === focusedSlot ? ' slot-card--focused' : '';
+        const selected = i === focusedSlot ? ' slot-row--focused' : '';
         if (!char) {
           return `
-            <button type="button" class="slot-card slot-card--empty${selected}" data-slot="${i}" role="option">
-              <span class="slot-label">Slot ${i + 1}</span>
-              <span class="slot-name">New Recruit</span>
-            </button>`;
+            <div class="slot-row${selected}">
+              <button type="button" class="slot-card slot-card--empty" data-slot="${i}" role="option">
+                <span class="slot-label">Slot ${i + 1}</span>
+                <span class="slot-name">New Recruit</span>
+              </button>
+            </div>`;
         }
         const bg = getBackgroundById(char.backgroundId);
         return `
-          <button type="button" class="slot-card slot-card--filled${selected}" data-slot="${i}" role="option">
-            <span class="slot-label">Slot ${i + 1}</span>
-            <span class="slot-name">${char.name}</span>
-            <span class="slot-meta">Day ${char.bootDay ?? 0} · ${bg.name}</span>
-          </button>`;
+          <div class="slot-row${selected}">
+            <button type="button" class="slot-card slot-card--filled" data-slot="${i}" role="option">
+              <span class="slot-label">Slot ${i + 1}</span>
+              <span class="slot-name">${char.name}</span>
+              <span class="slot-meta">Day ${char.bootDay ?? 0} · ${bg.name}</span>
+            </button>
+            <button type="button" class="btn btn-danger slot-reset-btn" data-slot="${i}" aria-label="Reset save slot ${i + 1}">Reset</button>
+          </div>`;
       }).join('');
     }
 
     function focusSlot(index) {
       focusedSlot = Math.max(0, Math.min(getSlotCount() - 1, index));
       renderSlots();
-      slotList.querySelector(`[data-slot="${focusedSlot}"]`)?.focus();
+      slotList.querySelector(`.slot-card[data-slot="${focusedSlot}"]`)?.focus();
     }
 
     function activateSlot(index) {
@@ -100,15 +104,18 @@ export function showSlotSelect() {
       }
     }
 
-    async function deleteFocusedSlot() {
-      const char = getAllSlots()[focusedSlot];
+    async function resetSlot(index) {
+      const char = getAllSlots()[index];
       if (!char) return;
       const confirmed = await createConfirmDialog(
-        `Delete recruit ${char.name}? This cannot be undone.`
+        `Reset slot ${index + 1} and delete ${char.name}? This cannot be undone.`,
+        { confirmLabel: 'Reset Save' }
       );
       if (confirmed) {
-        deleteSlot(focusedSlot);
+        deleteSlot(index);
+        focusedSlot = index;
         renderSlots();
+        slotList.querySelector(`.slot-card[data-slot="${index}"]`)?.focus();
       }
     }
 
@@ -124,11 +131,17 @@ export function showSlotSelect() {
       if (e.key === 'ArrowUp') focusSlot(focusedSlot - 1);
       if (e.key === 'ArrowDown') focusSlot(focusedSlot + 1);
       if (e.key === 'Enter') activateSlot(focusedSlot);
-      if (e.key === 'Delete') deleteFocusedSlot();
+      if (e.key === 'Delete') resetSlot(focusedSlot);
     }
 
     slotList.addEventListener('click', (e) => {
-      const card = e.target.closest('[data-slot]');
+      const resetButton = e.target.closest('.slot-reset-btn');
+      if (resetButton) {
+        e.stopPropagation();
+        resetSlot(Number(resetButton.dataset.slot));
+        return;
+      }
+      const card = e.target.closest('.slot-card');
       if (!card) return;
       const index = Number(card.dataset.slot);
       focusSlot(index);
@@ -136,13 +149,13 @@ export function showSlotSelect() {
     });
 
     slotList.addEventListener('focusin', (e) => {
-      const card = e.target.closest('[data-slot]');
+      const card = e.target.closest('.slot-card');
       if (card) focusedSlot = Number(card.dataset.slot);
     });
 
     document.addEventListener('keydown', onKey);
     document.body.appendChild(overlay);
     renderSlots();
-    slotList.querySelector(`[data-slot="${focusedSlot}"]`)?.focus();
+    slotList.querySelector(`.slot-card[data-slot="${focusedSlot}"]`)?.focus();
   });
 }

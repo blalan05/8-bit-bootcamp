@@ -1,0 +1,24 @@
+{
+  "id": "activity/pool",
+  "category": "activity",
+  "width": 16,
+  "height": 16,
+  "pixels": [
+    "pppppppppppppppp",
+    "ppPPppppppPPpppp",
+    "pppppppppppppppp",
+    "pppppwppppppppPP",
+    "pPPpppppppPPpppp",
+    "pppppppppppppppp",
+    "ppppppPPpppppppp",
+    "pPPpppppppppwppp",
+    "ppppppppppPPpppp",
+    "pppppppppppppppp",
+    "PPppppPPpppppppp",
+    "ppppppppppppPPpp",
+    "ppwppppppppppppp",
+    "ppppPPpppppppppp",
+    "pppppppppPPppppp",
+    "pPPppppppppppppp"
+  ]
+}

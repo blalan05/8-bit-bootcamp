@@ -1,0 +1,32 @@
+{
+  "id": "building/office",
+  "category": "building",
+  "width": 24,
+  "height": 24,
+  "pixels": [
+    "........................",
+    "........................",
+    "........................",
+    "........................",
+    "RRRRRRRRRRRRRRRRRRRRRRRR",
+    ".WWWWWWWWWWWWWWWWWWWWWW.",
+    ".WWWWWWWWWWWWWWWWWWWWWW.",
+    ".WWfffWWWWffffWWWWfffWW.",
+    ".WWfffWWWWffffWWWWfffWW.",
+    ".WWfffWWWWffffWWWWfffWW.",
+    ".WWWWWWWWWWWWWWWWWWWWWW.",
+    ".WWWWWWWWWWWWWWWWWWWWWW.",
+    ".WWWWWWWWWWWWWWWWWWWWWW.",
+    ".WWfffWWWWffffWWWWfffWW.",
+    ".WWfffWWWWffffWWWWfffWW.",
+    ".WWfffWWWWffffWWWWfffWW.",
+    ".WWWWWWWWWWWWWWWWWWWWWW.",
+    ".WWWWWWWWWRRRRWWWWWWWWW.",
+    ".WWWWWWWWWRRRRWWWWWWWWW.",
+    ".WWWWWWWWWRRRRWWWWWWWWW.",
+    ".WWWWWWWWWRRRRWWWWWWWWW.",
+    ".WWWWWWWWWRRRRWWWWWWWWW.",
+    ".WWWWWWWWWRRRRWWWWWWWWW.",
+    ".oooooooooooooooooooooo."
+  ]
+}
