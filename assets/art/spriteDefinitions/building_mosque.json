@@ -1,0 +1,32 @@
+{
+  "id": "building/mosque",
+  "category": "building",
+  "width": 24,
+  "height": 24,
+  "pixels": [
+    "........................",
+    "...........ooo..........",
+    "..........owwo..........",
+    ".........owwwo..........",
+    "........owwwwo..........",
+    ".......owwwwwwo.........",
+    "......otttttttto........",
+    ".....otttttttttto.......",
+    "...ottttttttttttttto.....",
+    "..ottttttttttttttttto....",
+    ".ottttttttttttttttttto...",
+    "ottttttttttttttttttttttto",
+    "ottttttttttttttttttttttto",
+    "ottttttttttttttttttttttto",
+    "ottttttttttttttttttttttto",
+    "ottttttttttttttttttttttto",
+    "ottttttttttttttttttttttto",
+    "ottttttttttttttttttttttto",
+    "ottttttttttttttttttttttto",
+    "ottttttttttttttttttttttto",
+    "ottttttttttttttttttttttto",
+    "ottttttttttttttttttttttto",
+    "ottttttttttttttttttttttto",
+    "ottttttttttttttttttttttto"
+  ]
+}

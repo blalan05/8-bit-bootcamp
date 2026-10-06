@@ -1,6 +1,7 @@
 import { STAT_KEYS, formatStatLabel, STAT_TOOLTIPS } from './stats.js';
 import { getBackgroundById } from './createCharacter.js';
 import { isSandbox } from '../campaign/campaignState.js';
+import { getCampaignForCharacter, getCampaignClimate } from '../campaigns/campaignRegistry.js';
 
 export function createRecruitHUD(character) {
   const el = document.createElement('div');
@@ -13,6 +14,8 @@ export function createRecruitHUD(character) {
       return;
     }
     const bg = getBackgroundById(character.backgroundId);
+    const campaignDef = getCampaignForCharacter(character);
+    const climate = getCampaignClimate(character);
     const statRows = STAT_KEYS.map(key => `
       <div class="recruit-stat" title="${STAT_TOOLTIPS[key]}">
         <span class="recruit-stat-label">${formatStatLabel(key)}</span>
@@ -23,19 +26,20 @@ export function createRecruitHUD(character) {
     const campaign = character.campaign;
     const sandbox = isSandbox(character);
     const ironman = campaign?.difficulty === 'ironman';
+    const periodLabel = campaignDef.periodLabel ?? 'Week';
     const weekMeta = campaign?.phase === 'graduated'
-      ? `Graduated · ${character.honorsTitle ?? 'Marine'}`
+      ? `Complete · ${character.honorsTitle ?? 'Marine'}`
       : sandbox
         ? 'Sandbox · Free Play'
         : campaign
-          ? `Week ${campaign.week} · Day ${campaign.dayInWeek} · Ready ${campaign.readiness}%`
+          ? `${periodLabel} ${campaign.week} · Day ${campaign.dayInWeek} · Ready ${campaign.readiness}%`
           : `Day ${character.bootDay ?? 0}`;
 
     const hydration = campaign?.hydration ?? 100;
     const tokens = campaign?.recycleTokens ?? 0;
     const hydrationBar = !sandbox && campaign?.phase !== 'graduated'
       ? `<div class="recruit-hydration">
-          <span class="recruit-hydration-label">Water</span>
+          <span class="recruit-hydration-label">${climate.resourceLabel}</span>
           <div class="recruit-hydration-track"><div class="recruit-hydration-fill" style="width:${hydration}%"></div></div>
           <span class="recruit-hydration-value">${Math.round(hydration)}%</span>
         </div>`

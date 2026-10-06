@@ -1,0 +1,24 @@
+{
+  "id": "activity/suribachi",
+  "category": "activity",
+  "width": 16,
+  "height": 16,
+  "pixels": [
+    "................",
+    "......kkkk......",
+    ".....kKKKKk.....",
+    "....kKKKKKKk....",
+    "...kKKKKKKKKk...",
+    "..kKKKKKKKKKKk..",
+    ".kKKKKKKKKKKKKk.",
+    "kKKKKKKKKKKKKKKk",
+    "kKKKKKKKKKKKKKKk",
+    ".kKKKKKKKKKKKKk.",
+    "..kKKKKKKKKKKk..",
+    "...kKKKKKKKKk...",
+    "....kKKKKKKk....",
+    ".....kKKKKk.....",
+    "......kkkk......",
+    "................"
+  ]
+}

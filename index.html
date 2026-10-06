@@ -1275,6 +1275,62 @@
       }
       .slot-badge--ironman { color: #ff6b6b; background: #301a1a; }
       .slot-badge--sandbox { color: #6db8e8; background: #1a2a3a; }
+      .slot-badge--campaign { color: #c8a84a; background: #2a2410; }
+      .slot-badge--available { color: #6de88a; background: #1a3020; }
+      .slot-badge--locked { color: #9898b0; background: #1a1a24; }
+
+      .campaign-panel { width: min(520px, 94vw); }
+      .campaign-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin: 16px 0;
+        max-height: 60vh;
+        overflow-y: auto;
+      }
+      .campaign-card {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+        width: 100%;
+        padding: 12px 14px;
+        background: var(--panel-bg);
+        border: 2px solid var(--panel-border);
+        color: var(--text);
+        font-family: var(--pixel-font);
+        cursor: pointer;
+        text-align: left;
+      }
+      .campaign-card:hover:not(:disabled),
+      .campaign-card:focus:not(:disabled) {
+        border-color: var(--accent);
+        outline: none;
+      }
+      .campaign-card--focused {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 1px var(--accent);
+      }
+      .campaign-card--locked {
+        opacity: 0.55;
+        cursor: not-allowed;
+      }
+      .campaign-card-title {
+        font-size: 0.55rem;
+        color: #ffd94a;
+      }
+      .campaign-card-subtitle {
+        font-size: 0.45rem;
+        color: #9898b0;
+      }
+      .mg-prompt--hostile { color: #ff6b6b; }
+      .mg-prompt--friendly { color: #6de88a; }
+      .mg-mortar-grid {
+        font-family: var(--pixel-font);
+        font-size: 0.45rem;
+        line-height: 1.8;
+        margin: 12px 0;
+      }
 
       /* --- Locker shop --- */
       .locker-panel { width: min(480px, 94vw); }

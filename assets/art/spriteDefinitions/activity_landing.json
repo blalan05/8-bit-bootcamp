@@ -1,0 +1,24 @@
+{
+  "id": "activity/landing",
+  "category": "activity",
+  "width": 16,
+  "height": 16,
+  "pixels": [
+    "................",
+    "....oooooooo....",
+    "...oqqqqqqqqo...",
+    "..oqqqqqqqqqqo..",
+    ".oqqqqqqqqqqqqo.",
+    "oqqqqqqqqqqqqqqo",
+    "oqqqqqqqqqqqqqqo",
+    "oqqqqqqqqqqqqqqo",
+    "oqqqqqqqqqqqqqqo",
+    "oqqqqqqqqqqqqqqo",
+    "oqqqqqqqqqqqqqqo",
+    "oqqqqqqqqqqqqqqo",
+    ".oqqqqqqqqqqqqo.",
+    "..oqqqqqqqqqqo..",
+    "...oqqqqqqqqo...",
+    "....oooooooo...."
+  ]
+}

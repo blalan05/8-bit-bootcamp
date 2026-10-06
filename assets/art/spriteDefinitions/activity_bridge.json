@@ -1,0 +1,24 @@
+{
+  "id": "activity/bridge",
+  "category": "activity",
+  "width": 16,
+  "height": 16,
+  "pixels": [
+    "................",
+    "................",
+    "oooooooooooooooo",
+    "oWWWWWWWWWWWWWWo",
+    "oWWWWWWWWWWWWWWo",
+    "oWWWWWWWWWWWWWWo",
+    "oWWWWWWWWWWWWWWo",
+    "oWWWWWWWWWWWWWWo",
+    "oWWWWWWWWWWWWWWo",
+    "oWWWWWWWWWWWWWWo",
+    "oWWWWWWWWWWWWWWo",
+    "oWWWWWWWWWWWWWWo",
+    "oooooooooooooooo",
+    "................",
+    "................",
+    "................"
+  ]
+}

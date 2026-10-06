@@ -1,0 +1,24 @@
+{
+  "id": "ground/jungle",
+  "category": "ground",
+  "width": 16,
+  "height": 16,
+  "pixels": [
+    "ggggGggggGgggggg",
+    "gGgggggglgggglgg",
+    "ggggGggggggGgggg",
+    "glgggggGgggggglg",
+    "ggggglgggglggggg",
+    "gGgggggGgggggGgg",
+    "gggglggggggglggg",
+    "ggGggggglGgggggg",
+    "glggggGggggggglg",
+    "gggggggglgggGggg",
+    "gGgglgggggglgggg",
+    "ggggggGggggggGgg",
+    "gglgggggglgggggg",
+    "gggGgggGgggglggg",
+    "glgggglggggGgggg",
+    "ggggGgggglgggggg"
+  ]
+}

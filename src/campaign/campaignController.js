@@ -16,7 +16,8 @@ import {
   isCampaignComplete,
   findLocation
 } from './campaignData.js';
-import { showSchedule, showWeekComplete, showComingSoon, showGraduation, showRecycled, showRunEnd } from './scheduleUI.js';
+import { showSchedule, showWeekComplete, showComingSoon, showGraduation, showRecycled, showRunEnd, showTheaterTransition } from './scheduleUI.js';
+import { getCampaignMapName, getCampaignMapNameForWeek, getTheaterTransitionForWeek } from '../campaigns/campaignRegistry.js';
 import { runActivity } from './runActivity.js';
 import { offerSideQuest } from './sideQuests/sideQuestRegistry.js';
 import { awardGrit } from './metaProgress.js';
@@ -36,8 +37,9 @@ export class CampaignController {
    * @param {{ update: Function }} options.recruitHUD
    * @param {import('./hydration.js').HydrationSystem} [options.hydrationSystem]
    * @param {() => void} [options.onRunEnd]
+   * @param {(mapName: string) => object | Promise<object>} [options.onMapChange]
    */
-  constructor({ character, slotIndex, player, parsedMap, recruitHUD, hydrationSystem, onRunEnd }) {
+  constructor({ character, slotIndex, player, parsedMap, recruitHUD, hydrationSystem, onRunEnd, onMapChange }) {
     this.character = ensureCampaign(character);
     this.slotIndex = slotIndex ?? character.slotIndex ?? 0;
     this.player = player;
@@ -45,6 +47,8 @@ export class CampaignController {
     this.recruitHUD = recruitHUD;
     this.hydrationSystem = hydrationSystem ?? null;
     this.onRunEnd = onRunEnd ?? null;
+    this.onMapChange = onMapChange ?? null;
+    this.currentMapName = getCampaignMapName(this.character);
 
     this.busy = false;
     this.runEnded = false;
@@ -85,7 +89,7 @@ export class CampaignController {
     if (isGraduated(this.character)) return;
     await this.dayLoop();
     if (this.runEnded) return;
-    if (isCampaignComplete(this.character.campaign.week) && !isGraduated(this.character)) {
+    if (isCampaignComplete(this.character.campaign.week, this.character) && !isGraduated(this.character)) {
       await this.handleGraduation();
     }
   }
@@ -111,7 +115,7 @@ export class CampaignController {
         updated = setHydration(updated, 50);
       }
       this.updateCharacter(updated);
-      await showRecycled(reason);
+      await showRecycled(this.character, reason);
       if (!this.awaitingProximity) {
         this.player.inputEnabled = true;
       }
@@ -131,8 +135,8 @@ export class CampaignController {
   }
 
   async dayLoop() {
-    while (!isCampaignComplete(this.character.campaign.week) && !this.runEnded) {
-      const weekDef = getWeek(this.character.campaign.week);
+    while (!isCampaignComplete(this.character.campaign.week, this.character) && !this.runEnded) {
+      const weekDef = getWeek(this.character.campaign.week, this.character);
       if (!weekDef) break;
 
       if (!weekDef.days?.length) {
@@ -142,7 +146,8 @@ export class CampaignController {
 
       const dayDef = getDayDefinition(
         this.character.campaign.week,
-        this.character.campaign.dayInWeek
+        this.character.campaign.dayInWeek,
+        this.character
       );
       if (!dayDef) break;
 
@@ -189,7 +194,25 @@ export class CampaignController {
 
     const weekComplete = this.advanceDay(weekDef);
     if (weekComplete) {
-      await showWeekComplete(weekDef);
+      await showWeekComplete(weekDef, this.character);
+      await this.maybeTransitionMap(weekDef.id);
+    }
+  }
+
+  async maybeTransitionMap(completedWeekId) {
+    const nextWeek = this.character.campaign.week;
+    const newMapName = getCampaignMapNameForWeek(this.character, nextWeek);
+    if (!this.onMapChange || newMapName === this.currentMapName) return;
+
+    const transition = getTheaterTransitionForWeek(this.character, nextWeek);
+    if (transition) {
+      await showTheaterTransition(transition);
+    }
+
+    const parsedMap = await this.onMapChange(newMapName);
+    if (parsedMap) {
+      this.parsedMap = parsedMap;
+      this.currentMapName = newMapName;
     }
   }
 

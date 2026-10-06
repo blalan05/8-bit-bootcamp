@@ -1,0 +1,24 @@
+{
+  "id": "ground/sand",
+  "category": "ground",
+  "width": 16,
+  "height": 16,
+  "pixels": [
+    "ddddDddddddddddd",
+    "dDddddddDddddddd",
+    "ddddddDddddddddd",
+    "ddDddddddddDdddd",
+    "dddddddddddddddd",
+    "dDddddDddddddDdd",
+    "dddddddddDdddddd",
+    "ddddDddddddddddd",
+    "dddddDddddDddddd",
+    "ddddddddddddDddd",
+    "dDdddddddddddddd",
+    "ddddDddddddDdddd",
+    "dddddddddddddddd",
+    "ddDddddDdddddddd",
+    "ddddddddDddddddd",
+    "dddddddddDdddddd"
+  ]
+}

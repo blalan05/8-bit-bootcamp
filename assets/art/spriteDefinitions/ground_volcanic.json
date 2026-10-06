@@ -1,0 +1,24 @@
+{
+  "id": "ground/volcanic",
+  "category": "ground",
+  "width": 16,
+  "height": 16,
+  "pixels": [
+    "rrrrRrrrrrrrrrrr",
+    "rRrrrrrrRrrrrrrr",
+    "rrrrrRrrrrrrrrrr",
+    "rrRrrrrrrrrRrrrr",
+    "rrrrrrrrrrrrrrrr",
+    "rRrrrrRrrrrrrRrr",
+    "rrrrrrrrRrrrrrrr",
+    "rrrrRrrrrrrrrrrr",
+    "rrrrrRrrrrRrrrrr",
+    "rrrrrrrrrrrrRrrr",
+    "rRrrrrrrrrrrrrrr",
+    "rrrrRrrrrrrRrrrr",
+    "rrrrrrrrrrrrrrrr",
+    "rrRrrrrRrrrrrrrr",
+    "rrrrrrrrRrrrrrrr",
+    "rrrrrrrrrRrrrrrr"
+  ]
+}

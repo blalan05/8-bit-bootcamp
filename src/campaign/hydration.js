@@ -8,10 +8,11 @@ import {
 } from './campaignState.js';
 import { getHydrationDrainMultiplier } from './metaProgress.js';
 import { showHeatExhaustion } from './scheduleUI.js';
+import { getCampaignClimate } from '../campaigns/campaignRegistry.js';
 
 const DRAIN_SECONDS = 240;
-const CANTEEN_RADIUS = 3;
-const CANTEENS_PER_DAY = 3;
+const PICKUP_RADIUS = 3;
+const PICKUPS_PER_DAY = 3;
 const REFILL_AMOUNT = 40;
 const ENDURANCE_ACTIVITY_PENALTY = 15;
 
@@ -32,8 +33,86 @@ function createCanteenTexture() {
   return tex;
 }
 
+function createFireTexture() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 16;
+  canvas.height = 16;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#4a3020';
+  ctx.fillRect(2, 12, 12, 3);
+  ctx.fillStyle = '#8b4513';
+  ctx.fillRect(4, 10, 8, 2);
+  ctx.fillStyle = '#d9a020';
+  ctx.fillRect(5, 5, 6, 6);
+  ctx.fillStyle = '#ff6b20';
+  ctx.fillRect(6, 3, 4, 5);
+  ctx.fillStyle = '#ffd94a';
+  ctx.fillRect(7, 1, 2, 4);
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.magFilter = THREE.NearestFilter;
+  tex.minFilter = THREE.NearestFilter;
+  return tex;
+}
+
+function createPonchoTexture() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 16;
+  canvas.height = 16;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#4a5a3a';
+  ctx.fillRect(3, 4, 10, 10);
+  ctx.fillStyle = '#5c6b4a';
+  ctx.fillRect(4, 5, 8, 8);
+  ctx.fillStyle = '#3d4a2e';
+  ctx.fillRect(3, 4, 10, 2);
+  ctx.fillStyle = '#6a7a58';
+  ctx.fillRect(5, 7, 6, 4);
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.magFilter = THREE.NearestFilter;
+  tex.minFilter = THREE.NearestFilter;
+  return tex;
+}
+
+function createBottleTexture() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 16;
+  canvas.height = 16;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#8ec8e8';
+  ctx.fillRect(5, 3, 6, 11);
+  ctx.fillStyle = '#b8e0f8';
+  ctx.fillRect(6, 5, 4, 7);
+  ctx.fillStyle = '#4a90c2';
+  ctx.fillRect(5, 2, 6, 2);
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(7, 0, 2, 3);
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.magFilter = THREE.NearestFilter;
+  tex.minFilter = THREE.NearestFilter;
+  return tex;
+}
+
+function createWaterskinTexture() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 16;
+  canvas.height = 16;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#8a6f47';
+  ctx.fillRect(4, 5, 8, 9);
+  ctx.fillStyle = '#6d5637';
+  ctx.fillRect(5, 6, 6, 7);
+  ctx.fillStyle = '#a8874f';
+  ctx.fillRect(6, 3, 4, 3);
+  ctx.fillStyle = '#cfa96b';
+  ctx.fillRect(7, 1, 2, 4);
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.magFilter = THREE.NearestFilter;
+  tex.minFilter = THREE.NearestFilter;
+  return tex;
+}
+
 /**
- * Hydration drain, canteen pickups, and heat-casualty handling.
+ * Climate resource drain, map pickups, and exhaustion-casualty handling.
  */
 export class HydrationSystem {
   /**
@@ -53,52 +132,73 @@ export class HydrationSystem {
     this.onCharacterUpdate = onCharacterUpdate;
     this.onRunFailure = onRunFailure;
 
-    this.canteens = [];
-    this.canteenMeshes = [];
-    this.heatExhaustionBusy = false;
+    this.pickups = [];
+    this.pickupMeshes = [];
+    this.exhaustionBusy = false;
     this.runFailureBusy = false;
     this._canteenTexture = createCanteenTexture();
+    this._fireTexture = createFireTexture();
+    this._ponchoTexture = createPonchoTexture();
+    this._bottleTexture = createBottleTexture();
+    this._waterskinTexture = createWaterskinTexture();
 
-    this.spawnCanteens();
+    this.spawnPickups();
+  }
+
+  get climate() {
+    return getCampaignClimate(this.character);
   }
 
   updateCharacter(character) {
     this.character = ensureCampaign(character);
   }
 
+  updateBounds(bounds) {
+    this.bounds = bounds;
+    this.spawnPickups();
+  }
+
   get isActive() {
     return !isSandbox(this.character) && this.character.campaign?.phase !== 'graduated';
   }
 
-  spawnCanteens() {
-    this.clearCanteens();
-    const count = CANTEENS_PER_DAY;
-    for (let i = 0; i < count; i++) {
+  getPickupTexture() {
+    const style = this.climate.pickupStyle;
+    if (style === 'fire') return this._fireTexture;
+    if (style === 'poncho') return this._ponchoTexture;
+    if (style === 'bottle') return this._bottleTexture;
+    if (style === 'waterskin') return this._waterskinTexture;
+    return this._canteenTexture;
+  }
+
+  spawnPickups() {
+    this.clearPickups();
+    for (let i = 0; i < PICKUPS_PER_DAY; i++) {
       const x = 8 + Math.random() * (this.bounds.width - 16);
       const z = 8 + Math.random() * (this.bounds.height - 16);
-      this.canteens.push({ x, z, id: `canteen-${Date.now()}-${i}` });
+      this.pickups.push({ x, z, id: `pickup-${Date.now()}-${i}` });
 
-      const mat = new THREE.SpriteMaterial({ map: this._canteenTexture, transparent: true });
+      const mat = new THREE.SpriteMaterial({ map: this.getPickupTexture(), transparent: true });
       const sprite = new THREE.Sprite(mat);
       sprite.scale.set(2, 2, 1);
       sprite.position.set(x, 1.5, z);
       this.mapContainer.add(sprite);
-      this.canteenMeshes.push(sprite);
+      this.pickupMeshes.push(sprite);
     }
   }
 
-  clearCanteens() {
-    for (const mesh of this.canteenMeshes) {
+  clearPickups() {
+    for (const mesh of this.pickupMeshes) {
       this.mapContainer.remove(mesh);
       mesh.material?.dispose();
     }
-    this.canteenMeshes = [];
-    this.canteens = [];
+    this.pickupMeshes = [];
+    this.pickups = [];
   }
 
   onNewDay() {
     if (!this.isActive) return;
-    this.spawnCanteens();
+    this.spawnPickups();
   }
 
   /** Extra drain after endurance-tagged activities. */
@@ -115,12 +215,12 @@ export class HydrationSystem {
     this.character = updated;
     this.onCharacterUpdate(updated);
     if (clamped <= 0 && prev > 0) {
-      this.handleDehydration();
+      this.handleExhaustion();
     }
   }
 
-  async handleDehydration() {
-    if (this.heatExhaustionBusy || this.runFailureBusy) return;
+  async handleExhaustion() {
+    if (this.exhaustionBusy || this.runFailureBusy) return;
 
     if (isIronman(this.character)) {
       this.runFailureBusy = true;
@@ -130,27 +230,27 @@ export class HydrationSystem {
       return;
     }
 
-    this.heatExhaustionBusy = true;
+    this.exhaustionBusy = true;
     this.player.inputEnabled = false;
     const penalized = applyHeatExhaustionPenalty(this.character);
     this.character = penalized;
     this.onCharacterUpdate(penalized);
-    await showHeatExhaustion();
+    await showHeatExhaustion(this.character);
     this.player.inputEnabled = true;
-    this.heatExhaustionBusy = false;
+    this.exhaustionBusy = false;
   }
 
-  checkCanteenPickup() {
+  checkPickup() {
     const px = this.player.position.x;
     const pz = this.player.position.z;
-    for (let i = this.canteens.length - 1; i >= 0; i--) {
-      const c = this.canteens[i];
+    for (let i = this.pickups.length - 1; i >= 0; i--) {
+      const c = this.pickups[i];
       const dist = Math.hypot(px - c.x, pz - c.z);
-      if (dist <= CANTEEN_RADIUS) {
+      if (dist <= PICKUP_RADIUS) {
         const hydration = Math.min(100, (this.character.campaign.hydration ?? 0) + REFILL_AMOUNT);
         this.applyHydration(hydration);
-        this.canteens.splice(i, 1);
-        const mesh = this.canteenMeshes.splice(i, 1)[0];
+        this.pickups.splice(i, 1);
+        const mesh = this.pickupMeshes.splice(i, 1)[0];
         if (mesh) {
           this.mapContainer.remove(mesh);
           mesh.material?.dispose();
@@ -165,18 +265,22 @@ export class HydrationSystem {
   update(dt) {
     if (!this.isActive) return;
     if (!this.player.inputEnabled) return;
-    if (this.heatExhaustionBusy || this.runFailureBusy) return;
+    if (this.exhaustionBusy || this.runFailureBusy) return;
 
     const drainPerSec = 100 / DRAIN_SECONDS;
     const multiplier = getHydrationDrainMultiplier();
     const hydration = (this.character.campaign.hydration ?? 100) - drainPerSec * dt * multiplier;
     this.applyHydration(hydration);
 
-    this.checkCanteenPickup();
+    this.checkPickup();
   }
 
   dispose() {
-    this.clearCanteens();
+    this.clearPickups();
     this._canteenTexture?.dispose();
+    this._fireTexture?.dispose();
+    this._ponchoTexture?.dispose();
+    this._bottleTexture?.dispose();
+    this._waterskinTexture?.dispose();
   }
 }

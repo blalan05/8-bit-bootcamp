@@ -1,4 +1,4 @@
-import { CAMPAIGN_WEEKS } from './campaignData.js';
+import { getCampaignWeeks } from '../campaigns/campaignRegistry.js';
 import { findLocation } from './campaignData.js';
 import { getActivity } from './activityRegistry.js';
 import { saveSlot } from '../character/saveSlots.js';
@@ -13,9 +13,9 @@ const SANDBOX_EXTRAS = [
 ];
 
 /** Build location -> activities map from campaign schedule. */
-export function buildLocationActivityMap() {
+export function buildLocationActivityMap(character) {
   const map = new Map();
-  for (const week of CAMPAIGN_WEEKS) {
+  for (const week of getCampaignWeeks(character)) {
     for (const day of week.days ?? []) {
       const loc = day.locationName;
       if (!map.has(loc)) map.set(loc, []);
@@ -48,7 +48,7 @@ export class SandboxController {
     this.player = player;
     this.parsedMap = parsedMap;
     this.recruitHUD = recruitHUD;
-    this.locationMap = buildLocationActivityMap();
+    this.locationMap = buildLocationActivityMap(this.character);
 
     this.busy = false;
     this.nearbyLocation = null;

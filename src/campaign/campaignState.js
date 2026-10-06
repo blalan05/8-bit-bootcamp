@@ -1,5 +1,6 @@
 import { SCHEMA_VERSION } from '../character/appearance.js';
 import { clampStat } from '../character/stats.js';
+import { getCampaignForCharacter } from '../campaigns/campaignRegistry.js';
 
 export const GRADES = ['unsat', 'passing', 'honor'];
 
@@ -18,6 +19,7 @@ export const MODES = ['campaign', 'sandbox'];
 
 export function createInitialCampaign(overrides = {}) {
   return {
+    campaignId: 'bootcamp',
     week: 1,
     dayInWeek: 1,
     completed: {},
@@ -243,16 +245,19 @@ export function getDayId(week, dayInWeek) {
 }
 
 /** Honors title from final readiness score. */
-export function getHonorsTitle(readiness) {
-  if (readiness >= 80) return 'Honor Graduate';
-  if (readiness >= 50) return 'Company Honors';
-  return 'United States Marine';
+export function getHonorsTitle(readiness, character) {
+  const honors = getCampaignForCharacter(character).completion?.honors ?? [];
+  const sorted = [...honors].sort((a, b) => b.min - a.min);
+  for (const entry of sorted) {
+    if (readiness >= entry.min) return entry.title;
+  }
+  return sorted[sorted.length - 1]?.title ?? 'United States Marine';
 }
 
 /** Mark campaign complete after graduation ceremony. */
 export function graduateCampaign(character) {
   const characterWithCampaign = ensureCampaign(character);
-  const honorsTitle = getHonorsTitle(characterWithCampaign.campaign.readiness);
+  const honorsTitle = getHonorsTitle(characterWithCampaign.campaign.readiness, characterWithCampaign);
   return {
     ...characterWithCampaign,
     honorsTitle,

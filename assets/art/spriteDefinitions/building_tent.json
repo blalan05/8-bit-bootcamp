@@ -1,0 +1,32 @@
+{
+  "id": "building/tent",
+  "category": "building",
+  "width": 24,
+  "height": 24,
+  "pixels": [
+    "........................",
+    "........oooooooo........",
+    ".......otttttttto.......",
+    "......otttttttttto......",
+    ".....otttttttttttto.....",
+    "....otttttttttttttto....",
+    "...otttttttttttttttto...",
+    "..otttttttttttttttttto..",
+    ".otttttttttttttttttttto.",
+    "otttttttttttttttttttttto",
+    "otttttttttttttttttttttto",
+    "otttttttttttttttttttttto",
+    "otttttttttttttttttttttto",
+    "otttttttttttttttttttttto",
+    "otttttttttttttttttttttto",
+    "otttttttttttttttttttttto",
+    "otttttttttttttttttttttto",
+    "otttttttttttttttttttttto",
+    "otttttttttttttttttttttto",
+    "otttttttttttttttttttttto",
+    "otttttttttttttttttttttto",
+    "otttttttttttttttttttttto",
+    "otttttttttttttttttttttto",
+    "otttttttttttttttttttttto"
+  ]
+}

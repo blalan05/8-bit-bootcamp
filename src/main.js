@@ -8,13 +8,16 @@ import { Player } from './playerCharacter/player.js';
 import { showSlotSelect } from './character/slotSelectUI.js';
 import { showCharacterCreation } from './character/characterCreationUI.js';
 import { showRecruiterVisit } from './recruiter/recruiterVisitUI.js';
+import { showCampaignSelect } from './campaigns/campaignSelectUI.js';
+import { showDeploymentBriefing } from './campaigns/deploymentBriefingUI.js';
+import { getCampaignForCharacter, getCampaignMapName, getMapBackground } from './campaigns/campaignRegistry.js';
 import { saveSlot } from './character/saveSlots.js';
 import { createRecruitHUD } from './character/recruitHUD.js';
 import { ISO_PITCH } from './art/assetLoader.js';
 import { CampaignController } from './campaign/campaignController.js';
 import { SandboxController } from './campaign/sandboxController.js';
 import { HydrationSystem } from './campaign/hydration.js';
-import { ensureCampaign, isSandbox } from './campaign/campaignState.js';
+import { ensureCampaign, isSandbox, createInitialCampaign } from './campaign/campaignState.js';
 
 /** Internal render resolution divisor — bigger = chunkier pixels */
 const PIXEL_SCALE = 3;
@@ -45,10 +48,27 @@ async function boot() {
     }
 
     if (result.type === 'create') {
+      const campaign = await showCampaignSelect();
+      if (!campaign) continue;
+
       const character = await showCharacterCreation(result.slotIndex);
       if (!character) continue;
 
-      const cleared = await showRecruiterVisit(character);
+      let cleared;
+      if (campaign.usesRecruiter) {
+        cleared = await showRecruiterVisit(character);
+        if (cleared) {
+          cleared = {
+            ...cleared,
+            campaign: createInitialCampaign({
+              campaignId: campaign.id,
+              ...(cleared.campaign ?? {})
+            })
+          };
+        }
+      } else {
+        cleared = await showDeploymentBriefing(character, campaign);
+      }
       if (!cleared) continue;
 
       if (!saveSlot(result.slotIndex, cleared)) {
@@ -154,7 +174,10 @@ function startGame(character) {
   const mapContainer = new THREE.Group();
   scene.add(mapContainer);
 
-  const mapDef = mapsConfig.maps?.find(m => m.name === 'mcrdsd');
+  const campaignDef = getCampaignForCharacter(character);
+  const mapName = getCampaignMapName(character);
+
+  const mapDef = mapsConfig.maps?.find(m => m.name === mapName);
   const bounds = {
     width: mapDef?.width ?? 60,
     height: mapDef?.height ?? 50
@@ -171,10 +194,28 @@ function startGame(character) {
     positionGetter: () => ({ x: player.position.x, z: player.position.z }),
     unloadDistance: 3
   });
-  tileLoader.setMap('mcrdsd');
+  tileLoader.setMap(mapName);
 
   const parsedMap = tileLoader.getParsedMap();
   const slotIndex = character.slotIndex ?? 0;
+
+  scene.background = new THREE.Color(getMapBackground(mapName));
+
+  const reloadMap = async (newMapName) => {
+    const newMapDef = mapsConfig.maps?.find(m => m.name === newMapName);
+    const newBounds = {
+      width: newMapDef?.width ?? 60,
+      height: newMapDef?.height ?? 50
+    };
+    player.bounds = newBounds;
+    const centerX = newBounds.width / 2;
+    const centerZ = newBounds.height / 2;
+    player.position.set(centerX, 0, centerZ);
+    tileLoader.setMap(newMapName);
+    scene.background = new THREE.Color(getMapBackground(newMapName));
+    hydrationSystem?.updateBounds?.(newBounds);
+    return tileLoader.getParsedMap();
+  };
 
   if (isSandbox(character)) {
     gameController = new SandboxController({
@@ -191,7 +232,8 @@ function startGame(character) {
       player,
       parsedMap,
       recruitHUD,
-      onRunEnd: () => endGameSession()
+      onRunEnd: () => endGameSession(),
+      onMapChange: reloadMap
     });
 
     hydrationSystem = new HydrationSystem({

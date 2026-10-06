@@ -23,6 +23,25 @@ import {
   runNightCleanup, runWriteLetter, runMailCall, runFieldDay,
   runFootlockerInspection
 } from './activities/games/dailyLifeGames.js';
+import {
+  runShipOut, runBeachLanding, runFoxholeDig, runMortarBracket,
+  runNightWatch, runSupplyRun, runFieldMedic, runFlagRaising
+} from './activities/games/wwiiGames.js';
+import {
+  runFrostbiteCheck, runWeaponsCold, runConvoyEscort, runBridgeRepair
+} from './activities/games/koreaGames.js';
+import {
+  runIncomingArtillery, runBunkerRepair, runMedevacSmoke, runWallBreach
+} from './activities/games/vietnamGames.js';
+import {
+  runIedSweep, runTurretGunner, runCheckpointSearch, runStatueTopple
+} from './activities/games/iraqGames.js';
+import {
+  runCamelCaravan, runMutinyParley, runDerneCharge, runCannonBattery, runDerneColors
+} from './activities/games/tripoliGames.js';
+import {
+  runGasAlarm, runJungleAmbush, runCrowdControl
+} from './activities/games/expeditionGames.js';
 
 /** @type {Record<string, { title: string, subtitle: string, intro: string, run: Function }>} */
 export const ACTIVITY_REGISTRY = {
@@ -277,6 +296,174 @@ export const ACTIVITY_REGISTRY = {
     subtitle: 'Barracks — white-glove clean',
     intro: 'Click cleaning stations in the correct order before the D.I. inspects.',
     run: runFieldDay
+  },
+  shipOut: {
+    title: 'Ship Out',
+    subtitle: 'Transport Ship — boats away',
+    intro: 'Execute every command before the Higgins boats launch for Guadalcanal.',
+    run: runShipOut
+  },
+  beachLanding: {
+    title: 'Beach Landing',
+    subtitle: 'Landing Beach — Higgins boat assault',
+    intro: 'Ride the Higgins boat in, hit the ramp on the cadence, and get off the beach.',
+    run: runBeachLanding
+  },
+  foxholeDig: {
+    title: 'Dig In',
+    subtitle: 'Foxhole Line — shovel strokes',
+    intro: 'Alternate <strong>J</strong> and <strong>K</strong> to dig your fighting position.',
+    run: runFoxholeDig
+  },
+  mortarBracket: {
+    title: 'Mortar Support',
+    subtitle: 'Ridge — adjust fire',
+    intro: 'Arrow keys adjust range and deflection. <strong>Space</strong> to fire each volley.',
+    run: runMortarBracket
+  },
+  nightWatch: {
+    title: 'Sniper Alley',
+    subtitle: 'Jungle Patrol — night watch',
+    intro: 'Press <strong>F</strong> on hostile movement. Do NOT fire on friendlies.',
+    run: runNightWatch
+  },
+  supplyRun: {
+    title: 'Supply Run',
+    subtitle: 'Supply Dump — hump rations',
+    intro: 'Load supplies in the correct order before the patrol moves out.',
+    run: runSupplyRun
+  },
+  fieldMedic: {
+    title: 'Field Medic',
+    subtitle: 'Field Hospital — triage',
+    intro: 'Triage casualties and execute field medicine in the correct order.',
+    run: runFieldMedic
+  },
+  flagRaising: {
+    title: 'Raising the Colors',
+    subtitle: 'Mt. Suribachi — 23 February 1945',
+    intro: 'Assemble the pipe, attach the flag, and hoist the colors on Suribachi. <strong>Space</strong> on the cadence.',
+    run: runFlagRaising
+  },
+  frostbiteCheck: {
+    title: 'Frostbite Triage',
+    subtitle: 'Aid Station — frozen casualties',
+    intro: 'Treat frostbite casualties in the correct order before evac.',
+    run: runFrostbiteCheck
+  },
+  weaponsCold: {
+    title: 'Frozen Weapons',
+    subtitle: 'Warming Tents — keep rifles firing',
+    intro: 'Work the bolt and hand-warm the action. <strong>B</strong> bolt · <strong>H</strong> warm · <strong>D</strong> dry-fire · <strong>C</strong> cycle.',
+    run: runWeaponsCold
+  },
+  convoyEscort: {
+    title: 'Fighting Withdrawal',
+    subtitle: 'Frozen Reservoir — attack in a different direction',
+    intro: '<strong>W</strong> to advance the column. Freeze on flares. <strong>Space</strong> to help a straggler.',
+    run: runConvoyEscort
+  },
+  bridgeRepair: {
+    title: 'Bridge Repair',
+    subtitle: 'Funchilin Pass — treadway assembly',
+    intro: 'Assemble treadway sections in the correct order before the column is cut off.',
+    run: runBridgeRepair
+  },
+  incomingArtillery: {
+    title: 'Incoming Barrage',
+    subtitle: 'Trenchline — rockets and mortars',
+    intro: 'Press <strong>D</strong> to dive on INCOMING — hold position on ALL CLEAR.',
+    run: runIncomingArtillery
+  },
+  bunkerRepair: {
+    title: 'Rebuild the Bunker',
+    subtitle: 'Combat Base — sandbags and timbers',
+    intro: 'Fill sandbags, stack the wall, and brace the bunker before the next barrage.',
+    run: runBunkerRepair
+  },
+  medevacSmoke: {
+    title: 'Guide the Medevac',
+    subtitle: 'Drop Zone — pop smoke and load casualties',
+    intro: 'Pop smoke, clear the LZ, mark approach, then load casualties on the cadence.',
+    run: runMedevacSmoke
+  },
+  wallBreach: {
+    title: 'Breach and Clear',
+    subtitle: 'University — stack up and clear the room',
+    intro: 'Stack up, breach, frag out, clear left and right, then room clear.',
+    run: runWallBreach
+  },
+  iedSweep: {
+    title: 'IED Sweep',
+    subtitle: 'Highway 1 — mark suspicious objects',
+    intro: 'Press <strong>M</strong> to mark SUSPICIOUS OBJECT — hold on ROADSIDE CLUTTER.',
+    run: runIedSweep
+  },
+  turretGunner: {
+    title: 'Turret Gunner',
+    subtitle: 'Highway 1 — traverse on contact',
+    intro: 'Press <strong>A</strong>/<strong>D</strong> on CONTACT LEFT/RIGHT — hold fire on CIVILIAN VEHICLE.',
+    run: runTurretGunner
+  },
+  checkpointSearch: {
+    title: 'Checkpoint Duty',
+    subtitle: 'Checkpoint — wave, search, or halt',
+    intro: 'Read each vehicle\'s cues and choose Wave Through, Search, or Halt.',
+    run: runCheckpointSearch
+  },
+  statueTopple: {
+    title: 'Firdos Square',
+    subtitle: 'Baghdad — pull down the statue',
+    intro: 'Rig the chain, clear the square, signal the M88, then pull it down on the cadence.',
+    run: runStatueTopple
+  },
+  camelCaravan: {
+    title: 'The Caravan',
+    subtitle: 'Libyan Desert — grab the lead',
+    intro: 'Press <strong>C</strong> to grab the lead on CAMEL BOLTS — hold on STEADY COLUMN.',
+    run: runCamelCaravan
+  },
+  mutinyParley: {
+    title: 'Mutiny at the Wells',
+    subtitle: 'Mercenary Camp — defuse the flashpoint',
+    intro: 'Pay Them, Promise Gold, or Stand Firm — read each mercenary flashpoint.',
+    run: runMutinyParley
+  },
+  derneCharge: {
+    title: 'Charge the Harbor Battery',
+    subtitle: 'Derne — fix bayonets and charge',
+    intro: 'Fix bayonets, over the wall, clear the battery, turn the guns, colors up.',
+    run: runDerneCharge
+  },
+  cannonBattery: {
+    title: 'Man the Harbor Battery',
+    subtitle: 'Derne — load and fire captured guns',
+    intro: 'Swab, powder, shot, ram, prime — then fire on the cadence.',
+    run: runCannonBattery
+  },
+  derneColors: {
+    title: 'Raise the Colors',
+    subtitle: 'Flag Bastion — first US flag over an Old World fortress',
+    intro: 'Rig the halyard, clear the bastion, attach the colors, hoist on the cadence.',
+    run: runDerneColors
+  },
+  gasAlarm: {
+    title: 'Gas Attack',
+    subtitle: 'Belleau Wood — mask up',
+    intro: 'Press <strong>G</strong> to mask on GAS! GAS! GAS! — hold on FALSE ALARM.',
+    run: runGasAlarm
+  },
+  jungleAmbush: {
+    title: 'Jungle Ambush',
+    subtitle: 'Nicaragua — return fire on muzzle flash',
+    intro: 'Press <strong>F</strong> on MUZZLE FLASH — hold on VILLAGERS ON THE TRAIL.',
+    run: runJungleAmbush
+  },
+  crowdControl: {
+    title: 'Crowd Control',
+    subtitle: 'Mogadishu — hold the line at the wire',
+    intro: 'Hold the Line, Open the Gate, or Call the Terp — read each crowd situation.',
+    run: runCrowdControl
   }
 };
 

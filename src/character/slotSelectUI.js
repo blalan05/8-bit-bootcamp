@@ -2,6 +2,7 @@ import { getAllSlots, deleteSlot, getSlotCount } from './saveSlots.js';
 import { getBackgroundById } from './createCharacter.js';
 import { getMeta } from '../campaign/metaProgress.js';
 import { showLocker } from '../campaign/lockerUI.js';
+import { getCampaignForCharacter } from '../campaigns/campaignRegistry.js';
 
 function createConfirmDialog(message, { confirmLabel = 'Confirm', cancelLabel = 'Cancel' } = {}) {
   return new Promise(resolve => {
@@ -50,6 +51,36 @@ function modeBadge(character) {
   return '';
 }
 
+function campaignBadge(character) {
+  const campaign = getCampaignForCharacter(character);
+  if (campaign.id === 'bootcamp') return '';
+  const short = {
+    wwii: 'WWII',
+    korea: 'KOREA',
+    vietnam: 'VIETNAM',
+    iraq: 'IRAQ',
+    tripoli: 'TRIPOLI',
+    belleau: 'WWI',
+    nicaragua: 'BANANA',
+    somalia: 'SOMALIA'
+  };
+  const label = short[campaign.id] ?? campaign.id.toUpperCase();
+  return `<span class="slot-badge slot-badge--campaign">${label}</span>`;
+}
+
+function campaignProgress(character) {
+  const campaign = getCampaignForCharacter(character);
+  const camp = character.campaign;
+  const period = campaign.periodLabel ?? 'Week';
+
+  if (character.mode === 'sandbox') return 'Sandbox · free play';
+  if (camp?.phase === 'graduated') {
+    return `Complete · ${character.honorsTitle ?? campaign.completion?.honors?.[2]?.title ?? 'Marine'}`;
+  }
+  if (camp) return `${period} ${camp.week} · Day ${camp.dayInWeek} · ${camp.readiness}% ready`;
+  return `Day ${character.bootDay ?? 0}`;
+}
+
 /**
  * @returns {Promise<{ type: 'continue', character: object, slotIndex: number } | { type: 'create', slotIndex: number }>}
  */
@@ -92,18 +123,11 @@ export function showSlotSelect() {
             </div>`;
         }
         const bg = getBackgroundById(char.backgroundId);
-        const camp = char.campaign;
-        const progress = char.mode === 'sandbox'
-          ? 'Sandbox · free play'
-          : camp?.phase === 'graduated'
-            ? `Graduated · ${char.honorsTitle ?? 'Marine'}`
-            : camp
-              ? `Week ${camp.week} · Day ${camp.dayInWeek} · ${camp.readiness}% ready`
-              : `Day ${char.bootDay ?? 0}`;
+        const progress = campaignProgress(char);
         return `
           <div class="slot-row${selected}">
             <button type="button" class="slot-card slot-card--filled" data-slot="${i}" role="option">
-              <span class="slot-label">Slot ${i + 1} ${modeBadge(char)}</span>
+              <span class="slot-label">Slot ${i + 1} ${modeBadge(char)} ${campaignBadge(char)}</span>
               <span class="slot-name">${char.name}</span>
               <span class="slot-meta">${progress} · ${bg.name}</span>
             </button>

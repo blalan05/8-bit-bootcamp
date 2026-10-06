@@ -1,3 +1,42 @@
+import { getCampaignForCharacter, getCampaignClimate } from '../campaigns/campaignRegistry.js';
+
+/**
+ * Theater transition when campaign moves to a new map/theater.
+ * @param {{ title: string, subtitle: string, paragraphs: string[], hint?: string, button?: string }} transition
+ */
+export function showTheaterTransition(transition) {
+  const paragraphs = (transition.paragraphs ?? []).map(p =>
+    `<p class="recruiter-copy">${p}</p>`
+  ).join('');
+  const hint = transition.hint
+    ? `<p class="recruiter-copy recruiter-copy--small">${transition.hint}</p>`
+    : '';
+
+  return new Promise(resolve => {
+    const overlay = document.createElement('div');
+    overlay.className = 'menu-overlay';
+    overlay.innerHTML = `
+      <div class="menu-panel schedule-panel">
+        <h2 class="menu-title">${transition.title ?? 'New Orders'}</h2>
+        <p class="menu-subtitle">${transition.subtitle ?? ''}</p>
+        <div class="schedule-body">
+          ${paragraphs}
+          ${hint}
+        </div>
+        <div class="schedule-actions">
+          <button type="button" class="btn btn-primary" id="theater-continue">${transition.button ?? 'Continue'}</button>
+        </div>
+      </div>
+    `;
+    overlay.querySelector('#theater-continue').addEventListener('click', () => {
+      overlay.remove();
+      resolve();
+    }, { once: true });
+    document.body.appendChild(overlay);
+    overlay.querySelector('#theater-continue').focus();
+  });
+}
+
 /**
  * Day-start schedule briefing overlay.
  * @param {object} character
@@ -5,13 +44,18 @@
  * @param {object} weekDef
  */
 export function showSchedule(character, dayDef, weekDef) {
+  const campaign = getCampaignForCharacter(character);
+  const periodLabel = campaign.periodLabel ?? 'Week';
+  const isCombat = campaign.usesRecruiter === false;
+  const dayLabel = isCombat ? 'Mission Day' : 'Training Day';
+
   return new Promise(resolve => {
     const overlay = document.createElement('div');
     overlay.className = 'menu-overlay';
     overlay.innerHTML = `
       <div class="menu-panel schedule-panel">
-        <h2 class="menu-title">Week ${weekDef.id}: ${weekDef.name}</h2>
-        <p class="menu-subtitle">Training Day ${character.campaign.dayInWeek}</p>
+        <h2 class="menu-title">${periodLabel} ${weekDef.id}: ${weekDef.name}</h2>
+        <p class="menu-subtitle">${dayLabel} ${character.campaign.dayInWeek}</p>
         <div class="schedule-body">
           <p class="schedule-assignment">${dayDef.title}</p>
           <p class="recruiter-copy">${dayDef.briefing}</p>
@@ -19,10 +63,10 @@ export function showSchedule(character, dayDef, weekDef) {
             <span class="schedule-label">Report to</span>
             <span class="schedule-value">${dayDef.locationName}</span>
           </div>
-          <p class="recruiter-copy recruiter-copy--small">Walk to the location on the MCRD map. A prompt will appear when you arrive.</p>
+          <p class="recruiter-copy recruiter-copy--small">${campaign.mapHint}</p>
         </div>
         <div class="schedule-actions">
-          <button type="button" class="btn btn-primary" id="schedule-begin">Begin Patrol</button>
+          <button type="button" class="btn btn-primary" id="schedule-begin">${isCombat ? 'Begin Mission' : 'Begin Patrol'}</button>
         </div>
       </div>
     `;
@@ -40,14 +84,18 @@ export function showSchedule(character, dayDef, weekDef) {
 /**
  * Week complete overlay.
  * @param {object} weekDef
+ * @param {object} [character]
  */
-export function showWeekComplete(weekDef) {
+export function showWeekComplete(weekDef, character) {
+  const campaign = getCampaignForCharacter(character);
+  const periodLabel = campaign.periodLabel ?? 'Week';
+
   return new Promise(resolve => {
     const overlay = document.createElement('div');
     overlay.className = 'menu-overlay';
     overlay.innerHTML = `
       <div class="menu-panel schedule-panel">
-        <h2 class="menu-title">Week ${weekDef.id} Complete</h2>
+        <h2 class="menu-title">${periodLabel} ${weekDef.id} Complete</h2>
         <p class="menu-subtitle">${weekDef.name}</p>
         <p class="recruiter-copy">${weekDef.theme}</p>
         <div class="schedule-actions">
@@ -95,25 +143,28 @@ export function showComingSoon(weekDef) {
  * @param {object} character
  */
 export function showGraduation(character) {
-  return new Promise(resolve => {
-    const honors = character.honorsTitle ?? 'United States Marine';
-    const readiness = character.campaign?.readiness ?? 0;
-    const completed = Object.keys(character.campaign?.completed ?? {}).length;
+  const campaign = getCampaignForCharacter(character);
+  const completion = campaign.completion ?? {};
+  const honors = character.honorsTitle ?? 'United States Marine';
+  const readiness = character.campaign?.readiness ?? 0;
+  const completed = Object.keys(character.campaign?.completed ?? {}).length;
+  const dayLabel = campaign.usesRecruiter === false ? 'Missions completed' : 'Training days';
 
+  return new Promise(resolve => {
     const overlay = document.createElement('div');
     overlay.className = 'menu-overlay';
     overlay.innerHTML = `
       <div class="menu-panel schedule-panel graduation-panel">
-        <h2 class="menu-title">Graduation</h2>
-        <p class="menu-subtitle">MCRD San Diego</p>
+        <h2 class="menu-title">${completion.title ?? 'Graduation'}</h2>
+        <p class="menu-subtitle">${completion.subtitle ?? campaign.subtitle}</p>
         <p class="schedule-assignment">${character.name}</p>
-        <p class="recruiter-copy">After 13 weeks of training, you have earned the title <strong>${honors}</strong>.</p>
+        <p class="recruiter-copy">You have earned the title <strong>${honors}</strong>.</p>
         <div class="graduation-stats">
           <div class="recruiter-result-row"><span>Readiness</span><span>${readiness}%</span></div>
-          <div class="recruiter-result-row"><span>Training days</span><span>${completed}</span></div>
-          <div class="recruiter-result-row"><span>Status</span><span>Graduated</span></div>
+          <div class="recruiter-result-row"><span>${dayLabel}</span><span>${completed}</span></div>
+          <div class="recruiter-result-row"><span>Status</span><span>Complete</span></div>
         </div>
-        <p class="recruiter-copy recruiter-copy--small">Semper Fidelis. Free roam the depot or start a new recruit.</p>
+        <p class="recruiter-copy recruiter-copy--small">${completion.footer ?? 'Semper Fidelis.'}</p>
         <div class="schedule-actions">
           <button type="button" class="btn btn-primary" id="grad-ok">Dismiss</button>
         </div>
@@ -128,18 +179,20 @@ export function showGraduation(character) {
 }
 
 /**
- * Story mode heat exhaustion warning.
+ * Story mode climate exhaustion warning (heat or frostbite).
+ * @param {object} character
  */
-export function showHeatExhaustion() {
+export function showHeatExhaustion(character) {
+  const climate = getCampaignClimate(character);
   return new Promise(resolve => {
     const overlay = document.createElement('div');
     overlay.className = 'menu-overlay';
     overlay.innerHTML = `
       <div class="menu-panel schedule-panel">
-        <h2 class="menu-title">Heat Exhaustion</h2>
+        <h2 class="menu-title">${climate.exhaustionTitle}</h2>
         <p class="menu-subtitle">Story mode</p>
-        <p class="recruiter-copy">You collapsed from dehydration. Corpsman revived you — readiness -5, hydration refilled to 50%.</p>
-        <p class="recruiter-copy recruiter-copy--small">Find canteens on the map before your next patrol.</p>
+        <p class="recruiter-copy">${climate.exhaustionCopy}</p>
+        <p class="recruiter-copy recruiter-copy--small">${climate.pickupHint}</p>
         <div class="schedule-actions">
           <button type="button" class="btn btn-primary" id="heat-ok">Roger</button>
         </div>
@@ -155,12 +208,14 @@ export function showHeatExhaustion() {
 
 /**
  * Ironman recycle token consumed — run continues.
+ * @param {object} character
  * @param {string} reason
  */
-export function showRecycled(reason) {
+export function showRecycled(character, reason) {
+  const climate = getCampaignClimate(character);
   const labels = {
     performance: 'Performance Drop',
-    heat: 'Heat Casualty'
+    heat: climate.casualtyLabel
   };
   return new Promise(resolve => {
     const overlay = document.createElement('div');
@@ -190,9 +245,12 @@ export function showRecycled(reason) {
  * @param {number} gritEarned
  */
 export function showRunEnd(character, reason, gritEarned) {
+  const campaign = getCampaignForCharacter(character);
+  const climate = getCampaignClimate(character);
+  const periodLabel = campaign.periodLabel ?? 'Week';
   const labels = {
     performance: 'Performance Drop',
-    heat: 'Heat Casualty'
+    heat: climate.casualtyLabel
   };
   const week = character.campaign?.week ?? 1;
   const readiness = character.campaign?.readiness ?? 0;
@@ -208,7 +266,7 @@ export function showRunEnd(character, reason, gritEarned) {
         <p class="schedule-assignment">${character.name}</p>
         <p class="recruiter-copy">Ironman run over. Grit earned carries to The Locker for your next recruit.</p>
         <div class="graduation-stats">
-          <div class="recruiter-result-row"><span>Weeks reached</span><span>${week}</span></div>
+          <div class="recruiter-result-row"><span>${periodLabel}s reached</span><span>${week}</span></div>
           <div class="recruiter-result-row"><span>Days completed</span><span>${completed}</span></div>
           <div class="recruiter-result-row"><span>Readiness</span><span>${readiness}%</span></div>
           <div class="recruiter-result-row"><span>Grit earned</span><span class="stat-delta stat-delta--up">+${gritEarned}</span></div>

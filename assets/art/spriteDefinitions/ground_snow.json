@@ -1,0 +1,24 @@
+{
+  "id": "ground/snow",
+  "category": "ground",
+  "width": 16,
+  "height": 16,
+  "pixels": [
+    "wwwwWwwwwwwwwwww",
+    "wWwwwwwwWwwwwwww",
+    "wwwwwWwwwwwwwwww",
+    "wwWwwwwwwwwWwwww",
+    "wwwwwwwwwwwwwwww",
+    "wWwwwwWwwwwwwWww",
+    "wwwwwwwwWwwwwwww",
+    "wwwwWwwwwwwwwwww",
+    "wwwwwWwwwwWwwwww",
+    "wwwwwwwwwwwwWwww",
+    "wWwwwwwwwwwwwwww",
+    "wwwwWwwwwwwWwwww",
+    "wwwwwwwwwwwwwwww",
+    "wwWwwwwWwwwwwwww",
+    "wwwwwwwwWwwwwwww",
+    "wwwwwwwwwWwwwwww"
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "id": "activity/helipad",
+  "category": "activity",
+  "width": 16,
+  "height": 16,
+  "pixels": [
+    "rrrrRrrrrrrrrrrr",
+    "rrrrrrrrrrrrrrrr",
+    "rrrrryrrrrrrrrrr",
+    "rrrrryrrrrrrrrrr",
+    "rrrrryrrrrrrrrrr",
+    "rrrrryrrrrrrrrrr",
+    "rrrrryrrrrrrrrrr",
+    "rrrrryrrrrrrrrrr",
+    "rrrrryrrrrrrrrrr",
+    "rrrrryrrrrrrrrrr",
+    "rrrrryrrrrrrrrrr",
+    "rrrrryrrrrrrrrrr",
+    "rrrrryrrrrrrrrrr",
+    "rrrrrrrrrrrrrrrr",
+    "rrrrRrrrrrrrrrrr",
+    "rrrrrrrrrrrrrrrr"
+  ]
+}
