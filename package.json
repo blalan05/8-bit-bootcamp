@@ -4,20 +4,28 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "generate:art": "node scripts/generateAtlas.mjs",
-    "generate:nco": "node scripts/buildNcoSprite.mjs",
+    "dev": "bunx --bun vite",
+    "build": "bunx --bun vite build",
+    "preview": "bunx --bun vite preview",
+    "generate:art": "bun scripts/generateAtlas.mjs",
+    "generate:icons": "bun scripts/generateIcons.mjs",
+    "generate:nco": "bun scripts/buildNcoSprite.mjs",
+    "generate:buildings": "bun scripts/buildBuildingSprites.mjs",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "packageManager": "pnpm@12.9.1+sha512.06b055fff5cd20dc12781de173ced3310ce0951bf2ec620211a16045d5444d5c93a663210764ef29a653a610459ba0368f0e74f84d80c54723cf95aae7bc0d6d",
+  "packageManager": "bun@1.4.4",
+  "trustedDependencies": [
+    "esbuild"
+  ],
   "dependencies": {
     "three": "^0.182.0"
   },
   "devDependencies": {
-    "vite": "^7.3.1"
+    "vite": "^7.3.1",
+    "vite-plugin-pwa": "^2.0.0",
+    "workbox-window": "^7.4.1"
   }
 }

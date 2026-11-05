@@ -1,4 +1,7 @@
+import { registerSW } from 'virtual:pwa-register';
 import * as THREE from 'three';
+
+registerSW({ immediate: true });
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import Stats from 'three/addons/libs/stats.module.js';
 import mapsConfig from './maps/maps.json';

@@ -1,6 +1,6 @@
 {
   "width": 128,
-  "height": 72,
+  "height": 128,
   "frames": {
     "npc/nco": {
       "x": 0,
@@ -20,51 +20,171 @@
       "w": 24,
       "h": 24
     },
-    "building/chapel": {
+    "building/bunker": {
       "x": 80,
       "y": 0,
       "w": 24,
       "h": 24
     },
-    "building/chow": {
+    "building/cave": {
       "x": 104,
       "y": 0,
       "w": 24,
       "h": 24
     },
-    "building/office": {
+    "building/chapel": {
       "x": 0,
       "y": 48,
       "w": 24,
       "h": 24
     },
-    "activity/pool": {
+    "building/chow": {
       "x": 24,
       "y": 48,
+      "w": 24,
+      "h": 24
+    },
+    "building/citadel": {
+      "x": 48,
+      "y": 48,
+      "w": 24,
+      "h": 24
+    },
+    "building/fort": {
+      "x": 72,
+      "y": 48,
+      "w": 24,
+      "h": 24
+    },
+    "building/mosque": {
+      "x": 96,
+      "y": 48,
+      "w": 24,
+      "h": 24
+    },
+    "building/office": {
+      "x": 0,
+      "y": 72,
+      "w": 24,
+      "h": 24
+    },
+    "building/seawall": {
+      "x": 24,
+      "y": 72,
+      "w": 24,
+      "h": 24
+    },
+    "building/tent": {
+      "x": 48,
+      "y": 72,
+      "w": 24,
+      "h": 24
+    },
+    "building/urban": {
+      "x": 72,
+      "y": 72,
+      "w": 24,
+      "h": 24
+    },
+    "activity/bridge": {
+      "x": 96,
+      "y": 72,
+      "w": 16,
+      "h": 16
+    },
+    "activity/flag": {
+      "x": 112,
+      "y": 72,
+      "w": 16,
+      "h": 16
+    },
+    "activity/helipad": {
+      "x": 0,
+      "y": 96,
+      "w": 16,
+      "h": 16
+    },
+    "activity/landing": {
+      "x": 16,
+      "y": 96,
+      "w": 16,
+      "h": 16
+    },
+    "activity/oasis": {
+      "x": 32,
+      "y": 96,
+      "w": 16,
+      "h": 16
+    },
+    "activity/pool": {
+      "x": 48,
+      "y": 96,
+      "w": 16,
+      "h": 16
+    },
+    "activity/suribachi": {
+      "x": 64,
+      "y": 96,
       "w": 16,
       "h": 16
     },
     "activity/track": {
-      "x": 40,
-      "y": 48,
+      "x": 80,
+      "y": 96,
       "w": 16,
       "h": 16
     },
     "activity/training": {
-      "x": 56,
-      "y": 48,
+      "x": 96,
+      "y": 96,
       "w": 16,
       "h": 16
     },
     "ground/grass": {
-      "x": 72,
-      "y": 48,
+      "x": 112,
+      "y": 96,
+      "w": 16,
+      "h": 16
+    },
+    "ground/ice": {
+      "x": 0,
+      "y": 112,
+      "w": 16,
+      "h": 16
+    },
+    "ground/jungle": {
+      "x": 16,
+      "y": 112,
+      "w": 16,
+      "h": 16
+    },
+    "ground/mud": {
+      "x": 32,
+      "y": 112,
       "w": 16,
       "h": 16
     },
     "ground/road": {
-      "x": 88,
-      "y": 48,
+      "x": 48,
+      "y": 112,
+      "w": 16,
+      "h": 16
+    },
+    "ground/sand": {
+      "x": 64,
+      "y": 112,
+      "w": 16,
+      "h": 16
+    },
+    "ground/snow": {
+      "x": 80,
+      "y": 112,
+      "w": 16,
+      "h": 16
+    },
+    "ground/volcanic": {
+      "x": 96,
+      "y": 112,
       "w": 16,
       "h": 16
     }

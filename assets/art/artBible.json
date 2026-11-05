@@ -38,7 +38,17 @@
     "j": { "name": "bottom-swap", "color": "#4a5a78" },
     "n": { "name": "navy", "color": "#1c2540" },
     "N": { "name": "navy-dark", "color": "#10162a" },
+    "S": { "name": "skin-shadow", "color": "#b07f55" },
     "m": { "name": "dress-trousers", "color": "#3b5a8c" },
-    "q": { "name": "scarlet", "color": "#b3202e" }
+    "M": { "name": "dress-trousers-dark", "color": "#2b4672" },
+    "q": { "name": "scarlet", "color": "#b3202e" },
+    "v": { "name": "olive-drab", "color": "#6b7040" },
+    "V": { "name": "olive-drab-dark", "color": "#4f5430" },
+    "i": { "name": "tile-teal", "color": "#3f9a95" },
+    "I": { "name": "tile-teal-dark", "color": "#2b6f6b" },
+    "e": { "name": "jungle", "color": "#4c7a34" },
+    "E": { "name": "jungle-dark", "color": "#355a26" },
+    "a": { "name": "sand", "color": "#d9c48f" },
+    "A": { "name": "sand-dark", "color": "#bca773" }
   }
 }

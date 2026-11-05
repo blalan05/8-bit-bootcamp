@@ -1,7 +1,7 @@
 /**
  * generateAtlas.mjs - Packs all sprite definitions into a single atlas.png + atlas.json.
  *
- * Usage: pnpm generate:art  (or: node scripts/generateAtlas.mjs)
+ * Usage: bun run generate:art  (or: bun scripts/generateAtlas.mjs)
  *
  * No dependencies: rasterizes pixel-grid JSON using the art bible palette and
  * writes the PNG by hand (zlib is built into node).
@@ -33,6 +33,21 @@ function hexToRgb(hex) {
 const defs = readdirSync(defsDir)
   .filter(f => f.endsWith('.json'))
   .map(f => JSON.parse(readFileSync(join(defsDir, f), 'utf8')));
+
+// The runtime rasterizer silently clips or pads malformed grids, so catch them here.
+const problems = [];
+for (const def of defs) {
+  if (def.pixels.length !== def.height) problems.push(`${def.id}: ${def.pixels.length} rows, declared height ${def.height}`);
+  def.pixels.forEach((row, y) => {
+    if (row.length !== def.width) problems.push(`${def.id}: row ${y} is ${row.length} px, declared width ${def.width}`);
+  });
+  const unknown = new Set([...def.pixels.join('')].filter(ch => !(ch in artBible.palette)));
+  if (unknown.size) problems.push(`${def.id}: unknown palette chars "${[...unknown].join('')}"`);
+}
+if (problems.length) {
+  console.error(`Malformed sprite definitions:\n  ${problems.join('\n  ')}`);
+  process.exit(1);
+}
 
 // Shelf packing: sort tallest first, fill rows up to atlas width
 const ATLAS_WIDTH = 128;

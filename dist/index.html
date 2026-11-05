@@ -3,11 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0f0f1a">
+    <meta name="description" content="Isometric 8-bit Marine recruit training.">
     <title>8-bit Bootcamp 2</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="icon" href="/favicon.ico" sizes="32x32">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
     <style>
+      @font-face {
+        font-family: 'Press Start 2P';
+        src: url('/fonts/press-start-2p-latin-400.woff2') format('woff2');
+        font-weight: 400;
+        font-style: normal;
+        font-display: swap;
+      }
       :root {
         --pixel-font: 'Press Start 2P', monospace;
         --panel-bg: #1e1e32;
@@ -1275,6 +1284,62 @@
       }
       .slot-badge--ironman { color: #ff6b6b; background: #301a1a; }
       .slot-badge--sandbox { color: #6db8e8; background: #1a2a3a; }
+      .slot-badge--campaign { color: #c8a84a; background: #2a2410; }
+      .slot-badge--available { color: #6de88a; background: #1a3020; }
+      .slot-badge--locked { color: #9898b0; background: #1a1a24; }
+
+      .campaign-panel { width: min(520px, 94vw); }
+      .campaign-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin: 16px 0;
+        max-height: 60vh;
+        overflow-y: auto;
+      }
+      .campaign-card {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+        width: 100%;
+        padding: 12px 14px;
+        background: var(--panel-bg);
+        border: 2px solid var(--panel-border);
+        color: var(--text);
+        font-family: var(--pixel-font);
+        cursor: pointer;
+        text-align: left;
+      }
+      .campaign-card:hover:not(:disabled),
+      .campaign-card:focus:not(:disabled) {
+        border-color: var(--accent);
+        outline: none;
+      }
+      .campaign-card--focused {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 1px var(--accent);
+      }
+      .campaign-card--locked {
+        opacity: 0.55;
+        cursor: not-allowed;
+      }
+      .campaign-card-title {
+        font-size: 0.55rem;
+        color: #ffd94a;
+      }
+      .campaign-card-subtitle {
+        font-size: 0.45rem;
+        color: #9898b0;
+      }
+      .mg-prompt--hostile { color: #ff6b6b; }
+      .mg-prompt--friendly { color: #6de88a; }
+      .mg-mortar-grid {
+        font-family: var(--pixel-font);
+        font-size: 0.45rem;
+        line-height: 1.8;
+        margin: 12px 0;
+      }
 
       /* --- Locker shop --- */
       .locker-panel { width: min(480px, 94vw); }
@@ -1367,8 +1432,8 @@
         margin: 8px 0;
       }
     </style>
-  <script type="module" crossorigin src="/assets/index-CUTfEki2.js"></script>
-</head>
+  <script type="module" crossorigin src="/assets/index-DE5_Kq90.js"></script>
+<link rel="manifest" href="/manifest.webmanifest"></head>
 <body>
 </body>
 </html>

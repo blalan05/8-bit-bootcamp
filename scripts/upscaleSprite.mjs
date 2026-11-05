@@ -1,13 +1,13 @@
 /**
  * Doubles a sprite definition (each pixel -> 2x2 block).
- * Usage: node scripts/upscaleSprite.mjs assets/art/spriteDefinitions/recruit_civilian.json
+ * Usage: bun scripts/upscaleSprite.mjs assets/art/spriteDefinitions/recruit_civilian.json
  */
 
 import { readFileSync, writeFileSync } from 'node:fs';
 
 const path = process.argv[2];
 if (!path) {
-  console.error('Usage: node scripts/upscaleSprite.mjs <sprite.json>');
+  console.error('Usage: bun scripts/upscaleSprite.mjs <sprite.json>');
   process.exit(1);
 }
 
