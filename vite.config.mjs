@@ -2,6 +2,9 @@ import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
+  define: {
+    __APP_BUILD__: JSON.stringify(new Date().toISOString().slice(0, 10))
+  },
   plugins: [
     VitePWA({
       registerType: 'autoUpdate',
@@ -43,6 +46,7 @@ export default defineConfig({
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,woff2,webmanifest}'],
         navigateFallback: 'index.html',
+        navigateFallbackDenylist: [/^\/privacy\.html$/, /^\/terms\.html$/],
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024
       }
     })

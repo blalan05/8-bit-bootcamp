@@ -100,6 +100,7 @@ export function showSlotSelect() {
           <button type="button" class="btn btn-secondary" id="btn-locker">The Locker</button>
         </div>
         <p class="menu-hint">Press 1–3 to select · Enter to confirm · Delete to reset focused slot</p>
+        <p class="menu-hint"><a class="privacy-link" href="/privacy.html">Privacy</a> · <a class="privacy-link" href="/terms.html">Terms</a></p>
       </div>
     `;
 
@@ -108,7 +109,7 @@ export function showSlotSelect() {
 
     function renderSlots() {
       const meta = getMeta();
-      gritEl.innerHTML = `Grit: <strong>${meta.grit}</strong> · Runs: ${meta.runsCompleted} · Best readiness: ${meta.bestReadiness}%`;
+      gritEl.innerHTML = `Grit: <strong>${meta.grit}</strong> · Runs: <strong>${meta.runsCompleted}</strong> · Best readiness: <strong>${meta.bestReadiness}%</strong>`;
 
       const current = getAllSlots();
       slotList.innerHTML = current.map((char, i) => {

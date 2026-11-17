@@ -8,6 +8,7 @@ import {
   isSandbox
 } from './campaignState.js';
 import { runIncentiveTraining } from './activities/games/dailyLifeGames.js';
+import { setPlayContext } from '../telemetry.js';
 
 const IT_HYDRATION_COST = 20;
 const IT_PASS_THRESHOLD = 0.6;
@@ -24,6 +25,8 @@ export function runActivity(character, activityId, dayMeta = {}) {
   if (!activity) {
     return Promise.resolve(character);
   }
+
+  setPlayContext({ activity: activityId });
 
   return new Promise(resolve => {
     const overlay = document.createElement('div');
@@ -48,6 +51,7 @@ export function runActivity(character, activityId, dayMeta = {}) {
     const themedStats = dayMeta.stats ?? [];
 
     function cleanup(resultCharacter) {
+      setPlayContext({ activity: '' });
       overlay.remove();
       resolve(resultCharacter);
     }

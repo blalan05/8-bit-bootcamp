@@ -1,6 +1,8 @@
 import { registerSW } from 'virtual:pwa-register';
 import * as THREE from 'three';
+import { installErrorListener, setPlayContext } from './telemetry.js';
 
+installErrorListener();
 registerSW({ immediate: true });
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import Stats from 'three/addons/libs/stats.module.js';
@@ -91,6 +93,7 @@ function runGameSession(character) {
 }
 
 function endGameSession() {
+  setPlayContext({ campaign: '', activity: '' });
   renderer?.setAnimationLoop(null);
 
   gameController?.dispose();
@@ -133,6 +136,10 @@ function endGameSession() {
 
 function startGame(character) {
   character = ensureCampaign(character);
+  setPlayContext({
+    campaign: getCampaignForCharacter(character).id,
+    activity: ''
+  });
 
   perfStats = new Stats();
   document.body.appendChild(perfStats.dom);
