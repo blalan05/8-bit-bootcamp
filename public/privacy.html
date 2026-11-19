@@ -6,6 +6,14 @@
   <meta name="theme-color" content="#0f0f1a">
   <title>Privacy — 8-bit Bootcamp</title>
   <link rel="icon" href="/favicon.ico" sizes="32x32">
+  <script>
+    try {
+      if (localStorage.getItem('bootcamp-telemetry') === 'off') {
+        localStorage.setItem('umami.disabled', '1');
+      }
+    } catch (err) { /* storage blocked */ }
+  </script>
+  <script defer src="https://cloud.umami.is/script.js" data-website-id="7761c1c3-0355-41f9-8c3b-64e35b038a66"></script>
   <style>
     @font-face {
       font-family: 'Press Start 2P';
@@ -58,7 +66,7 @@
 <body>
   <main>
     <h1>Privacy</h1>
-    <p class="updated">8-bit Bootcamp. Updated 17 November 2026.</p>
+    <p class="updated">8-bit Bootcamp. Updated 19 November 2026.</p>
     <p><a href="/">Back to the game</a> · <a href="/terms.html">Terms of use</a></p>
 
     <h2>On this device</h2>
@@ -66,18 +74,17 @@
     <p>The game does not use tracking cookies and does not show ads.</p>
 
     <h2>Counts that may leave the device</h2>
-    <p>A published build can send cookieless counts to <a href="https://plausible.io/privacy">Plausible</a>. Two events exist:</p>
+    <p>The game sends cookieless counts to <a href="https://umami.is/privacy">Umami</a>. A visit includes the page address, browser, and country. Umami does not use cookies. The game also sends two events:</p>
     <ul>
-      <li><strong>play</strong> — the game was opened.</li>
+      <li><strong>play</strong> — the game was opened. This includes the build id.</li>
       <li><strong>error</strong> — the page hit an uncaught error. The count includes a short error message (about 150 characters), the campaign id, the activity id, and the build id.</li>
     </ul>
-    <p>Those counts do not include your recruit name, stats, appearance, save file, or stack trace. The page address sent with them is only the site and path, with no query string.</p>
-    <p>Nothing is sent unless the build was configured with a Plausible domain, and nothing is sent from this browser after you turn counts off below. Plausible keeps the visit long enough to make a daily count, then stores aggregate numbers. We do not sell this information.</p>
+    <p>Those events do not include your recruit name, stats, appearance, save file, or stack trace. Nothing is sent from this browser after you turn counts off below. We do not sell this information.</p>
 
     <h2>This browser</h2>
     <p id="telemetry-status"></p>
     <p><button type="button" id="telemetry-toggle">Stop counts from this browser</button></p>
-    <p>That choice is stored in local storage as <code>bootcamp-telemetry</code>. It is not a cookie.</p>
+    <p>That choice is stored in local storage as <code>bootcamp-telemetry</code> and <code>umami.disabled</code>. Neither is a cookie.</p>
 
     <h2>Children</h2>
     <p>Do not type a real child’s name into the recruit screen. Names stay on the device, and the counts above are not tied to an account.</p>
@@ -105,8 +112,13 @@
 
     button.addEventListener('click', () => {
       try {
-        if (stopped()) localStorage.removeItem(KEY);
-        else localStorage.setItem(KEY, 'off');
+        if (stopped()) {
+          localStorage.removeItem(KEY);
+          localStorage.removeItem('umami.disabled');
+        } else {
+          localStorage.setItem(KEY, 'off');
+          localStorage.setItem('umami.disabled', '1');
+        }
       } catch {
         status.textContent = 'This browser is blocking storage, so counts stay off.';
         return;

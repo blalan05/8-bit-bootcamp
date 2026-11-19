@@ -9,6 +9,14 @@
     <link rel="icon" href="/favicon.ico" sizes="32x32">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <script>
+      try {
+        if (localStorage.getItem('bootcamp-telemetry') === 'off') {
+          localStorage.setItem('umami.disabled', '1');
+        }
+      } catch (err) { /* storage blocked */ }
+    </script>
+    <script defer src="https://cloud.umami.is/script.js" data-website-id="7761c1c3-0355-41f9-8c3b-64e35b038a66"></script>
     <style>
       @font-face {
         font-family: 'Press Start 2P';

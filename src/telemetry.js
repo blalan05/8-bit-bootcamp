@@ -88,7 +88,7 @@ function noteError(message, filename) {
 
 function countsAllowed() {
   try {
-    return localStorage.getItem(OPT_OUT_KEY) !== 'off';
+    return localStorage.getItem(OPT_OUT_KEY) !== 'off' && !localStorage.getItem('umami.disabled');
   } catch {
     return false;
   }
@@ -97,34 +97,22 @@ function countsAllowed() {
 function send(name, props) {
   if (!countsAllowed()) return;
 
-  const payload = {
-    name,
-    props: {
-      ...props,
-      build: __APP_BUILD__
-    }
-  };
-
+  const data = { ...props, build: __APP_BUILD__ };
   if (import.meta.env.DEV) {
-    window.__bootcampLastCount = payload;
+    window.__bootcampLastCount = { name, props: data };
   }
 
-  const domain = String(import.meta.env.VITE_PLAUSIBLE_DOMAIN ?? '').trim();
-  if (!import.meta.env.PROD || !domain) return;
+  const fire = () => {
+    if (typeof window.umami?.track !== 'function') return false;
+    window.umami.track(name, data);
+    return true;
+  };
 
-  const endpoint = String(import.meta.env.VITE_PLAUSIBLE_API ?? 'https://plausible.io/api/event').trim();
-  const body = JSON.stringify({
-    name,
-    url: `${location.origin}${location.pathname}`,
-    domain,
-    props: payload.props
-  });
+  if (fire()) return;
 
-  fetch(endpoint, {
-    method: 'POST',
-    body,
-    headers: { 'Content-Type': 'application/json' },
-    keepalive: true,
-    mode: 'cors'
-  }).catch(() => {});
+  let tries = 0;
+  const timer = setInterval(() => {
+    tries += 1;
+    if (fire() || tries >= 20) clearInterval(timer);
+  }, 200);
 }
