@@ -1,149 +1,33 @@
 import { buildActivityResult } from '../../activityRegistry.js';
 import {
-  mountGame, setProgress, flashResult, windowMsFor,
-  runQTESequence, runClickSequence, runChoiceRounds, bindKeys
+  runWatchRounds, runQTESequence, runClickSequence, runChoiceRounds
 } from '../lib/minigameKit.js';
 
 export async function runIedSweep(container, character) {
-  return new Promise(resolve => {
-    const ui = mountGame(container, {
-      title: 'IED Sweep',
-      hint: 'Press M to mark SUSPICIOUS OBJECT — hold on ROADSIDE CLUTTER'
-    });
-
-    let hits = 0;
-    let misses = 0;
-    let rounds = 0;
-    const totalRounds = 8;
-    let currentType = 'suspicious';
-    let active = false;
-    let timer = null;
-
-    function nextRound() {
-      if (rounds >= totalRounds) {
-        unbind();
-        ui.dispose();
-        const score = hits / totalRounds;
-        resolve(buildActivityResult(score, ['dexterity', 'intelligence'], { hits, misses }));
-        return;
-      }
-      rounds++;
-      currentType = Math.random() < 0.55 ? 'suspicious' : 'clutter';
-      active = true;
-      const windowMs = windowMsFor(character, ['dexterity', 'intelligence'], 500, 1000);
-      ui.main.innerHTML = `
-        <div class="mg-prompt ${currentType === 'suspicious' ? 'mg-prompt--hostile' : 'mg-prompt--friendly'}">
-          ${currentType === 'suspicious' ? 'SUSPICIOUS OBJECT' : 'ROADSIDE CLUTTER'}
-        </div>
-        <div class="mg-key-hint">${currentType === 'suspicious' ? 'Press <kbd>M</kbd> to mark' : 'Hold position — do nothing'}</div>
-      `;
-      setProgress(ui, rounds, totalRounds);
-      timer = setTimeout(() => {
-        if (!active) return;
-        if (currentType === 'suspicious') misses++;
-        flashResult(ui, currentType === 'suspicious' ? 'miss' : 'hit');
-        active = false;
-        setTimeout(nextRound, 400);
-      }, windowMs);
-    }
-
-    const onKey = (code) => {
-      if (!active || code !== 'KeyM') return;
-      active = false;
-      clearTimeout(timer);
-      if (currentType === 'suspicious') {
-        hits++;
-        flashResult(ui, 'hit');
-      } else {
-        misses++;
-        flashResult(ui, 'miss');
-      }
-      setTimeout(nextRound, 400);
-    };
-
-    const unbind = bindKeys(['KeyM'], onKey);
-    nextRound();
+  const r = await runWatchRounds(container, character, {
+    title: 'IED Sweep',
+    hint: 'Press I (arms up) to mark SUSPICIOUS OBJECT — hold on ROADSIDE CLUTTER',
+    statKeys: ['dexterity', 'intelligence'],
+    stimuli: [
+      { label: 'SUSPICIOUS OBJECT', weight: 0.55, code: 'KeyI', action: 'MARK IT' },
+      { label: 'ROADSIDE CLUTTER', weight: 0.45, code: null }
+    ]
   });
+  return buildActivityResult(r.score, ['dexterity', 'intelligence'], { hits: r.hits, misses: r.misses });
 }
 
 export async function runTurretGunner(container, character) {
-  return new Promise(resolve => {
-    const ui = mountGame(container, {
-      title: 'Turret Gunner',
-      hint: 'Press A/D on CONTACT — hold fire on CIVILIAN VEHICLE'
-    });
-
-    let hits = 0;
-    let misses = 0;
-    let rounds = 0;
-    const totalRounds = 8;
-    let currentType = 'left';
-    let active = false;
-    let timer = null;
-
-    const ROUND_TYPES = ['left', 'right', 'civilian'];
-
-    function nextRound() {
-      if (rounds >= totalRounds) {
-        unbind();
-        ui.dispose();
-        const score = hits / totalRounds;
-        resolve(buildActivityResult(score, ['dexterity', 'intelligence'], { hits, misses }));
-        return;
-      }
-      rounds++;
-      const roll = Math.random();
-      currentType = roll < 0.35 ? 'left' : roll < 0.7 ? 'right' : 'civilian';
-      active = true;
-      const windowMs = windowMsFor(character, ['dexterity', 'intelligence'], 500, 1000);
-      const labels = {
-        left: 'CONTACT LEFT!',
-        right: 'CONTACT RIGHT!',
-        civilian: 'CIVILIAN VEHICLE'
-      };
-      const hints = {
-        left: 'Press <kbd>A</kbd> to traverse left',
-        right: 'Press <kbd>D</kbd> to traverse right',
-        civilian: 'Hold fire — do nothing'
-      };
-      ui.main.innerHTML = `
-        <div class="mg-prompt ${currentType === 'civilian' ? 'mg-prompt--friendly' : 'mg-prompt--hostile'}">
-          ${labels[currentType]}
-        </div>
-        <div class="mg-key-hint">${hints[currentType]}</div>
-      `;
-      setProgress(ui, rounds, totalRounds);
-      timer = setTimeout(() => {
-        if (!active) return;
-        if (currentType !== 'civilian') misses++;
-        flashResult(ui, currentType !== 'civilian' ? 'miss' : 'hit');
-        active = false;
-        setTimeout(nextRound, 400);
-      }, windowMs);
-    }
-
-    const onKey = (code) => {
-      if (!active) return;
-      const expected = currentType === 'left' ? 'KeyA' : currentType === 'right' ? 'KeyD' : null;
-      if (currentType === 'civilian') {
-        active = false;
-        clearTimeout(timer);
-        misses++;
-        flashResult(ui, 'miss');
-        setTimeout(nextRound, 400);
-        return;
-      }
-      if (code !== expected) return;
-      active = false;
-      clearTimeout(timer);
-      hits++;
-      flashResult(ui, 'hit');
-      setTimeout(nextRound, 400);
-    };
-
-    const unbind = bindKeys(['KeyA', 'KeyD'], onKey);
-    nextRound();
+  const r = await runWatchRounds(container, character, {
+    title: 'Turret Gunner',
+    hint: 'Press A / D to traverse on CONTACT — hold fire on CIVILIAN VEHICLE',
+    statKeys: ['dexterity', 'intelligence'],
+    stimuli: [
+      { label: 'CONTACT LEFT!', weight: 0.35, code: 'KeyA', action: 'TRAVERSE LEFT' },
+      { label: 'CONTACT RIGHT!', weight: 0.35, code: 'KeyD', action: 'TRAVERSE RIGHT' },
+      { label: 'CIVILIAN VEHICLE', weight: 0.3, code: null }
+    ]
   });
+  return buildActivityResult(r.score, ['dexterity', 'intelligence'], { hits: r.hits, misses: r.misses });
 }
 
 const CHECKPOINT_CHOICES = ['Wave Through', 'Search', 'Halt'];
@@ -180,10 +64,10 @@ const STATUE_PREP_STEPS = [
 ];
 
 const STATUE_PULL_COMMANDS = [
-  { label: 'TAKE UP SLACK!', code: 'Space', keyLabel: 'Space' },
-  { label: 'HEAVE — PULL!', code: 'Space', keyLabel: 'Space' },
-  { label: 'SECURE THE RIG!', code: 'KeyS', keyLabel: 'S' },
-  { label: 'STATUE DOWN!', code: 'Enter', keyLabel: 'Enter' }
+  { label: 'TAKE UP SLACK!' },
+  { label: 'HEAVE — PULL!' },
+  { label: 'SECURE THE RIG!' },
+  { label: 'STATUE DOWN!' }
 ];
 
 export async function runStatueTopple(container, character) {

@@ -1,69 +1,19 @@
 import { buildActivityResult } from '../../activityRegistry.js';
 import {
-  mountGame, setProgress, flashResult, windowMsFor,
-  runQTESequence, runClickSequence, runChoiceRounds, bindKeys
+  runWatchRounds, runQTESequence, runClickSequence, runChoiceRounds
 } from '../lib/minigameKit.js';
 
 export async function runCamelCaravan(container, character) {
-  return new Promise(resolve => {
-    const ui = mountGame(container, {
-      title: 'The Caravan',
-      hint: 'Press C to grab the lead on CAMEL BOLTS — hold on STEADY COLUMN'
-    });
-
-    let hits = 0;
-    let misses = 0;
-    let rounds = 0;
-    const totalRounds = 8;
-    let currentType = 'bolt';
-    let active = false;
-    let timer = null;
-
-    function nextRound() {
-      if (rounds >= totalRounds) {
-        unbind();
-        ui.dispose();
-        const score = hits / totalRounds;
-        resolve(buildActivityResult(score, ['dexterity', 'endurance'], { hits, misses }));
-        return;
-      }
-      rounds++;
-      currentType = Math.random() < 0.55 ? 'bolt' : 'steady';
-      active = true;
-      const windowMs = windowMsFor(character, ['dexterity', 'endurance'], 500, 1000);
-      ui.main.innerHTML = `
-        <div class="mg-prompt ${currentType === 'bolt' ? 'mg-prompt--hostile' : 'mg-prompt--friendly'}">
-          ${currentType === 'bolt' ? 'CAMEL BOLTS!' : 'STEADY COLUMN'}
-        </div>
-        <div class="mg-key-hint">${currentType === 'bolt' ? 'Press <kbd>C</kbd> to grab the lead' : 'Hold position — do nothing'}</div>
-      `;
-      setProgress(ui, rounds, totalRounds);
-      timer = setTimeout(() => {
-        if (!active) return;
-        if (currentType === 'bolt') misses++;
-        flashResult(ui, currentType === 'bolt' ? 'miss' : 'hit');
-        active = false;
-        setTimeout(nextRound, 400);
-      }, windowMs);
-    }
-
-    const onKey = (code) => {
-      if (!active || code !== 'KeyC') return;
-      active = false;
-      clearTimeout(timer);
-      if (currentType === 'bolt') {
-        hits++;
-        flashResult(ui, 'hit');
-      } else {
-        misses++;
-        flashResult(ui, 'miss');
-      }
-      setTimeout(nextRound, 400);
-    };
-
-    const unbind = bindKeys(['KeyC'], onKey);
-    nextRound();
+  const r = await runWatchRounds(container, character, {
+    title: 'The Caravan',
+    hint: 'Press J (left hand) to grab the lead on CAMEL BOLTS — hold on STEADY COLUMN',
+    statKeys: ['dexterity', 'endurance'],
+    stimuli: [
+      { label: 'CAMEL BOLTS!', weight: 0.55, code: 'KeyJ', action: 'GRAB THE LEAD' },
+      { label: 'STEADY COLUMN', weight: 0.45, code: null }
+    ]
   });
+  return buildActivityResult(r.score, ['dexterity', 'endurance'], { hits: r.hits, misses: r.misses });
 }
 
 const MUTINY_CHOICES = ['Pay Them', 'Promise Gold', 'Stand Firm'];
@@ -94,11 +44,11 @@ export async function runMutinyParley(container, character) {
 }
 
 const DERNE_CHARGE_COMMANDS = [
-  { label: 'FIX BAYONETS!', code: 'KeyF', keyLabel: 'F' },
-  { label: 'OVER THE WALL!', code: 'KeyW', keyLabel: 'W' },
-  { label: 'CLEAR THE BATTERY!', code: 'KeyA', keyLabel: 'A' },
-  { label: 'TURN THE GUNS!', code: 'KeyD', keyLabel: 'D' },
-  { label: 'COLORS UP!', code: 'Enter', keyLabel: 'Enter' }
+  { label: 'FIX BAYONETS!' },
+  { label: 'OVER THE WALL!' },
+  { label: 'CLEAR THE BATTERY!' },
+  { label: 'TURN THE GUNS!' },
+  { label: 'COLORS UP!' }
 ];
 
 export async function runDerneCharge(container, character) {
@@ -120,10 +70,10 @@ const CANNON_PREP_STEPS = [
 ];
 
 const CANNON_FIRE_COMMANDS = [
-  { label: 'MATCH TO THE VENT!', code: 'Space', keyLabel: 'Space' },
-  { label: 'FIRE!', code: 'Space', keyLabel: 'Space' },
-  { label: 'RELOAD!', code: 'KeyR', keyLabel: 'R' },
-  { label: 'FIRE!', code: 'Space', keyLabel: 'Space' }
+  { label: 'MATCH TO THE VENT!' },
+  { label: 'FIRE!' },
+  { label: 'RELOAD!' },
+  { label: 'FIRE!' }
 ];
 
 export async function runCannonBattery(container, character) {
@@ -154,10 +104,10 @@ const DERNE_COLORS_STEPS = [
 ];
 
 const DERNE_HOIST_COMMANDS = [
-  { label: 'MARINES — HEAVE!', code: 'Space', keyLabel: 'Space' },
-  { label: 'AGAIN — HEAVE HO!', code: 'Space', keyLabel: 'Space' },
-  { label: 'SECURE THE STAFF!', code: 'KeyS', keyLabel: 'S' },
-  { label: 'COLORS ARE UP!', code: 'Enter', keyLabel: 'Enter' }
+  { label: 'MARINES — HEAVE!' },
+  { label: 'AGAIN — HEAVE HO!' },
+  { label: 'SECURE THE STAFF!' },
+  { label: 'COLORS ARE UP!' }
 ];
 
 export async function runDerneColors(container, character) {

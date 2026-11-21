@@ -1,20 +1,16 @@
 import { buildActivityResult } from '../../activityRegistry.js';
-import {
-  mountGame, setProgress, flashResult, windowMsFor,
-  runQTESequence, runClickSequence, runChoiceRounds
-} from '../lib/minigameKit.js';
+import { runQTESequence, runClickSequence, runChoiceRounds } from '../lib/minigameKit.js';
 
 const FOOTPRINT_COMMANDS = [
-  { label: 'GET ON THE FOOTPRINTS!', code: 'Space', keyLabel: 'Space' },
-  { label: 'EYES FRONT!', code: 'KeyF', keyLabel: 'F' },
-  { label: 'STAND AT ATTENTION!', code: 'KeyA', keyLabel: 'A' },
-  { label: 'HANDS AT YOUR SIDES!', code: 'KeyH', keyLabel: 'H' },
-  { label: 'CHIN UP!', code: 'KeyC', keyLabel: 'C' },
-  { label: 'DO NOT MOVE!', code: 'KeyD', keyLabel: 'D' }
+  { label: 'GET ON THE FOOTPRINTS!' },
+  { label: 'EYES FRONT!' },
+  { label: 'STAND AT ATTENTION!' },
+  { label: 'HANDS AT YOUR SIDES!' },
+  { label: 'CHIN UP!' },
+  { label: 'DO NOT MOVE!' }
 ];
 
 export async function runYellowFootprints(container, character) {
-  const windowMs = Math.round(windowMsFor(character, ['leadership', 'dexterity'], 700, 1100));
   const r = await runQTESequence(container, character, {
     prompts: FOOTPRINT_COMMANDS,
     statKeys: ['leadership', 'dexterity'],

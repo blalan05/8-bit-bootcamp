@@ -695,19 +695,21 @@ function runDialogueQuest(character, questStorageId, title, script) {
 
     (async () => {
       let reward = { readiness: 2 };
+      let lesson = null;
       for (const step of script) {
         if (step.say) await scene.say(step.say);
         if (step.ask) {
           const choice = await scene.ask(step.ask);
           const picked = step.ask.choices[choice];
           reward = picked.reward ?? { readiness: 2 };
-          if (picked.say) await scene.say(picked.say);
-          else if (step.ask.bestSay && choice === 0) await scene.say(step.ask.bestSay);
+          const response = picked.say ?? (choice === 0 ? step.ask.bestSay : undefined);
+          if (response) await scene.say(response);
+          lesson = { choice: picked.text, response };
         }
       }
       scene.dispose();
       overlay.remove();
-      resolve(completeSideQuest(character, questStorageId, reward));
+      resolve(completeSideQuest(character, questStorageId, reward, lesson));
     })();
   });
 }

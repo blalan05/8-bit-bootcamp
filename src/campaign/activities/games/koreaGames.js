@@ -1,6 +1,6 @@
 import { buildActivityResult } from '../../activityRegistry.js';
 import {
-  mountGame, setProgress, flashResult, windowMsFor, setMeter,
+  mountGame, setProgress, setMeter,
   runQTESequence, runClickSequence, bindKeys, createLoop
 } from '../lib/minigameKit.js';
 
@@ -24,11 +24,11 @@ export async function runFrostbiteCheck(container, character) {
 }
 
 const WEAPONS_COLD_COMMANDS = [
-  { label: 'WORK THE BOLT!', code: 'KeyB', keyLabel: 'B' },
-  { label: 'HAND-WARM THE ACTION!', code: 'KeyH', keyLabel: 'H' },
-  { label: 'DRY-FIRE CHECK!', code: 'KeyD', keyLabel: 'D' },
-  { label: 'CYCLE AND CLEAR!', code: 'KeyC', keyLabel: 'C' },
-  { label: 'RIFLE IS HOT!', code: 'Enter', keyLabel: 'Enter' }
+  { label: 'WORK THE BOLT!' },
+  { label: 'HAND-WARM THE ACTION!' },
+  { label: 'DRY-FIRE CHECK!' },
+  { label: 'CYCLE AND CLEAR!' },
+  { label: 'RIFLE IS HOT!' }
 ];
 
 export async function runWeaponsCold(container, character) {
@@ -45,7 +45,7 @@ export async function runConvoyEscort(container, character) {
   return new Promise(resolve => {
     const ui = mountGame(container, {
       title: 'Fighting Withdrawal',
-      hint: 'W to advance · freeze on flare · Space to help a straggler'
+      hint: 'Hold W to advance · release on flare · I (arms up) to lift a straggler'
     });
     let progress = 0;
     let stamina = 1;
@@ -77,7 +77,7 @@ export async function runConvoyEscort(container, character) {
         ui.hint.textContent = 'FLARE — FREEZE!';
         setTimeout(() => {
           flareActive = false;
-          ui.hint.textContent = 'W to advance · Space to help straggler';
+          ui.hint.textContent = 'Hold W to advance · I to lift a straggler';
         }, 1500);
       }
     }, 4500);
@@ -85,13 +85,13 @@ export async function runConvoyEscort(container, character) {
     let stragglerTimer = setInterval(() => {
       if (Math.random() > 0.6) {
         stragglerNeeded = true;
-        ui.hint.textContent = 'Marine falling out! Press Space to help (+LDR, -stamina)';
+        ui.hint.textContent = 'Marine falling out! Press I to lift him (+LDR, -stamina)';
       }
     }, 6000);
 
-    const unbind = bindKeys(['KeyW', 'Space'], (code) => {
+    const unbind = bindKeys(['KeyW', 'KeyI'], (code) => {
       if (code === 'KeyW' && stamina > 0 && !flareActive) marching = true;
-      if (code === 'Space' && stragglerNeeded) {
+      if (code === 'KeyI' && stragglerNeeded) {
         stragglerNeeded = false;
         stamina -= 0.12;
         ldrBonus += 1;

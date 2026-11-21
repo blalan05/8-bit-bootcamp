@@ -31,6 +31,10 @@ export function createInitialCampaign(overrides = {}) {
     hydration: 100,
     recycleTokens: 0,
     itUsed: {},
+    /** Fog-of-war cells revealed per map: { [mapName]: number[] } */
+    explored: {},
+    /** Side quest choices made: { [questId]: { choice: string, response?: string } } */
+    lessons: {},
     ...overrides
   };
 }
@@ -49,7 +53,26 @@ export function ensureCampaign(character) {
       completed: { ...campaign.completed },
       weekStatGains: { ...campaign.weekStatGains },
       sideQuests: { ...campaign.sideQuests },
-      itUsed: { ...campaign.itUsed }
+      itUsed: { ...campaign.itUsed },
+      explored: { ...campaign.explored },
+      lessons: { ...campaign.lessons }
+    }
+  };
+}
+
+/**
+ * Replace the revealed fog cells for one map.
+ * @param {object} character
+ * @param {string} mapName
+ * @param {number[]} cells
+ */
+export function setExploredCells(character, mapName, cells) {
+  const characterWithCampaign = ensureCampaign(character);
+  return {
+    ...characterWithCampaign,
+    campaign: {
+      ...characterWithCampaign.campaign,
+      explored: { ...characterWithCampaign.campaign.explored, [mapName]: cells }
     }
   };
 }
@@ -213,11 +236,15 @@ export function advanceCampaignDay(character, daysInWeek) {
 
 /**
  * Mark a side quest as completed.
+ * @param {{ choice: string, response?: string }} [lesson] - recorded in the journal
  */
-export function completeSideQuest(character, questId, reward = {}) {
+export function completeSideQuest(character, questId, reward = {}, lesson = null) {
   const characterWithCampaign = ensureCampaign(character);
   const campaign = { ...characterWithCampaign.campaign };
   campaign.sideQuests = { ...campaign.sideQuests, [questId]: 'done' };
+  if (lesson) {
+    campaign.lessons = { ...campaign.lessons, [questId]: lesson };
+  }
 
   let readiness = campaign.readiness;
   if (reward.readiness) {

@@ -1,15 +1,15 @@
 import { buildActivityResult } from '../../activityRegistry.js';
 import {
-  mountGame, setProgress, flashResult, windowMsFor, setMeter,
-  runQTESequence, runClickSequence, runChoiceRounds, bindKeys, createLoop
+  mountGame, setProgress, flashResult, setMeter,
+  runQTESequence, runClickSequence, runWatchRounds, bindKeys, createLoop
 } from '../lib/minigameKit.js';
 
 const SHIP_OUT_COMMANDS = [
-  { label: 'MAN YOUR STATIONS!', code: 'KeyM', keyLabel: 'M' },
-  { label: 'CHECK YOUR GEAR!', code: 'KeyG', keyLabel: 'G' },
-  { label: 'STAND BY TO LAND!', code: 'Space', keyLabel: 'Space' },
-  { label: 'BOATS AWAY!', code: 'KeyB', keyLabel: 'B' },
-  { label: 'HIT THE BEACH!', code: 'KeyH', keyLabel: 'H' }
+  { label: 'MAN YOUR STATIONS!' },
+  { label: 'CHECK YOUR GEAR!' },
+  { label: 'STAND BY TO LAND!' },
+  { label: 'BOATS AWAY!' },
+  { label: 'HIT THE BEACH!' }
 ];
 
 export async function runShipOut(container, character) {
@@ -23,12 +23,12 @@ export async function runShipOut(container, character) {
 }
 
 const BEACH_LANDING_COMMANDS = [
-  { label: 'STAY LOW IN THE BOAT!', code: 'KeyS', keyLabel: 'S' },
-  { label: 'RAMP DOWN — GO!', code: 'Space', keyLabel: 'Space' },
-  { label: 'MOVE LEFT!', code: 'KeyA', keyLabel: 'A' },
-  { label: 'DODGE INCOMING!', code: 'KeyD', keyLabel: 'D' },
-  { label: 'HIT THE SAND!', code: 'KeyH', keyLabel: 'H' },
-  { label: 'GET OFF THE BEACH!', code: 'KeyW', keyLabel: 'W' }
+  { label: 'STAY LOW IN THE BOAT!' },
+  { label: 'RAMP DOWN — GO!' },
+  { label: 'MOVE LEFT!' },
+  { label: 'DODGE INCOMING!' },
+  { label: 'HIT THE SAND!' },
+  { label: 'GET OFF THE BEACH!' }
 ];
 
 export async function runBeachLanding(container, character) {
@@ -45,19 +45,17 @@ export async function runFoxholeDig(container, character) {
   return new Promise(resolve => {
     const ui = mountGame(container, {
       title: 'Dig In',
-      hint: 'Alternate J and K to dig — keep the pace in the green band'
+      hint: 'Alternate J (left arm) and L (right arm) to dig — keep the pace in the green band'
     });
     let presses = 0;
     let hits = 0;
     let target = 30;
-    let phase = 0;
     let lastKey = '';
     const durationMs = 12000;
-    const speed = windowMsFor(character, ['strength', 'endurance'], 400, 700);
 
     ui.main.innerHTML = `
       <div class="mg-prompt">Digging foxhole — ${target} shovel strokes</div>
-      <div class="mg-key-hint">Alternate <kbd>J</kbd> and <kbd>K</kbd></div>
+      <div class="mg-key-hint">Alternate <kbd>J</kbd> and <kbd>L</kbd></div>
     `;
 
     const loop = createLoop({
@@ -78,7 +76,7 @@ export async function runFoxholeDig(container, character) {
     }
 
     const onKey = (code) => {
-      if (code !== 'KeyJ' && code !== 'KeyK') return;
+      if (code !== 'KeyJ' && code !== 'KeyL') return;
       if (code === lastKey) {
         flashResult(ui, 'miss');
         return;
@@ -92,7 +90,7 @@ export async function runFoxholeDig(container, character) {
       }
     };
 
-    const unbind = bindKeys(['KeyJ', 'KeyK'], onKey);
+    const unbind = bindKeys(['KeyJ', 'KeyL'], onKey);
     setProgress(ui, 0, target);
   });
 }
@@ -160,65 +158,17 @@ export async function runMortarBracket(container, character) {
 }
 
 export async function runNightWatch(container, character) {
-  return new Promise(resolve => {
-    const ui = mountGame(container, {
-      title: 'Sniper Alley',
-      hint: 'Press F on hostile movement — do NOT fire on friendlies (green flash)'
-    });
-
-    let hits = 0;
-    let misses = 0;
-    let rounds = 0;
-    const totalRounds = 8;
-    let currentType = 'hostile';
-    let active = false;
-    let timer = null;
-
-    function nextRound() {
-      if (rounds >= totalRounds) {
-        unbind();
-        ui.dispose();
-        const score = hits / totalRounds;
-        resolve(buildActivityResult(score, ['dexterity', 'intelligence'], { hits, misses }));
-        return;
-      }
-      rounds++;
-      currentType = Math.random() < 0.65 ? 'hostile' : 'friendly';
-      active = true;
-      const windowMs = windowMsFor(character, ['dexterity', 'intelligence'], 600, 1200);
-      ui.main.innerHTML = `
-        <div class="mg-prompt ${currentType === 'hostile' ? 'mg-prompt--hostile' : 'mg-prompt--friendly'}">
-          ${currentType === 'hostile' ? 'MOVEMENT — HOSTILE!' : 'MOVEMENT — FRIENDLY!'}
-        </div>
-        <div class="mg-key-hint">${currentType === 'hostile' ? 'Press <kbd>F</kbd> to engage' : 'Hold fire — do nothing'}</div>
-      `;
-      setProgress(ui, rounds, totalRounds);
-      timer = setTimeout(() => {
-        if (!active) return;
-        if (currentType === 'hostile') misses++;
-        flashResult(ui, currentType === 'hostile' ? 'miss' : 'hit');
-        active = false;
-        setTimeout(nextRound, 400);
-      }, windowMs);
-    }
-
-    const onKey = (code) => {
-      if (!active || code !== 'KeyF') return;
-      active = false;
-      clearTimeout(timer);
-      if (currentType === 'hostile') {
-        hits++;
-        flashResult(ui, 'hit');
-      } else {
-        misses++;
-        flashResult(ui, 'miss');
-      }
-      setTimeout(nextRound, 400);
-    };
-
-    const unbind = bindKeys(['KeyF'], onKey);
-    nextRound();
+  const r = await runWatchRounds(container, character, {
+    title: 'Sniper Alley',
+    hint: 'Press L (right hand) on hostile movement — do NOT fire on friendlies',
+    statKeys: ['dexterity', 'intelligence'],
+    windowRange: [600, 1200],
+    stimuli: [
+      { label: 'MOVEMENT — HOSTILE!', weight: 0.65, code: 'KeyL', action: 'ENGAGE' },
+      { label: 'MOVEMENT — FRIENDLY!', weight: 0.35, code: null }
+    ]
   });
+  return buildActivityResult(r.score, ['dexterity', 'intelligence'], { hits: r.hits, misses: r.misses });
 }
 
 const SUPPLY_RUN_STEPS = [
@@ -269,10 +219,10 @@ const FLAG_POLE_STEPS = [
 ];
 
 const FLAG_HOIST_COMMANDS = [
-  { label: 'MARINES — HEAVE!', code: 'Space', keyLabel: 'Space' },
-  { label: 'AGAIN — HEAVE HO!', code: 'Space', keyLabel: 'Space' },
-  { label: 'SECURE THE BASE!', code: 'KeyS', keyLabel: 'S' },
-  { label: 'COLORS ARE UP!', code: 'Enter', keyLabel: 'Enter' }
+  { label: 'MARINES — HEAVE!' },
+  { label: 'AGAIN — HEAVE HO!' },
+  { label: 'SECURE THE BASE!' },
+  { label: 'COLORS ARE UP!' }
 ];
 
 export async function runFlagRaising(container, character) {

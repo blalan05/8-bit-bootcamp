@@ -1,14 +1,15 @@
 import { buildActivityResult } from '../../activityRegistry.js';
 import {
   mountGame, setMeter, setProgress, flashResult, createLoop, bindKeys,
-  windowMsFor, avgStatT, runQTESequence, runClickSequence
+  avgStatT, runQTESequence, runClickSequence
 } from '../lib/minigameKit.js';
+import { createSwimScene, createGearShedScene } from '../scenes/poolScenes.js';
 
 export async function runSteadyAim(container, character) {
   return new Promise(resolve => {
     const ui = mountGame(container, {
       title: 'Steady Aim',
-      hint: 'Hold <kbd>Space</kbd> to steady · <kbd>F</kbd> to fire when aligned'
+      hint: 'Hold <kbd>Space</kbd> to steady · <kbd>L</kbd> (right hand) to fire when aligned'
     });
     let shots = 0;
     let hits = 0;
@@ -37,9 +38,9 @@ export async function runSteadyAim(container, character) {
       onFinish: end
     });
 
-    const unbind = bindKeys(['Space', 'KeyF'], (code) => {
+    const unbind = bindKeys(['Space', 'KeyL'], (code) => {
       if (code === 'Space' && breath > 0.1) steady = true;
-      if (code === 'KeyF' && shots < total) {
+      if (code === 'KeyL' && shots < total) {
         shots++;
         const dist = Math.abs(reticleX - 50);
         if (dist < 12) { hits++; flashResult(ui, 'hit'); } else flashResult(ui, 'miss');
@@ -61,15 +62,13 @@ export async function runSteadyAim(container, character) {
 
 export async function runPaceRunner(container, character) {
   const prompts = Array.from({ length: 14 }, (_, i) => ({
-    label: i % 2 === 0 ? 'LEFT STRIDE' : 'RIGHT STRIDE',
-    code: i % 2 === 0 ? 'KeyJ' : 'KeyK',
-    keyLabel: i % 2 === 0 ? 'J' : 'K'
+    label: i % 2 === 0 ? 'LEFT STRIDE' : 'RIGHT STRIDE'
   }));
   const r = await runQTESequence(container, character, {
     prompts,
     statKeys: ['endurance'],
     title: 'PFT Pace Run',
-    hint: 'Alternate J and K to stay in stride'
+    hint: 'Legs: A left stride · D right stride — stay in step'
   });
   return buildActivityResult(r.score, ['endurance'], r);
 }
@@ -80,7 +79,7 @@ export async function runFieldStrip(container, character) {
   const r = await runClickSequence(container, {
     items: STRIP_STEPS,
     correctOrder: STRIP_STEPS,
-    timeMs: 20000 + windowMsFor(character, ['intelligence', 'dexterity'], 0, 8000),
+    timeMs: 20000 + Math.round(avgStatT(character, ['intelligence', 'dexterity']) * 8000),
     title: 'Field Strip',
     hint: 'Click parts in correct disassembly order'
   });
@@ -89,38 +88,40 @@ export async function runFieldStrip(container, character) {
 
 export async function runSwimStrokes(container, character) {
   const prompts = [
-    { label: 'FREESTYLE', code: 'KeyF', keyLabel: 'F' },
-    { label: 'BREATHE', code: 'Space', keyLabel: 'Space' },
-    { label: 'FREESTYLE', code: 'KeyF', keyLabel: 'F' },
-    { label: 'BREATHE', code: 'Space', keyLabel: 'Space' },
-    { label: 'FREESTYLE', code: 'KeyF', keyLabel: 'F' },
-    { label: 'BREATHE', code: 'Space', keyLabel: 'Space' },
-    { label: 'FREESTYLE', code: 'KeyF', keyLabel: 'F' },
-    { label: 'TURN', code: 'KeyT', keyLabel: 'T' }
+    { label: 'FREESTYLE' },
+    { label: 'BREATHE' },
+    { label: 'FREESTYLE' },
+    { label: 'BREATHE' },
+    { label: 'FREESTYLE' },
+    { label: 'BREATHE' },
+    { label: 'FREESTYLE' },
+    { label: 'TURN — PUSH OFF' }
   ];
   const r = await runQTESequence(container, character, {
     prompts,
     statKeys: ['endurance'],
     title: 'Swim Qual',
-    hint: 'F to stroke · Space to breathe at the wall'
+    hint: 'L (right arm) to stroke · I (head up) to breathe · W to push off the wall',
+    scene: createSwimScene
   });
   return buildActivityResult(r.score, ['endurance'], r);
 }
 
 export async function runGearShed(container, character) {
   const prompts = [
-    { label: 'DROP HELMET', code: 'KeyH', keyLabel: 'H' },
-    { label: 'DROP FLAK', code: 'KeyF', keyLabel: 'F' },
-    { label: 'DROP BELT', code: 'KeyB', keyLabel: 'B' },
-    { label: 'DROP BOOTS', code: 'KeyN', keyLabel: 'N' },
-    { label: 'DROP TROUSERS', code: 'KeyT', keyLabel: 'T' },
-    { label: 'SURFACE', code: 'Space', keyLabel: 'Space' }
+    { label: 'DROP HELMET' },
+    { label: 'DROP FLAK' },
+    { label: 'DROP BELT' },
+    { label: 'DROP BOOTS' },
+    { label: 'DROP TROUSERS' },
+    { label: 'SURFACE' }
   ];
   const r = await runQTESequence(container, character, {
     prompts,
     statKeys: ['dexterity', 'endurance'],
     title: 'Gear Shed',
-    hint: 'Shed gear in order before air runs out'
+    hint: 'Shed gear in order before air runs out — press the lit key',
+    scene: createGearShedScene
   });
   return buildActivityResult(r.score, ['dexterity', 'endurance'], r);
 }
@@ -165,20 +166,20 @@ export async function runLogTeamLift(container, character) {
 
 export async function runObstacleRun(container, character) {
   const obstacles = [
-    { label: 'VAULT', code: 'KeyV', keyLabel: 'V' },
-    { label: 'CRAWL', code: 'KeyC', keyLabel: 'C' },
-    { label: 'CLIMB', code: 'KeyL', keyLabel: 'L' },
-    { label: 'SWING', code: 'KeyS', keyLabel: 'S' },
-    { label: 'VAULT', code: 'KeyV', keyLabel: 'V' },
-    { label: 'CRAWL', code: 'KeyC', keyLabel: 'C' },
-    { label: 'CLIMB', code: 'KeyL', keyLabel: 'L' },
-    { label: 'FINISH', code: 'Enter', keyLabel: 'Enter' }
+    { label: 'VAULT' },
+    { label: 'CRAWL' },
+    { label: 'CLIMB' },
+    { label: 'SWING' },
+    { label: 'VAULT' },
+    { label: 'CRAWL' },
+    { label: 'CLIMB' },
+    { label: 'FINISH' }
   ];
   const r = await runQTESequence(container, character, {
     prompts: obstacles,
     statKeys: ['dexterity'],
     title: 'Fire Team Course',
-    hint: 'V vault · C crawl · L climb · S swing'
+    hint: 'W vault · S crawl · I climb · L swing · Enter finish'
   });
   return buildActivityResult(r.score, ['dexterity'], r);
 }

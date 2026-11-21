@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0f0f1a">
+  <title>Privacy — 8-bit Bootcamp</title>
+  <link rel="icon" href="/favicon.ico" sizes="32x32">
+  <script>
+    try {
+      if (localStorage.getItem('bootcamp-telemetry') === 'off') {
+        localStorage.setItem('umami.disabled', '1');
+      }
+    } catch (err) { /* storage blocked */ }
+  </script>
+  <script defer src="https://cloud.umami.is/script.js" data-website-id="7761c1c3-0355-41f9-8c3b-64e35b038a66"></script>
+  <style>
+    @font-face {
+      font-family: 'Press Start 2P';
+      src: url('/fonts/press-start-2p-latin-400.woff2') format('woff2');
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+    }
+    html, body {
+      margin: 0;
+      background: #0f0f1a;
+      color: #e8e8f0;
+      font-family: system-ui, -apple-system, sans-serif;
+      line-height: 1.5;
+    }
+    main {
+      max-width: 40rem;
+      margin: 0 auto;
+      padding: 32px 20px 64px;
+    }
+    h1 {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 1rem;
+      line-height: 1.6;
+      color: #ffd94a;
+      text-shadow: 3px 3px 0 #000;
+    }
+    h2 {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.65rem;
+      line-height: 1.6;
+      margin-top: 2rem;
+      color: #e8e8f0;
+    }
+    a { color: #8eb0ff; }
+    p, li { color: #c8c8d8; }
+    .updated { color: #9898b0; font-size: 0.9rem; }
+    button {
+      font: inherit;
+      background: #282840;
+      color: #e8e8f0;
+      border: 3px solid #0a0a14;
+      box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.4);
+      padding: 10px 14px;
+      cursor: pointer;
+    }
+    #telemetry-status { font-weight: 600; color: #e8e8f0; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Privacy</h1>
+    <p class="updated">8-bit Bootcamp. Updated 19 November 2026.</p>
+    <p><a href="/">Back to the game</a> · <a href="/terms.html">Terms of use</a></p>
+
+    <h2>On this device</h2>
+    <p>Your recruit name, appearance, stats, and progress stay in this browser. The game stores them in local storage under <code>bootcamp-save-0</code>, <code>bootcamp-save-1</code>, <code>bootcamp-save-2</code>, and <code>bootcamp-meta</code>. Clearing site data deletes those saves. The game does not upload them.</p>
+    <p>The game does not use tracking cookies and does not show ads.</p>
+
+    <h2>Counts that may leave the device</h2>
+    <p>The game sends cookieless counts to <a href="https://umami.is/privacy">Umami</a>. A visit includes the page address, browser, and country. Umami does not use cookies. The game also sends two events:</p>
+    <ul>
+      <li><strong>play</strong> — the game was opened. This includes the build id.</li>
+      <li><strong>error</strong> — the page hit an uncaught error. The count includes a short error message (about 150 characters), the campaign id, the activity id, and the build id.</li>
+    </ul>
+    <p>Those events do not include your recruit name, stats, appearance, save file, or stack trace. Nothing is sent from this browser after you turn counts off below. We do not sell this information.</p>
+
+    <h2>This browser</h2>
+    <p id="telemetry-status"></p>
+    <p><button type="button" id="telemetry-toggle">Stop counts from this browser</button></p>
+    <p>That choice is stored in local storage as <code>bootcamp-telemetry</code> and <code>umami.disabled</code>. Neither is a cookie.</p>
+
+    <h2>Children</h2>
+    <p>Do not type a real child’s name into the recruit screen. Names stay on the device, and the counts above are not tied to an account.</p>
+  </main>
+  <script>
+    const KEY = 'bootcamp-telemetry';
+    const status = document.querySelector('#telemetry-status');
+    const button = document.querySelector('#telemetry-toggle');
+
+    function stopped() {
+      try {
+        return localStorage.getItem(KEY) === 'off';
+      } catch {
+        return true;
+      }
+    }
+
+    function render() {
+      const off = stopped();
+      status.textContent = off
+        ? 'Counts from this browser are off.'
+        : 'Counts from this browser are on.';
+      button.textContent = off ? 'Resume counts' : 'Stop counts from this browser';
+    }
+
+    button.addEventListener('click', () => {
+      try {
+        if (stopped()) {
+          localStorage.removeItem(KEY);
+          localStorage.removeItem('umami.disabled');
+        } else {
+          localStorage.setItem(KEY, 'off');
+          localStorage.setItem('umami.disabled', '1');
+        }
+      } catch {
+        status.textContent = 'This browser is blocking storage, so counts stay off.';
+        return;
+      }
+      render();
+    });
+
+    render();
+  </script>
+</body>
+</html>

@@ -1,8 +1,11 @@
 import { buildActivityResult } from '../../activityRegistry.js';
 import {
   mountGame, setProgress, setMeter, flashResult, createLoop, bindKeys,
-  windowMsFor, runQTESequence, runClickSequence, runChoiceRounds
+  windowMsFor, runQTESequence, runClickSequence, runChoiceRounds, runInspectionBoard, declarePadKeys,
+  PREP_MS, RESULT_PAUSE_MS
 } from '../lib/minigameKit.js';
+
+const DRESS_MIN_MS = 2200;
 
 const DRESS_ITEMS = [
   { call: 'BLOUSE!', label: 'Blouse', id: 'blouse' },
@@ -15,26 +18,29 @@ const DRESS_ITEMS = [
 
 export async function runDressDrill(container, character) {
   return new Promise(resolve => {
-    const ui = mountGame(container, { title: 'Dressing Drill', hint: 'Click the correct gear when the D.I. calls it' });
+    const ui = mountGame(container, { title: 'Dressing Drill', hint: 'STAND BY, then click the gear the D.I. calls — early clicks do not count' });
     let round = 0;
     let hits = 0;
     const total = 8;
     let timeLeft = 0;
     let current = null;
     let timer = null;
+    let calling = false;
 
     function renderPile(targetId) {
       const shuffled = [...DRESS_ITEMS].sort(() => Math.random() - 0.5);
       ui.main.innerHTML = `
-        <div class="mg-prompt">${current.call}</div>
-        <div class="mg-countdown" id="mg-countdown">${Math.ceil(timeLeft / 1000)}</div>
+        <div class="mg-prompt mg-prep-word" id="mg-dress-call">STAND BY...</div>
+        <div class="mg-countdown" id="mg-countdown">&nbsp;</div>
         <div class="mg-choices">${shuffled.map(item =>
           `<button type="button" class="btn btn-secondary mg-choice" data-id="${item.id}">${item.label}</button>`
         ).join('')}</div>`;
       ui.main.onclick = (e) => {
         const btn = e.target.closest('[data-id]');
         if (!btn || !current) return;
+        if (!calling) { flashResult(ui, 'wait'); return; }
         ui.main.onclick = null;
+        calling = false;
         clearInterval(timer);
         if (btn.dataset.id === targetId) {
           hits++;
@@ -43,8 +49,31 @@ export async function runDressDrill(container, character) {
           flashResult(ui, 'miss');
         }
         round++;
-        setTimeout(nextRound, 400);
+        setTimeout(nextRound, RESULT_PAUSE_MS);
       };
+    }
+
+    function startCall() {
+      calling = true;
+      const call = ui.main.querySelector('#mg-dress-call');
+      call.textContent = current.call;
+      call.className = 'mg-prompt mg-exec-word';
+      const end = Date.now() + timeLeft;
+      const tick = () => {
+        timeLeft = end - Date.now();
+        const el = ui.main.querySelector('#mg-countdown');
+        if (el) el.textContent = Math.max(0, Math.ceil(timeLeft / 1000));
+        if (timeLeft <= 0) {
+          clearInterval(timer);
+          calling = false;
+          ui.main.onclick = null;
+          flashResult(ui, 'miss');
+          round++;
+          setTimeout(nextRound, RESULT_PAUSE_MS);
+        }
+      };
+      tick();
+      timer = setInterval(tick, 100);
     }
 
     function nextRound() {
@@ -54,23 +83,11 @@ export async function runDressDrill(container, character) {
         return;
       }
       current = DRESS_ITEMS[round % DRESS_ITEMS.length];
-      const baseMs = windowMsFor(character, ['dexterity'], 1200, 2000);
-      timeLeft = Math.max(600, baseMs - round * 80);
+      const baseMs = windowMsFor(character, ['dexterity'], 2800, 3600);
+      timeLeft = Math.max(DRESS_MIN_MS, baseMs - round * 80);
       setProgress(ui, round + 1, total);
       renderPile(current.id);
-      const end = Date.now() + timeLeft;
-      timer = setInterval(() => {
-        timeLeft = end - Date.now();
-        const el = ui.main.querySelector('#mg-countdown');
-        if (el) el.textContent = Math.max(0, Math.ceil(timeLeft / 1000));
-        if (timeLeft <= 0) {
-          clearInterval(timer);
-          ui.main.onclick = null;
-          flashResult(ui, 'miss');
-          round++;
-          setTimeout(nextRound, 400);
-        }
-      }, 100);
+      setTimeout(startCall, PREP_MS);
     }
     nextRound();
   });
@@ -78,27 +95,27 @@ export async function runDressDrill(container, character) {
 
 export async function runHighObstacle(container, character) {
   const prompts = [
-    { label: 'GRIP LEFT', code: 'KeyJ', keyLabel: 'J' },
-    { label: 'GRIP RIGHT', code: 'KeyK', keyLabel: 'K' },
-    { label: 'GRIP LEFT', code: 'KeyJ', keyLabel: 'J' },
-    { label: 'GRIP RIGHT', code: 'KeyK', keyLabel: 'K' },
-    { label: 'PULL UP', code: 'Space', keyLabel: 'Space' },
-    { label: 'GRIP LEFT', code: 'KeyJ', keyLabel: 'J' },
-    { label: 'GRIP RIGHT', code: 'KeyK', keyLabel: 'K' },
-    { label: 'MOUNT TOP', code: 'Enter', keyLabel: 'Enter' }
+    { label: 'GRIP LEFT' },
+    { label: 'GRIP RIGHT' },
+    { label: 'GRIP LEFT' },
+    { label: 'GRIP RIGHT' },
+    { label: 'PULL UP' },
+    { label: 'GRIP LEFT' },
+    { label: 'GRIP RIGHT' },
+    { label: 'MOUNT TOP' }
   ];
   const r = await runQTESequence(container, character, {
     prompts,
     statKeys: ['strength', 'dexterity'],
     title: 'High Obstacle Course',
-    hint: 'J/K alternate grips · Space pull · Enter mount'
+    hint: 'J left grip · L right grip · I pull up / mount'
   });
   return buildActivityResult(r.score, ['strength', 'dexterity'], r);
 }
 
 export async function runRappelTower(container, character) {
   return new Promise(resolve => {
-    const ui = mountGame(container, { title: 'Rappel Tower', hint: 'Press B in the green band each bounce' });
+    const ui = mountGame(container, { title: 'Rappel Tower', hint: 'Press K (brake hand down) in the green band each bounce' });
     let bounces = 0;
     let hits = 0;
     const total = 10;
@@ -112,11 +129,11 @@ export async function runRappelTower(container, character) {
         ui.main.innerHTML = `
           <div class="mg-prompt">Bounce ${bounces + 1} / ${total}</div>
           <div class="mg-meter-track"><div class="mg-meter-bar" style="width:${bandPos}%;background:#6dff8a"></div></div>
-          <div class="mg-key-hint">Press <kbd>B</kbd> in the green zone (40–70%)</div>`;
+          <div class="mg-key-hint">Press <kbd>K</kbd> in the green zone (40–70%)</div>`;
       }
     });
 
-    const unbind = bindKeys(['KeyB'], () => {
+    const unbind = bindKeys(['KeyK'], () => {
       if (bounces >= total) return;
       if (bandPos >= 40 && bandPos <= 70) {
         hits++;
@@ -137,63 +154,33 @@ export async function runRappelTower(container, character) {
 }
 
 export async function runGasChamber(container, character) {
-  return new Promise(resolve => {
-    const ui = mountGame(container, { title: 'Gas Chamber', hint: 'Hold breath on GAS · Clear mask on CLEAR · Exhale on BREATHE' });
-    const phases = [
-      { label: 'GAS — HOLD BREATH', code: 'Space', hold: true },
-      { label: 'CLEAR — MASK OFF', code: 'KeyC' },
-      { label: 'BREATHE — CONTROLLED EXHALE', code: 'KeyB' },
-      { label: 'GAS — HOLD BREATH', code: 'Space', hold: true },
-      { label: 'CLEAR — MASK OFF', code: 'KeyC' },
-      { label: 'BREATHE — CONTROLLED EXHALE', code: 'KeyB' }
-    ];
-    let index = 0;
-    let hits = 0;
-    let breath = 100;
-
-    function next() {
-      if (index >= phases.length) {
-        unbind();
-        ui.dispose();
-        resolve(buildActivityResult(hits / phases.length, ['endurance'], { hits, total: phases.length }));
-        return;
-      }
-      const p = phases[index];
-      ui.main.innerHTML = `<div class="mg-prompt">${p.label}</div><div class="mg-key-hint">Press <kbd>${p.code === 'Space' ? 'Space' : p.code.replace('Key', '')}</kbd></div>`;
-      setProgress(ui, index + 1, phases.length);
+  const phases = [
+    { label: 'GAS — HOLD BREATH' },
+    { label: 'CLEAR — MASK OFF' },
+    { label: 'BREATHE — CONTROLLED EXHALE' },
+    { label: 'GAS — HOLD BREATH' },
+    { label: 'CLEAR — MASK OFF' },
+    { label: 'BREATHE — CONTROLLED EXHALE' }
+  ];
+  let breath = 100;
+  const r = await runQTESequence(container, character, {
+    prompts: phases,
+    statKeys: ['endurance'],
+    title: 'Gas Chamber',
+    hint: 'Space hold breath on GAS · J clear mask on CLEAR · I exhale on BREATHE',
+    windowRange: [2200, 3000],
+    onStart: (ui) => setMeter(ui, 1),
+    onResult: (hit, _step, ui) => {
+      if (!hit) breath = Math.max(0, breath - 20);
       setMeter(ui, breath / 100);
-
-      let handled = false;
-      const timer = setTimeout(() => {
-        if (!handled) {
-          breath = Math.max(0, breath - 20);
-          flashResult(ui, 'miss');
-          index++;
-          setTimeout(next, 300);
-        }
-      }, windowMsFor(character, ['endurance'], 800, 1400));
-
-      ui._onPhase = (code) => {
-        if (handled) return;
-        if (code === p.code) {
-          handled = true;
-          clearTimeout(timer);
-          hits++;
-          flashResult(ui, 'hit');
-          index++;
-          setTimeout(next, 250);
-        }
-      };
     }
-
-    const unbind = bindKeys(['Space', 'KeyC', 'KeyB'], (code) => ui._onPhase?.(code));
-    next();
   });
+  return buildActivityResult(r.score, ['endurance'], { hits: r.hits, total: r.total });
 }
 
 export async function runNightCleanup(container, character) {
   return new Promise(resolve => {
-    const ui = mountGame(container, { title: 'Night Cleanup', hint: 'Hold S to scrub · release on creaks' });
+    const ui = mountGame(container, { title: 'Night Cleanup', hint: 'Hold L (right hand) to scrub · release on creaks' });
     let progress = 0;
     let noise = 20;
     let scrubbing = false;
@@ -221,20 +208,22 @@ export async function runNightCleanup(container, character) {
       ui.hint.textContent = 'CREAK — freeze!';
       setTimeout(() => {
         creak = false;
-        ui.hint.textContent = 'Hold S to scrub · release on creaks';
+        ui.hint.textContent = 'Hold L (right hand) to scrub · release on creaks';
       }, 1200);
     }, 3500);
 
-    const onKeyDown = (e) => { if (e.code === 'KeyS' && !creak) scrubbing = true; };
-    const onKeyUp = (e) => { if (e.code === 'KeyS') scrubbing = false; };
+    const onKeyDown = (e) => { if (e.code === 'KeyL' && !creak) scrubbing = true; };
+    const onKeyUp = (e) => { if (e.code === 'KeyL') scrubbing = false; };
     window.addEventListener('keydown', onKeyDown);
     window.addEventListener('keyup', onKeyUp);
+    const undeclare = declarePadKeys(['KeyL']);
 
     function end(success) {
       clearInterval(creakTimer);
       loop.stop();
       window.removeEventListener('keydown', onKeyDown);
       window.removeEventListener('keyup', onKeyUp);
+      undeclare();
       ui.dispose();
       resolve(buildActivityResult(success ? 0.85 : progress / 100, ['dexterity'], { progress, noise }));
     }
@@ -300,51 +289,89 @@ export async function runFieldDay(container, character) {
   return buildActivityResult(r.score, ['endurance', 'leadership'], r);
 }
 
+const FOOTLOCKER_ITEMS = [
+  {
+    id: 'socks', name: 'Socks',
+    ok: { desc: 'rolled, 6 pr', art: ['ww.ww.ww', 'ss.ss.ss', '........', 'ww.ww.ww', 'ss.ss.ss', '........'] },
+    fault: { desc: 'loose, 5 pr', reason: 'SOCKS UNROLLED', cue: 'crooked',
+      art: ['wwwww...', 'sssss...', '..wwwwww', '..ssssss', 'ww.ww...', 'ss.ss...'] }
+  },
+  {
+    id: 'skivvies', name: 'Skivvies',
+    ok: { desc: 'folded square', art: ['........', '.wwwwww.', '.wssssw.', '.wwwwww.', '.wssssw.', '.wwwwww.'] },
+    fault: { desc: 'wadded up', reason: 'SKIVVIES WADDED',
+      art: ['...ww...', '.wwsww..', 'wsw.wsww', '.wwsw.w.', '..www.s.', '........'] }
+  },
+  {
+    id: 'towel', name: 'Towel',
+    ok: { desc: 'folded 3x', art: ['........', 'gggggggg', 'GGGGGGGG', 'gggggggg', 'GGGGGGGG', 'gggggggg'] },
+    fault: { desc: 'bunched up', reason: 'TOWEL UNFOLDED',
+      art: ['..gg....', '.gGgg.g.', 'gGg.gGgg', 'gg.GgGg.', '.gggG.gg', '...gg...'] }
+  },
+  {
+    id: 'razor', name: 'Razor',
+    ok: { desc: 'capped, in kit', art: ['bbbbbbbb', 'bkkkkkkb', 'bkuuuukb', 'bkkssskb', 'bkkkkkkb', 'bbbbbbbb'] },
+    fault: { desc: 'loose, uncapped', reason: 'RAZOR UNSECURED',
+      art: ['bbbbb...', 'bkkkb.s.', 'bkkkb.ss', 'bkkkb..s', 'bbbbb..u', '......uu'] }
+  },
+  {
+    id: 'boots', name: 'Boots',
+    ok: { desc: 'shined', art: ['.BB..BB.', '.BB..BB.', '.BB..BB.', '.BwB.BwB', '.BBB.BBB', '........'] },
+    fault: { desc: 'scuffed, dull', reason: 'BOOTS UNSHINED', cue: 'dull',
+      art: ['.BB..BB.', '.Bh..BB.', '.BB..hB.', '.BBB.BBB', '.BhB.BBB', '........'] }
+  },
+  {
+    id: 'belt', name: 'Belt',
+    ok: { desc: 'brass bright', art: ['........', '..yyyy..', 'GGykkyGG', 'GGykkyGG', '..yyyy..', '........'] },
+    fault: { desc: 'tarnished', reason: 'BUCKLE TARNISHED', cue: 'dull',
+      art: ['........', '..dddd..', 'GGdkkdGG', 'GGdkkdGG', '..dddd..', '........'] }
+  },
+  {
+    id: 'photo', name: 'Photo',
+    ok: { desc: 'in lid tray', art: ['wwwwww..', 'wppppw..', 'wpnnpw..', 'wggggw..', 'wwwwww..', '........'] },
+    fault: { desc: 'out of place', reason: 'PHOTO ADRIFT', cue: 'tilt',
+      art: ['........', '..wwwwww', '..wppppw', '..wpnnpw', '..wggggw', '..wwwwww'] }
+  },
+  {
+    id: 'letters', name: 'Letters',
+    ok: { desc: 'squared', art: ['.eeeeee.', '.ewwwwe.', '.eeeeee.', '.nnnnnn.', '.eeeeee.', '.nnnnnn.'] },
+    fault: { desc: 'fanned out', reason: 'MAIL ADRIFT',
+      art: ['ee......', 'eeee.n..', '.eeeenn.', '...eeenn', '.nn..eee', 'nnn....e'] }
+  },
+  {
+    id: 'padlock', name: 'Padlock',
+    ok: { desc: 'locked', art: ['..ssss..', '.s....s.', '.s....s.', 'yyyyyyyy', 'yyykkyyy', 'yyyyyyyy'] },
+    fault: { desc: 'hasp open', reason: 'LOCK OPEN',
+      art: ['.ssss...', '.s..s...', '.s..s...', '.s......', 'yyyyyyyy', 'yyykkyyy'] }
+  },
+  {
+    id: 'hygiene', name: 'Hygiene',
+    ok: { desc: 'caps on', art: ['uu.kk.uu', 'ww.nn.ww', 'wu.nk.wu', 'ww.nn.ww', 'ww.nn.ww', '........'] },
+    fault: { desc: 'cap missing', reason: 'CAP MISSING',
+      art: ['uu....uu', 'ww.nn.ww', 'wu.nn.wu', 'ww.nn.ww', 'ww.nn.ww', '........'] }
+  }
+];
+
 export async function runFootlockerInspection(container, character) {
-  return new Promise(resolve => {
-    const ui = mountGame(container, { title: 'Footlocker Inspection', hint: 'Click every discrepancy before time runs out' });
-    const errors = [
-      { id: 'socks', x: 25, y: 70 },
-      { id: 'boots', x: 40, y: 75 },
-      { id: 'gig', x: 55, y: 40 },
-      { id: 'locker', x: 70, y: 55 },
-      { id: 'photos', x: 35, y: 25 }
-    ];
-    const found = new Set();
-    ui.main.innerHTML = `<div class="mg-inspect-board">${errors.map(e =>
-      `<button type="button" class="mg-inspect-spot" data-id="${e.id}" style="left:${e.x}%;top:${e.y}%"></button>`
-    ).join('')}</div>`;
-
-    const loop = createLoop({
-      durationMs: 14000,
-      onFinish: finish
-    });
-
-    function finish() {
-      ui.main.removeEventListener('click', onClick);
-      ui.dispose();
-      resolve(buildActivityResult(found.size / errors.length, ['leadership', 'intelligence'], { found: found.size, total: errors.length }));
-    }
-
-    function onClick(e) {
-      const spot = e.target.closest('[data-id]');
-      if (!spot) return;
-      found.add(spot.dataset.id);
-      spot.classList.add('mg-inspect-found');
-      setProgress(ui, found.size, errors.length);
-      if (found.size >= errors.length) loop.stop();
-    }
-    ui.main.addEventListener('click', onClick);
-    setProgress(ui, 0, errors.length);
+  const statKeys = ['leadership', 'intelligence'];
+  const r = await runInspectionBoard(container, character, {
+    title: 'Footlocker Inspection',
+    hint: 'Read every item — tap each discrepancy before time runs out',
+    caption: 'FOOTLOCKER · TOP TRAY',
+    variant: 'footlocker',
+    items: FOOTLOCKER_ITEMS,
+    faultCount: 4,
+    statKeys
   });
+  return buildActivityResult(r.score, statKeys, { found: r.found, total: r.total, falseFlags: r.falseFlags });
 }
 
 const IT_COMMANDS = [
-  { label: 'PUSH-UPS', keys: ['KeyJ', 'KeyK'], alternates: true },
-  { label: 'MOUNTAIN CLIMBERS', keys: ['KeyJ', 'KeyK'], alternates: true },
-  { label: 'SIDE STRADDLE HOPS', keys: ['Space'], alternates: false },
-  { label: 'PUSH-UPS', keys: ['KeyJ', 'KeyK'], alternates: true },
-  { label: 'MOUNTAIN CLIMBERS', keys: ['KeyJ', 'KeyK'], alternates: true }
+  { label: 'PUSH-UPS', keys: ['KeyJ', 'KeyL'], guide: 'Arms: alternate J / L rapidly' },
+  { label: 'MOUNTAIN CLIMBERS', keys: ['KeyA', 'KeyD'], guide: 'Legs: alternate A / D rapidly' },
+  { label: 'SIDE STRADDLE HOPS', keys: ['KeyI', 'KeyK'], guide: 'Arms up / down: alternate I / K rapidly' },
+  { label: 'PUSH-UPS', keys: ['KeyJ', 'KeyL'], guide: 'Arms: alternate J / L rapidly' },
+  { label: 'MOUNTAIN CLIMBERS', keys: ['KeyA', 'KeyD'], guide: 'Legs: alternate A / D rapidly' }
 ];
 
 export async function runIncentiveTraining(container, character) {
@@ -364,9 +391,10 @@ export async function runIncentiveTraining(container, character) {
         return;
       }
       const c = IT_COMMANDS[cmd];
-      ui.main.innerHTML = `<div class="mg-prompt">${c.label}</div><div class="mg-key-hint">${c.alternates ? 'Alternate J / K rapidly' : 'Mash Space'}</div>`;
+      ui.main.innerHTML = `<div class="mg-prompt">${c.label}</div><div class="mg-key-hint">${c.guide}</div>`;
       setProgress(ui, cmd + 1, total);
       pace = 40;
+      lastKey = null;
       let presses = 0;
       const need = 12;
       const interval = setInterval(() => {
@@ -374,33 +402,31 @@ export async function runIncentiveTraining(container, character) {
         setMeter(ui, pace / 100);
         if (pace <= 0) {
           clearInterval(interval);
+          ui._onKey = null;
           flashResult(ui, 'miss');
           cmd++;
-          setTimeout(nextCommand, 300);
+          setTimeout(nextCommand, RESULT_PAUSE_MS);
         }
       }, 200);
 
       ui._onKey = (code) => {
-        if (c.alternates) {
-          if (code !== 'KeyJ' && code !== 'KeyK') return;
-          if (lastKey === code) return;
-          lastKey = code;
-        } else if (code !== 'Space') return;
+        if (!c.keys.includes(code) || lastKey === code) return;
+        lastKey = code;
         presses++;
         pace = Math.min(100, pace + 8);
         setMeter(ui, pace / 100);
         if (presses >= need) {
           clearInterval(interval);
+          ui._onKey = null;
           hits++;
           flashResult(ui, 'hit');
           cmd++;
-          lastKey = null;
-          setTimeout(nextCommand, 300);
+          setTimeout(nextCommand, RESULT_PAUSE_MS);
         }
       };
     }
 
-    const unbind = bindKeys(['KeyJ', 'KeyK', 'Space'], (code) => ui._onKey?.(code));
+    const unbind = bindKeys(['KeyJ', 'KeyL', 'KeyA', 'KeyD', 'KeyI', 'KeyK'], (code) => ui._onKey?.(code));
     nextCommand();
   });
 }

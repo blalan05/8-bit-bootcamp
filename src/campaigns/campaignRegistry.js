@@ -46,6 +46,7 @@ export const CAMPAIGNS = {
     weeks: BOOTCAMP_WEEKS,
     status: 'available',
     usesRecruiter: true,
+    fogOfWar: false,
     periodLabel: 'Week',
     unitLabel: 'Recruit',
     mapHint: 'Walk to the location on the MCRD map. A prompt will appear when you arrive.',

@@ -8,7 +8,7 @@ import { runLandNav } from './phaseBGames.js';
 
 export async function runHumpPrep(container, character) {
   return new Promise(resolve => {
-    const ui = mountGame(container, { title: 'Full Gear Hike', hint: 'W to march · Space to help a falling teammate (costs stamina)' });
+    const ui = mountGame(container, { title: 'Full Gear Hike', hint: 'Hold W to march · I (arms up) to lift a falling teammate (costs stamina)' });
     let progress = 0;
     let stamina = 1;
     let marching = false;
@@ -33,14 +33,14 @@ export async function runHumpPrep(container, character) {
     let eventTimer = setInterval(() => {
       if (events < 3 && Math.random() > 0.5) {
         events++;
-        ui.hint.textContent = 'Buddy falling back! Press Space to help (+LDR, -stamina)';
+        ui.hint.textContent = 'Buddy falling back! Press I to lift him (+LDR, -stamina)';
         ui._helpNeeded = true;
       }
     }, 5000);
 
-    const unbind = bindKeys(['KeyW', 'Space'], (code) => {
+    const unbind = bindKeys(['KeyW', 'KeyI'], (code) => {
       if (code === 'KeyW' && stamina > 0) marching = true;
-      if (code === 'Space' && ui._helpNeeded) {
+      if (code === 'KeyI' && ui._helpNeeded) {
         ui._helpNeeded = false;
         stamina -= 0.15;
         ui.hint.textContent = 'Good leadership. Keep marching.';
@@ -80,18 +80,18 @@ export async function runCrucibleDay(container, character) {
 
 export async function runCrucibleNight(container, character) {
   const prompts = [
-    { label: 'FREEZE', code: 'Space', keyLabel: 'Space' },
-    { label: 'MOVE', code: 'KeyW', keyLabel: 'W' },
-    { label: 'NAV LEFT', code: 'KeyA', keyLabel: 'A' },
-    { label: 'NAV RIGHT', code: 'KeyD', keyLabel: 'D' },
-    { label: 'FREEZE', code: 'Space', keyLabel: 'Space' },
-    { label: 'MOVE', code: 'KeyW', keyLabel: 'W' }
+    { label: 'FREEZE' },
+    { label: 'MOVE' },
+    { label: 'NAV LEFT' },
+    { label: 'NAV RIGHT' },
+    { label: 'FREEZE' },
+    { label: 'MOVE' }
   ];
   const r = await runQTESequence(container, character, {
     prompts,
     statKeys: ['endurance', 'intelligence'],
     title: 'Crucible Night',
-    hint: 'Night movement — freeze on command'
+    hint: 'Night movement — S freeze · W move · A / D navigate'
   });
   return buildActivityResult(r.score, ['endurance', 'intelligence'], r);
 }
@@ -139,16 +139,13 @@ export async function runReaperHike(container, character) {
 export async function runWarriorBreakfast(container, character) {
   const items = ['Eggs', 'Bacon', 'Pancakes', 'Sausage', 'Toast', 'Fruit', 'Juice', 'Coffee'];
   const calls = ['Eggs', 'Bacon', 'Pancakes', 'Sausage', 'Toast', 'Fruit', 'Juice', 'Coffee', 'Eggs', 'Bacon'];
-  const prompts = calls.map(item => ({
-    label: `Grab ${item}`,
-    code: 'Space',
-    keyLabel: 'Space'
-  }));
+  const prompts = calls.map(item => ({ label: `GRAB ${item.toUpperCase()}` }));
   const r = await runQTESequence(container, character, {
     prompts,
     statKeys: ['endurance'],
     title: 'Warrior Breakfast',
-    hint: 'Press Space when the called item appears — generous windows'
+    hint: 'Press L (right hand) when the called item appears — generous windows',
+    windowRange: [2600, 3400]
   });
   return buildActivityResult(Math.max(0.7, r.score), ['endurance'], r);
 }
@@ -167,22 +164,22 @@ export async function runGearTurnIn(container, character) {
 
 export async function runFinalDrill(container, character) {
   const prompts = [
-    { label: 'LEFT FACE', code: 'KeyL', keyLabel: 'L' },
-    { label: 'RIGHT FACE', code: 'KeyR', keyLabel: 'R' },
-    { label: 'ABOUT FACE', code: 'KeyA', keyLabel: 'A' },
-    { label: 'FORWARD MARCH', code: 'KeyM', keyLabel: 'M' },
-    { label: 'HALT', code: 'KeyH', keyLabel: 'H' },
-    { label: 'LEFT FACE', code: 'KeyL', keyLabel: 'L' },
-    { label: 'RIGHT FACE', code: 'KeyR', keyLabel: 'R' },
-    { label: 'HALT', code: 'KeyH', keyLabel: 'H' },
-    { label: 'ABOUT FACE', code: 'KeyA', keyLabel: 'A' },
-    { label: 'HALT', code: 'KeyH', keyLabel: 'H' }
+    { label: 'LEFT FACE' },
+    { label: 'RIGHT FACE' },
+    { label: 'ABOUT FACE' },
+    { label: 'FORWARD MARCH' },
+    { label: 'HALT' },
+    { label: 'LEFT FACE' },
+    { label: 'RIGHT FACE' },
+    { label: 'HALT' },
+    { label: 'ABOUT FACE' },
+    { label: 'HALT' }
   ];
   const r = await runQTESequence(container, character, {
     prompts,
     statKeys: ['leadership', 'dexterity'],
     title: 'Final Drill Eval',
-    hint: 'Execute from memory — no second chances on timing'
+    hint: 'A left face · D right face · W forward march · S halt / about face — move only on the command of execution'
   });
   return buildActivityResult(r.score, ['leadership'], r);
 }
@@ -224,12 +221,12 @@ export async function runFamilyDay(container, character) {
 
 export async function runGraduationParade(container, character) {
   const prompts = [
-    { label: 'PRESENT ARMS', code: 'KeyP', keyLabel: 'P' },
-    { label: 'ORDER ARMS', code: 'KeyO', keyLabel: 'O' },
-    { label: 'EYES RIGHT', code: 'KeyE', keyLabel: 'E' },
-    { label: 'FORWARD MARCH', code: 'KeyM', keyLabel: 'M' },
-    { label: 'HALT', code: 'KeyH', keyLabel: 'H' },
-    { label: 'EGA CEREMONY', code: 'Enter', keyLabel: 'Enter' }
+    { label: 'PRESENT ARMS' },
+    { label: 'ORDER ARMS' },
+    { label: 'EYES RIGHT' },
+    { label: 'FORWARD MARCH' },
+    { label: 'HALT' },
+    { label: 'EGA CEREMONY' }
   ];
   const r = await runQTESequence(container, character, {
     prompts,

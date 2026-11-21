@@ -264,7 +264,7 @@ export class HydrationSystem {
    */
   update(dt) {
     if (!this.isActive) return;
-    if (!this.player.inputEnabled) return;
+    if (!this.player.inputEnabled || this.player.paused) return;
     if (this.exhaustionBusy || this.runFailureBusy) return;
 
     const drainPerSec = 100 / DRAIN_SECONDS;

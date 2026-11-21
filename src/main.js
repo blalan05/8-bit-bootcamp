@@ -23,6 +23,8 @@ import { CampaignController } from './campaign/campaignController.js';
 import { SandboxController } from './campaign/sandboxController.js';
 import { HydrationSystem } from './campaign/hydration.js';
 import { ensureCampaign, isSandbox, createInitialCampaign } from './campaign/campaignState.js';
+import { ExplorationTracker } from './maps/exploration.js';
+import { GameMenu } from './ui/gameMenu.js';
 
 /** Internal render resolution divisor — bigger = chunkier pixels */
 const PIXEL_SCALE = 3;
@@ -40,6 +42,8 @@ let debugTileEl;
 let perfStats;
 let gameController;
 let hydrationSystem;
+let exploration;
+let gameMenu;
 const clock = new THREE.Clock();
 let sessionEndCallback = null;
 
@@ -95,6 +99,10 @@ function runGameSession(character) {
 function endGameSession() {
   setPlayContext({ campaign: '', activity: '' });
   renderer?.setAnimationLoop(null);
+
+  gameMenu?.dispose();
+  gameMenu = null;
+  exploration = null;
 
   gameController?.dispose();
   gameController = null;
@@ -257,6 +265,24 @@ function startGame(character) {
     gameController.hydrationSystem = hydrationSystem;
   }
 
+  exploration = new ExplorationTracker({
+    getCharacter: () => gameController.character,
+    getParsedMap: () => tileLoader.getParsedMap(),
+    getPosition: () => ({ x: player.position.x, z: player.position.z }),
+    onCharacterUpdate: (c) => gameController.updateCharacter(c)
+  });
+
+  gameMenu = new GameMenu({
+    player,
+    exploration,
+    getCharacter: () => gameController.character,
+    getParsedMap: () => tileLoader.getParsedMap(),
+    getObjective: () => (gameController.awaitingProximity ? gameController.currentDayDef : null),
+    getPickups: () => (hydrationSystem?.isActive ? hydrationSystem.pickups : []),
+    canOpen: () => !gameController.busy && !gameController.runEnded
+      && !document.querySelector('.menu-overlay:not(.game-menu)')
+  });
+
   gameController.start();
 
   const horizontal = 40;
@@ -275,6 +301,7 @@ function animate() {
   hydrationSystem?.update(dt);
   gameController?.updateProximity();
   tileLoader.update();
+  exploration?.update();
   controls.update();
   perfStats.update();
 
