@@ -9,21 +9,26 @@ const PULL_RANGE = 0.9;
  * Renders at low internal resolution and upscales with hard pixels
  * to match the in-game 8-bit look.
  *
+ * With `fit: true` the canvas display size is left to CSS and the render
+ * resolution / camera aspect track it; `width`/`height` are only the initial size.
+ *
  * @param {HTMLElement} container
- * @param {{ width?: number, height?: number, background?: number | null, pixelScale?: number }} [options]
+ * @param {{ width?: number, height?: number, background?: number | null, pixelScale?: number, fit?: boolean }} [options]
  */
 export class CharacterPreview {
   constructor(container, options = {}) {
     this.container = container;
     this.width = options.width ?? 220;
     this.height = options.height ?? 320;
-    const pixelScale = options.pixelScale ?? 4;
+    this.pixelScale = options.pixelScale ?? 4;
 
     this.renderer = new THREE.WebGLRenderer({ alpha: true });
     this.renderer.setPixelRatio(1);
-    this.renderer.setSize(this.width / pixelScale, this.height / pixelScale, false);
-    this.renderer.domElement.style.width = `${this.width}px`;
-    this.renderer.domElement.style.height = `${this.height}px`;
+    this.renderer.setSize(this.width / this.pixelScale, this.height / this.pixelScale, false);
+    if (!options.fit) {
+      this.renderer.domElement.style.width = `${this.width}px`;
+      this.renderer.domElement.style.height = `${this.height}px`;
+    }
     this.renderer.domElement.style.imageRendering = 'pixelated';
     container.appendChild(this.renderer.domElement);
 
@@ -53,9 +58,40 @@ export class CharacterPreview {
     this._baseY = this.mesh.position.y;
     this._pullT = 0;
 
+    this._resizeObserver = null;
+    if (options.fit && typeof ResizeObserver !== 'undefined') {
+      this._resizeObserver = new ResizeObserver(entries => {
+        const box = entries[0]?.contentRect;
+        if (box) this.resize(box.width, box.height);
+      });
+      this._resizeObserver.observe(this.renderer.domElement);
+    }
+
     this._boundAnimate = this._animate.bind(this);
     this._animating = true;
     requestAnimationFrame(this._boundAnimate);
+  }
+
+  /**
+   * Match render resolution and camera aspect to a new display size (CSS px).
+   * @param {number} width
+   * @param {number} height
+   */
+  resize(width, height) {
+    if (width < 1 || height < 1) return;
+    if (width === this.width && height === this.height) return;
+    this.width = width;
+    this.height = height;
+    this.renderer.setSize(
+      Math.max(1, Math.round(width / this.pixelScale)),
+      Math.max(1, Math.round(height / this.pixelScale)),
+      false
+    );
+    const viewHeight = this.camera.top - this.camera.bottom;
+    const halfWidth = (viewHeight * (width / height)) / 2;
+    this.camera.left = -halfWidth;
+    this.camera.right = halfWidth;
+    this.camera.updateProjectionMatrix();
   }
 
   update(character) {
@@ -85,6 +121,7 @@ export class CharacterPreview {
 
   dispose() {
     this._animating = false;
+    this._resizeObserver?.disconnect();
     this.renderer.dispose();
     this.renderer.domElement.remove();
   }

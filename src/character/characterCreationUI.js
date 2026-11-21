@@ -106,7 +106,7 @@ export async function showCharacterCreation(slotIndex) {
     let preview = null;
 
     const overlay = document.createElement('div');
-    overlay.className = 'menu-overlay';
+    overlay.className = 'menu-overlay builder-overlay';
     overlay.innerHTML = `
       <div class="menu-panel builder-panel">
         <div class="builder-preview" id="builder-preview"></div>
@@ -123,8 +123,8 @@ export async function showCharacterCreation(slotIndex) {
           </label>
           <fieldset class="field">
             <legend>Gender</legend>
-            <label><input type="radio" name="gender" value="male" checked /> Male</label>
-            <label><input type="radio" name="gender" value="female" /> Female</label>
+            <label class="gender-option"><input type="radio" name="gender" value="male" checked /> Male</label>
+            <label class="gender-option"><input type="radio" name="gender" value="female" /> Female</label>
           </fieldset>
           <fieldset class="field">
             <legend>Skin Tone</legend>
@@ -167,7 +167,7 @@ export async function showCharacterCreation(slotIndex) {
     document.body.appendChild(overlay);
 
     const previewContainer = overlay.querySelector('#builder-preview');
-    preview = new CharacterPreview(previewContainer);
+    preview = new CharacterPreview(previewContainer, { fit: true });
 
     const nameInput = overlay.querySelector('#char-name');
     const nameError = overlay.querySelector('#name-error');
@@ -377,6 +377,6 @@ export async function showCharacterCreation(slotIndex) {
 
     document.addEventListener('keydown', onKey);
     refreshUI();
-    nameInput.focus();
+    if (!window.matchMedia?.('(pointer: coarse)').matches) nameInput.focus();
   });
 }
