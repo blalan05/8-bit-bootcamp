@@ -1,7 +1,7 @@
 import { MIN_STAT, MAX_STAT } from '../../../character/stats.js';
-import { openTouchPad, declarePadKeys, setPadHighlight } from './touchPad.js';
+import { openTouchPad, declarePadKeys, setPadHighlight, touchCopy } from './touchPad.js';
 
-export { declarePadKeys, setPadHighlight };
+export { declarePadKeys, setPadHighlight, touchCopy };
 
 /** Preparatory command hold before the press window opens (not scored). */
 export const PREP_MS = 1700;
@@ -112,7 +112,7 @@ export function mountGame(container, { title = '', hint = '' } = {}) {
         <span class="mg-flash" id="mg-flash"></span>
       </div>
       <div class="mg-meter-track"><div class="mg-meter-bar" id="mg-meter"></div></div>
-      <div class="mg-hint" id="mg-hint">${hint}</div>
+      <div class="mg-hint" id="mg-hint">${touchCopy(hint)}</div>
     </div>
   `;
   return {
@@ -265,7 +265,7 @@ function bindKeyButtons(root, onPress) {
 const RULE_TEXT = 'Preparatory command = stand fast · command of execution = press the lit key';
 
 function appendRule(ui, text = RULE_TEXT) {
-  ui.hint.insertAdjacentHTML('beforeend', `<div class="mg-hint-rule">${text}</div>`);
+  ui.hint.insertAdjacentHTML('beforeend', `<div class="mg-hint-rule">${touchCopy(text)}</div>`);
 }
 
 /**
@@ -402,7 +402,7 @@ export function runQTESequence(container, character, {
         const box = ui.main.querySelector('.mg-command');
         box.className = `mg-command mg-command--exec${sc ? ' mg-command--compact' : ''}`;
         box.querySelector('.mg-exec-word').textContent = exec;
-        box.querySelector('.mg-phase-note').textContent = `PRESS ${step.keyLabel}`;
+        box.querySelector('.mg-phase-note').textContent = touchCopy(`PRESS ${step.keyLabel}`);
         setKeyStates(ui.main, () => 'go');
         callScene(sc, 'onExecute', step);
         timer = setTimeout(() => settle(false), windowMs);
@@ -511,7 +511,7 @@ export function runWatchRounds(container, character, {
         box.querySelector('.mg-exec-word').textContent = current.label;
         box.querySelector('.mg-phase-note').textContent = hold
           ? 'HOLD — DO NOTHING'
-          : `PRESS ${keyCap(current.code)}${current.action ? ` — ${current.action}` : ''}`;
+          : touchCopy(`PRESS ${keyCap(current.code)}${current.action ? ` — ${current.action}` : ''}`);
         setKeyStates(ui.main, c => (hold ? 'hold' : c === current.code ? 'go' : 'prep'));
         timer = setTimeout(() => settle(hold), windowMs);
       }, PREP_MS - 100 + Math.random() * 200);

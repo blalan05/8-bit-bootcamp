@@ -6,9 +6,11 @@ import {
   getPullupMaxEnergy,
   getPullupEnergyCost
 } from '../character/stats.js';
+import { openTouchPad, declarePadKeys, setPadHighlight, isTouchPrimary } from '../campaign/activities/lib/touchPad.js';
 
 export const PULLUP_SESSION_SEC = 45;
-export const PULLUP_KEYS = { pull: 'KeyF', top: 'KeyJ', bottom: 'KeyK' };
+/** Arm cluster: I = lift, L = lock out chin over bar, K = lower to full hang */
+export const PULLUP_KEYS = { pull: 'KeyI', top: 'KeyL', bottom: 'KeyK' };
 
 const RELEVANT_CODES = [PULLUP_KEYS.pull, PULLUP_KEYS.top, PULLUP_KEYS.bottom];
 
@@ -26,13 +28,20 @@ export function applyPullupResult(character, strDelta) {
   return { ...character, stats };
 }
 
-const HINT_HANG = 'Press <b>F</b> to pull up';
-const HINT_RISING = 'Rise! Press <b>J</b> at the top';
-const HINT_FALLING = 'Lower down. Press <b>K</b> at full hang';
+const HINTS = {
+  hang: 'Press <b>I</b> to pull up',
+  rising: 'Rise! Press <b>L</b> at the top',
+  falling: 'Lower down. Press <b>K</b> at full hang'
+};
+const TOUCH_HINTS = {
+  hang: 'Tap <b>I</b> to pull up',
+  rising: 'Rise! Tap <b>L</b> when it lights',
+  falling: 'Lower down. Tap <b>K</b> when it lights'
+};
 
 /**
  * Rhythm pull-up mini-game. The recruit rises and falls; the player presses
- * F to start a rep, J at the top (chin over bar), and K at the bottom (full hang).
+ * I to start a rep, L at the top (chin over bar), and K at the bottom (full hang).
  * STR/END widen timing windows, speed the motion, and set the energy pool.
  * A rep counts when the top key lands in-window; hitting the bottom key too
  * makes it a perfect rep with reduced energy cost. Ends at the timer or 0 energy.
@@ -60,17 +69,38 @@ export function runPullupMiniGame(scene, character) {
     let lastTs = performance.now();
     let elapsed = 0;
     const sessionMs = PULLUP_SESSION_SEC * 1000;
+    const hints = isTouchPrimary() ? TOUCH_HINTS : HINTS;
+
+    const closePad = openTouchPad(scene.container);
+    const undeclarePad = declarePadKeys(RELEVANT_CODES);
+
+    /** Pad lighting per phase: the next key preps while moving and goes live in its window. */
+    const PAD_STATES = {
+      hang: { [PULLUP_KEYS.pull]: 'go' },
+      rising: { [PULLUP_KEYS.top]: 'prep' },
+      top: { [PULLUP_KEYS.top]: 'go' },
+      falling: { [PULLUP_KEYS.bottom]: 'prep' },
+      bottom: { [PULLUP_KEYS.bottom]: 'go' }
+    };
+
+    function setPhase(next) {
+      phase = next;
+      if (hints[next]) scene.setPhaseHint(hints[next]);
+      setPadHighlight(PAD_STATES[next]);
+    }
 
     scene.setReps(0);
     scene.setEnergy(1);
     scene.setTimer(PULLUP_SESSION_SEC);
     scene.setPullHeight(0);
-    scene.setPhaseHint(HINT_HANG);
+    setPhase('hang');
 
     function finish() {
       if (!running) return;
       running = false;
       window.removeEventListener('keydown', onKey);
+      undeclarePad();
+      closePad();
       resolve({ reps, perfectReps, energyLeft: energy, ...gradePullups(reps) });
     }
 
@@ -83,7 +113,7 @@ export function runPullupMiniGame(scene, character) {
         finish();
         return;
       }
-      scene.setPhaseHint(HINT_HANG);
+      setPhase('hang');
     }
 
     function onKey(e) {
@@ -93,9 +123,8 @@ export function runPullupMiniGame(scene, character) {
       switch (phase) {
         case 'hang':
           if (e.code === PULLUP_KEYS.pull) {
-            phase = 'rising';
+            setPhase('rising');
             phaseStart = performance.now();
-            scene.setPhaseHint(HINT_RISING);
           }
           break;
         case 'top':
@@ -103,9 +132,8 @@ export function runPullupMiniGame(scene, character) {
             reps++;
             scene.setReps(reps);
             scene.flash('perfect');
-            phase = 'falling';
+            setPhase('falling');
             phaseStart = performance.now();
-            scene.setPhaseHint(HINT_FALLING);
           } else {
             scene.flash('miss');
             endCycle(false);
@@ -143,7 +171,7 @@ export function runPullupMiniGame(scene, character) {
         const p = Math.min(1, (ts - phaseStart) / ascentMs);
         scene.setPullHeight(p);
         if (p >= 1) {
-          phase = 'top';
+          setPhase('top');
           windowStart = ts;
         }
       } else if (phase === 'top') {
@@ -156,7 +184,7 @@ export function runPullupMiniGame(scene, character) {
         const p = Math.min(1, (ts - phaseStart) / descentMs);
         scene.setPullHeight(1 - p);
         if (p >= 1) {
-          phase = 'bottom';
+          setPhase('bottom');
           windowStart = ts;
         }
       } else if (phase === 'bottom') {

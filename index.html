@@ -66,6 +66,19 @@
         max-height: 90vh;
         overflow-y: auto;
       }
+      /* Phones / tablets: count padding + border inside the width so the frame stays on screen */
+      @media (max-width: 900px), (max-height: 600px) {
+        .menu-panel {
+          box-sizing: border-box;
+          max-width: calc(100vw - 24px);
+          max-height: calc(100vh - 24px);
+          max-height: calc(100dvh - 24px);
+          overscroll-behavior: contain;
+        }
+      }
+      @media (max-width: 480px), (max-height: 500px) {
+        .menu-panel { --panel-pad: 16px; padding: 16px; }
+      }
 
       .menu-title {
         margin: 0 0 12px;
@@ -425,6 +438,7 @@
           box-sizing: border-box;
           width: 100%;
           height: 100%;
+          max-width: none;
           max-height: none;
           padding: 0;
           border: none;
@@ -551,6 +565,18 @@
       }
 
       .confirm-actions { display: flex; gap: 10px; justify-content: center; margin-top: 16px; }
+      @media (max-width: 900px), (max-height: 600px) {
+        .confirm-box {
+          box-sizing: border-box;
+          max-width: min(360px, calc(100vw - 24px));
+          max-height: calc(100vh - 24px);
+          max-height: calc(100dvh - 24px);
+          overflow-y: auto;
+        }
+      }
+      @media (max-width: 480px), (max-height: 500px) {
+        .confirm-box { --panel-pad: 16px; padding: 16px; }
+      }
 
       .recruit-hud {
         position: fixed;
@@ -870,6 +896,13 @@
         filter: drop-shadow(3px 3px 0 rgba(0, 0, 0, 0.35));
       }
 
+      /* Short landscape phones: shorter room so the dialogue and choices sit higher */
+      @media (orientation: landscape) and (max-height: 500px) {
+        .station-room { height: 120px; margin-bottom: 8px; }
+        .station-nco-sprite { width: auto !important; height: 100% !important; }
+        .recruiter-panel--station .recruiter-body { min-height: 0; }
+      }
+
       .nco-dialogue {
         background: #282840;
         border: 3px solid var(--panel-border);
@@ -909,6 +942,20 @@
       .nco-actions {
         display: flex;
         justify-content: flex-end;
+      }
+
+      /* Short landscape phones: drop the room art while answering and pair the choices up */
+      @media (orientation: landscape) and (max-height: 500px) {
+        .station-scene:has(.nco-choice) .station-room { display: none; }
+        .nco-dialogue { padding: 8px 10px; min-height: 0; }
+        .nco-nameplate { margin-bottom: 4px; }
+        .nco-text { margin-bottom: 8px; min-height: 0; line-height: 1.4; }
+        .nco-choices {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          margin-bottom: 0;
+        }
+        .nco-choice { padding: 8px 10px; line-height: 1.3; }
       }
 
       .nco-continue {
@@ -1162,8 +1209,21 @@
         opacity: 0.75;
       }
       @media (max-width: 640px) {
-        .game-toolbar-btn { font-size: 0; gap: 0; }
-        .game-toolbar-btn .game-toolbar-key { font-size: 0.5rem; border: 0; opacity: 1; }
+        .game-toolbar { top: 8px; right: 8px; }
+        .game-toolbar-btn { font-size: 0; gap: 0; min-width: 44px; min-height: 44px; justify-content: center; }
+        .game-toolbar-btn .game-toolbar-key { font-size: 0.625rem; border: 0; opacity: 1; }
+        /* HUD sits below the toolbar row so the two never overlap */
+        .recruit-hud {
+          top: 60px;
+          left: 8px;
+          box-sizing: border-box;
+          min-width: 0;
+          max-width: calc(100vw - 16px);
+          padding: 8px 10px;
+        }
+        .recruit-hud-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        html.is-touch .game-toolbar-btn { font-size: 0.625rem; padding: 8px 10px; }
+        html.is-touch .game-toolbar-btn .game-toolbar-key { display: none; }
       }
 
       .game-menu-panel {
@@ -1803,9 +1863,22 @@
       /* Keep the mini-game panel clear of the pad */
       @media (orientation: landscape) {
         html.mg-pad-open .mg-pad-frame {
+          --pad-side: calc(var(--pad-cluster) + var(--pad-edge) * 3 + max(var(--pad-safe-l), var(--pad-safe-r)));
           box-sizing: border-box;
-          max-width: calc(100vw - 2 * (var(--pad-cluster) + var(--pad-edge) * 3 + max(var(--pad-safe-l), var(--pad-safe-r))));
+          max-width: calc(100vw - 2 * var(--pad-side));
           padding: 12px;
+        }
+        /* One cluster only: reserve that side and let the panel use the rest */
+        html.mg-pad-open--right:not(.mg-pad-open--left) .mg-pad-frame {
+          max-width: calc(100vw - var(--pad-side) - 16px);
+          margin-right: var(--pad-side);
+        }
+        html.mg-pad-open--left:not(.mg-pad-open--right) .mg-pad-frame {
+          max-width: calc(100vw - var(--pad-side) - 16px);
+          margin-left: var(--pad-side);
+        }
+        html.mg-pad-open:not(.mg-pad-open--left):not(.mg-pad-open--right) .mg-pad-frame {
+          max-width: calc(100vw - 16px);
         }
         html.mg-pad-open--center .mg-pad-frame {
           --pad-reserve: calc(var(--pad-btn) + var(--pad-edge) * 2 + var(--pad-safe-b));
@@ -1863,6 +1936,15 @@
         transform: translate(-50%, -50%);
         top: 50%;
         left: 50%;
+      }
+      /* Short landscape phones: shrink the ring (reticle is %-positioned) so HUD + meter stay on screen */
+      @media (orientation: landscape) and (max-height: 500px) {
+        .mg-aim-ring { width: min(200px, 38vh); height: min(200px, 38vh); }
+        .menu-panel:has(.mg-aim-ring) .mg-hint,
+        .menu-panel:has(.mg-aim-ring) .mg-title { display: none; }
+        .menu-panel:has(.mg-aim-ring) .mg-prompt { font-size: 0.8rem; margin-bottom: 4px; }
+        .menu-panel:has(.mg-aim-ring) .mg-wind { line-height: 1.6; margin-bottom: 4px; }
+        .menu-panel:has(.mg-aim-ring) .mg-wind kbd { padding: 1px 4px; font-size: 0.7rem; border-width: 2px; }
       }
       .mg-log-lane {
         display: flex;
@@ -2220,6 +2302,131 @@
         font-size: 1.2rem;
         color: #ff6b6b;
         margin: 8px 0;
+      }
+
+      /* --- Touch vs keyboard copy (html.is-touch set from isTouchPrimary) --- */
+      html.is-touch .kbd-only,
+      html:not(.is-touch) .touch-only { display: none !important; }
+      html.is-touch .game-toolbar-key { display: none; }
+      .drill-hud > span:first-child { white-space: nowrap; }
+
+      /* --- Phones / tablets: activity prompt clear of the location HUD, primary actions reachable --- */
+      @media (max-width: 900px), (max-height: 600px) {
+        .activity-prompt {
+          box-sizing: border-box;
+          width: max-content;
+          max-width: calc(100vw - 24px);
+          bottom: calc(48px + env(safe-area-inset-bottom, 0px));
+        }
+        .activity-prompt-text { line-height: 1.6; }
+        /* Last-row actions stick to the panel's bottom border while the body scrolls */
+        .menu-panel .recruiter-actions:not(:empty),
+        .menu-panel .schedule-actions,
+        .confirm-actions {
+          position: sticky;
+          bottom: calc(-1 * var(--panel-pad, 24px));
+          z-index: 1;
+          margin-bottom: calc(-1 * var(--panel-pad, 24px));
+          padding: 10px 0 var(--panel-pad, 24px);
+          background: var(--panel-bg);
+        }
+        .confirm-actions { margin-top: 6px; }
+      }
+
+      /* --- Touch / small screens: no pixel text under 10px --- */
+      @media (hover: none), (max-width: 700px) {
+        .mode-card-desc,
+        .corevalues-choices .cv-choice,
+        .slot-grit,
+        .slot-label,
+        .locker-perk-desc,
+        .slot-badge,
+        .recruit-stat-label,
+        .recruit-hud-meta,
+        .recruit-hydration-label,
+        .recruit-hydration-value,
+        .recruit-mode-badge,
+        .recruit-token-badge,
+        .game-toolbar-key,
+        .asvab-paper-header,
+        .campaign-card-title,
+        .campaign-card-subtitle,
+        .schedule-label,
+        .pullup-energy-label,
+        .corevalues-progress,
+        .drill-rule,
+        .mg-hint-rule,
+        .menu-hint,
+        .privacy-link,
+        .btn-compact,
+        .stat-toolbar .btn-compact,
+        .stat-meta,
+        .stat-label,
+        .stat-bg-mod,
+        .activity-prompt-btn,
+        .sandbox-activity-btns .activity-prompt-btn,
+        .locker-buy-btn,
+        .game-menu-tab,
+        .game-menu-close,
+        .sheet-heading,
+        .sheet-rank,
+        .sheet-campaign,
+        .sheet-bg-name,
+        .sheet-stat-label,
+        .sheet-stat-name,
+        .stat-delta,
+        .sheet-derived,
+        .sheet-meter-row > span:last-child,
+        .fieldmap-meta,
+        .fieldmap-orders .schedule-value,
+        .journal-week-title,
+        .journal-status,
+        .journal-count,
+        .journal-note-topic,
+        .journal-note-source,
+        .grade-badge,
+        .sheet-record .grade-badge,
+        .journal-day-status .grade-badge,
+        .nco-nameplate { font-size: 0.625rem; }
+        .mode-card-desc, .corevalues-choices .cv-choice, .recruit-hud-meta, .locker-perk-desc { line-height: 1.6; }
+        .sheet-derived, .sheet-stat-name { line-height: 1.6; }
+        .recruit-stat { padding: 3px 2px; }
+      }
+
+      /* --- Touch: tap targets of at least 44px --- */
+      @media (pointer: coarse) {
+        .btn,
+        .activity-prompt-btn,
+        .nco-continue,
+        .locker-buy-btn,
+        .slot-reset-btn,
+        .asvab-bubble,
+        .fieldmap-legend-item,
+        .game-menu-tab,
+        .game-menu-close { min-height: 44px; }
+        .privacy-link {
+          display: inline-flex;
+          align-items: center;
+          min-height: 44px;
+          padding: 0 10px;
+        }
+        .menu-hint:has(.privacy-link) { margin-top: 4px; }
+        .stat-btn { width: 40px; height: 40px; font-size: 0.8rem; }
+        .field .gender-option {
+          display: inline-flex;
+          align-items: center;
+          gap: 10px;
+          min-height: 44px;
+          padding-right: 8px;
+        }
+        .field .gender-option input { width: 24px; height: 24px; margin: 0; flex-shrink: 0; }
+        html.mg-pad-open .mg-pad-frame .drill-keys { display: none; }
+        .drill-flash { min-width: 0; }
+      }
+
+      /* Tablet portrait: builder keeps its frame inside the viewport */
+      @media (min-width: 701px) and (max-width: 900px) {
+        .builder-panel { box-sizing: border-box; max-width: calc(100vw - 24px); }
       }
     </style>
 </head>

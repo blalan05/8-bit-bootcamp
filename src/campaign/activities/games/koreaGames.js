@@ -1,7 +1,7 @@
 import { buildActivityResult } from '../../activityRegistry.js';
 import {
   mountGame, setProgress, setMeter,
-  runQTESequence, runClickSequence, bindKeys, createLoop
+  runQTESequence, runClickSequence, bindKeys, createLoop, touchCopy
 } from '../lib/minigameKit.js';
 
 const FROSTBITE_STEPS = [
@@ -85,7 +85,7 @@ export async function runConvoyEscort(container, character) {
     let stragglerTimer = setInterval(() => {
       if (Math.random() > 0.6) {
         stragglerNeeded = true;
-        ui.hint.textContent = 'Marine falling out! Press I to lift him (+LDR, -stamina)';
+        ui.hint.textContent = touchCopy('Marine falling out! Press I to lift him (+LDR, -stamina)');
       }
     }, 6000);
 

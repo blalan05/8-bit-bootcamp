@@ -1,7 +1,7 @@
 /**
  * Close-order drill command rhythm scene.
  */
-import { openTouchPad, setPadHighlight } from '../lib/touchPad.js';
+import { openTouchPad, setPadHighlight, touchCopy } from '../lib/touchPad.js';
 
 export const DRILL_KEYS = [
   { code: 'KeyW', cap: 'W', label: 'Forward March' },
@@ -37,7 +37,7 @@ export class DrillCadenceScene {
               <span class="mg-key-cap">${k.cap}</span><span class="mg-key-role">${k.label}</span>
             </button>`).join('')}
         </div>
-        <div class="drill-rule">Preparatory command = stand fast · command of execution = press the lit key</div>
+        <div class="drill-rule">${touchCopy('Preparatory command = stand fast · command of execution = press the lit key')}</div>
       </div>
     `;
 

@@ -12,6 +12,7 @@ import {
 import { AsvabScene } from './asvabScene.js';
 import { PullupScene } from './pullupScene.js';
 import { NcoScene } from './ncoScene.js';
+import { touchCopy } from '../campaign/activities/lib/touchPad.js';
 import {
   RECRUITER_QUESTIONS,
   pickBuffStat,
@@ -143,7 +144,7 @@ export function showRecruiterVisit(character) {
       titleEl.textContent = 'Pull-Up Test';
       subtitleEl.textContent = 'Sgt. Vasquez — "Show me what you\'ve got on the bar."';
       bodyEl.innerHTML = `
-        <p class="recruiter-copy">Step up to the bar. Press <strong>F</strong> to pull, <strong>J</strong> as your chin clears the bar, and <strong>K</strong> at full hang.</p>
+        <p class="recruiter-copy">${touchCopy('Step up to the bar. Press <strong>I</strong> to pull, <strong>L</strong> as your chin clears the bar, and <strong>K</strong> at full hang.')}</p>
         <p class="recruiter-copy recruiter-copy--small">Strength and endurance widen your timing windows and set your energy. Perfect reps cost less energy. The test ends at the buzzer or when you gas out.</p>
       `;
       setActions('<button type="button" class="btn btn-primary" id="btn-begin-pullups">Approach the Bar</button>');

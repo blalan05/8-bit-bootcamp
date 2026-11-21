@@ -49,6 +49,26 @@ export function isTouchPrimary() {
   return (navigator.maxTouchPoints ?? 0) > 0 && !hoverQuery?.matches;
 }
 
+/** Toggle `is-touch` on <html> so CSS can swap keyboard hints for touch copy. */
+export function syncTouchClass() {
+  const update = () => document.documentElement.classList.toggle('is-touch', isTouchPrimary());
+  update();
+  coarseQuery?.addEventListener?.('change', update);
+  hoverQuery?.addEventListener?.('change', update);
+}
+
+/** Reword keyboard instructions for the on-screen pad ("Press L" → "Tap L"). No-op off touch. */
+export function touchCopy(html) {
+  if (!isTouchPrimary()) return html;
+  return String(html)
+    .replace(/\bPRESS\b/g, 'TAP')
+    .replace(/\b(Press|Click)\b/g, 'Tap')
+    .replace(/\b(press|click)\b/g, 'tap')
+    .replace(/\blit key\b/g, 'lit button')
+    .replace(/\bArrow keys\b/g, 'Arrow buttons')
+    .replace(/\barrow keys\b/g, 'arrow buttons');
+}
+
 /**
  * Declare key codes the current game listens for. Returns an undo function.
  * @param {string[]} codes

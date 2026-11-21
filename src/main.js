@@ -25,11 +25,18 @@ import { HydrationSystem } from './campaign/hydration.js';
 import { ensureCampaign, isSandbox, createInitialCampaign } from './campaign/campaignState.js';
 import { ExplorationTracker } from './maps/exploration.js';
 import { GameMenu } from './ui/gameMenu.js';
+import { syncTouchClass } from './campaign/activities/lib/touchPad.js';
+
+syncTouchClass();
 
 /** Internal render resolution divisor — bigger = chunkier pixels */
 const PIXEL_SCALE = 3;
 /** Vertical world units visible on screen */
 const FRUSTUM_SIZE = 24;
+/** Horizontal world units always visible; only tall portrait screens grow the frustum to keep it */
+const MIN_VISIBLE_WIDTH = 18;
+/** FPS panel only with ?debug */
+const SHOW_PERF_STATS = new URLSearchParams(location.search).has('debug');
 
 let renderer;
 let scene;
@@ -149,8 +156,10 @@ function startGame(character) {
     activity: ''
   });
 
-  perfStats = new Stats();
-  document.body.appendChild(perfStats.dom);
+  if (SHOW_PERF_STATS) {
+    perfStats = new Stats();
+    document.body.appendChild(perfStats.dom);
+  }
 
   debugTileEl = document.createElement('div');
   debugTileEl.className = 'location-hud';
@@ -168,15 +177,8 @@ function startGame(character) {
   scene = new THREE.Scene();
   scene.background = new THREE.Color(0x2e3b28);
 
-  const aspect = window.innerWidth / window.innerHeight;
-  camera = new THREE.OrthographicCamera(
-    (-FRUSTUM_SIZE * aspect) / 2,
-    (FRUSTUM_SIZE * aspect) / 2,
-    FRUSTUM_SIZE / 2,
-    -FRUSTUM_SIZE / 2,
-    0.1,
-    200
-  );
+  camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 200);
+  fitFrustum();
   controls = new OrbitControls(camera, renderer.domElement);
   controls.enableRotate = false;
 
@@ -303,7 +305,7 @@ function animate() {
   tileLoader.update();
   exploration?.update();
   controls.update();
-  perfStats.update();
+  perfStats?.update();
 
   const parsedMap = tileLoader.getParsedMap();
   if (parsedMap) {
@@ -318,13 +320,18 @@ function animate() {
   renderer.render(scene, camera);
 }
 
-function onResize() {
+function fitFrustum() {
   const aspect = window.innerWidth / window.innerHeight;
-  camera.left = (-FRUSTUM_SIZE * aspect) / 2;
-  camera.right = (FRUSTUM_SIZE * aspect) / 2;
-  camera.top = FRUSTUM_SIZE / 2;
-  camera.bottom = -FRUSTUM_SIZE / 2;
+  const height = Math.max(FRUSTUM_SIZE, MIN_VISIBLE_WIDTH / aspect);
+  camera.left = (-height * aspect) / 2;
+  camera.right = (height * aspect) / 2;
+  camera.top = height / 2;
+  camera.bottom = -height / 2;
   camera.updateProjectionMatrix();
+}
+
+function onResize() {
+  fitFrustum();
   renderer.setSize(window.innerWidth / PIXEL_SCALE, window.innerHeight / PIXEL_SCALE, false);
 }
 

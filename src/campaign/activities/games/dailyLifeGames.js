@@ -1,7 +1,7 @@
 import { buildActivityResult } from '../../activityRegistry.js';
 import {
   mountGame, setProgress, setMeter, flashResult, createLoop, bindKeys,
-  windowMsFor, runQTESequence, runClickSequence, runChoiceRounds, runInspectionBoard, declarePadKeys,
+  windowMsFor, runQTESequence, runClickSequence, runChoiceRounds, runInspectionBoard, declarePadKeys, touchCopy,
   PREP_MS, RESULT_PAUSE_MS
 } from '../lib/minigameKit.js';
 
@@ -116,6 +116,7 @@ export async function runHighObstacle(container, character) {
 export async function runRappelTower(container, character) {
   return new Promise(resolve => {
     const ui = mountGame(container, { title: 'Rappel Tower', hint: 'Press K (brake hand down) in the green band each bounce' });
+    const keyHint = touchCopy('Press <kbd>K</kbd> in the green zone (40–70%)');
     let bounces = 0;
     let hits = 0;
     const total = 10;
@@ -129,7 +130,7 @@ export async function runRappelTower(container, character) {
         ui.main.innerHTML = `
           <div class="mg-prompt">Bounce ${bounces + 1} / ${total}</div>
           <div class="mg-meter-track"><div class="mg-meter-bar" style="width:${bandPos}%;background:#6dff8a"></div></div>
-          <div class="mg-key-hint">Press <kbd>K</kbd> in the green zone (40–70%)</div>`;
+          <div class="mg-key-hint">${keyHint}</div>`;
       }
     });
 

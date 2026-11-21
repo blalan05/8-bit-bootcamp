@@ -15,7 +15,10 @@ export function showCampaignSelect() {
         <h1 class="menu-title">SELECT CAMPAIGN</h1>
         <p class="menu-subtitle">Choose your deployment</p>
         <div class="campaign-list" role="listbox"></div>
-        <p class="menu-hint">Arrow keys to focus · Enter to select · Esc to cancel</p>
+        <div class="slot-footer-actions touch-only">
+          <button type="button" class="btn btn-secondary" id="btn-campaign-back">Back</button>
+        </div>
+        <p class="menu-hint"><span class="kbd-only">Arrow keys to focus · Enter to select · Esc to cancel</span><span class="touch-only">Tap a campaign to deploy</span></p>
       </div>
     `;
 
@@ -75,6 +78,11 @@ export function showCampaignSelect() {
       const index = Number(card.dataset.index);
       focusIndex(index);
       activate(index);
+    });
+
+    overlay.querySelector('#btn-campaign-back').addEventListener('click', () => {
+      cleanup();
+      resolve(null);
     });
 
     listEl.addEventListener('focusin', (e) => {

@@ -9,6 +9,7 @@ import {
 } from './campaignState.js';
 import { runIncentiveTraining } from './activities/games/dailyLifeGames.js';
 import { setPlayContext } from '../telemetry.js';
+import { touchCopy } from './activities/lib/touchPad.js';
 
 const IT_HYDRATION_COST = 20;
 const IT_PASS_THRESHOLD = 0.6;
@@ -163,7 +164,7 @@ export function runActivity(character, activityId, dayMeta = {}) {
     function showIntro() {
       titleEl.textContent = dayMeta.title ?? activity.title;
       subtitleEl.textContent = activity.subtitle;
-      bodyEl.innerHTML = `<p class="recruiter-copy">${activity.intro}</p>`;
+      bodyEl.innerHTML = `<p class="recruiter-copy">${touchCopy(activity.intro)}</p>`;
       actionsEl.innerHTML = '<button type="button" class="btn btn-primary" id="activity-begin">Begin</button>';
       overlay.querySelector('#activity-begin').addEventListener('click', async () => {
         panelEl.classList.add('recruiter-panel--pullup');

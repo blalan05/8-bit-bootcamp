@@ -1,7 +1,7 @@
 import { buildActivityResult } from '../../activityRegistry.js';
 import {
   mountGame, setMeter, setProgress, flashResult, createLoop, bindKeys,
-  runQTESequence, runChoiceRounds, runClickSequence, avgStatT
+  runQTESequence, runChoiceRounds, runClickSequence, avgStatT, touchCopy
 } from '../lib/minigameKit.js';
 import { runSteadyAim } from './phaseAGames.js';
 import { runLandNav } from './phaseBGames.js';
@@ -33,7 +33,7 @@ export async function runHumpPrep(container, character) {
     let eventTimer = setInterval(() => {
       if (events < 3 && Math.random() > 0.5) {
         events++;
-        ui.hint.textContent = 'Buddy falling back! Press I to lift him (+LDR, -stamina)';
+        ui.hint.textContent = touchCopy('Buddy falling back! Press I to lift him (+LDR, -stamina)');
         ui._helpNeeded = true;
       }
     }, 5000);

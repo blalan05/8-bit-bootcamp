@@ -99,7 +99,7 @@ export function showSlotSelect() {
         <div class="slot-footer-actions">
           <button type="button" class="btn btn-secondary" id="btn-locker">The Locker</button>
         </div>
-        <p class="menu-hint">Press 1–3 to select · Enter to confirm · Delete to reset focused slot</p>
+        <p class="menu-hint"><span class="kbd-only">Press 1–3 to select · Enter to confirm · Delete to reset focused slot</span><span class="touch-only">Tap a slot to play · Reset clears a save</span></p>
         <p class="menu-hint"><a class="privacy-link" href="/privacy.html">Privacy</a> · <a class="privacy-link" href="/terms.html">Terms</a></p>
       </div>
     `;

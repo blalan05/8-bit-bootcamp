@@ -171,6 +171,7 @@ export async function showCharacterCreation(slotIndex) {
 
     const nameInput = overlay.querySelector('#char-name');
     const nameError = overlay.querySelector('#name-error');
+    let nameTouched = false;
     const enterBtn = overlay.querySelector('#btn-enter');
     const heightInput = overlay.querySelector('#char-height');
     const skinSwatches = overlay.querySelector('#skin-swatches');
@@ -268,9 +269,9 @@ export async function showCharacterCreation(slotIndex) {
       validateForm();
     }
 
-    function validateForm() {
+    function validateForm({ showError = nameTouched } = {}) {
       const err = validateCharacterName(nameInput.value);
-      nameError.textContent = err ?? '';
+      nameError.textContent = showError ? err ?? '' : '';
       enterBtn.disabled = !!err || !draft.backgroundId;
       return !err;
     }
@@ -286,7 +287,14 @@ export async function showCharacterCreation(slotIndex) {
       if (e.key === 'Escape') cleanup(null);
     }
 
-    nameInput.addEventListener('input', refreshUI);
+    nameInput.addEventListener('input', () => {
+      nameTouched = true;
+      refreshUI();
+    });
+    nameInput.addEventListener('blur', () => {
+      nameTouched = true;
+      validateForm();
+    });
 
     overlay.querySelector('#btn-random-name').addEventListener('click', () => {
       nameInput.value = getRandomName(draft.appearance.gender);
@@ -358,7 +366,7 @@ export async function showCharacterCreation(slotIndex) {
     overlay.querySelector('#btn-back').addEventListener('click', () => cleanup(null));
 
     overlay.querySelector('#btn-enter').addEventListener('click', () => {
-      if (!validateForm()) return;
+      if (!validateForm({ showError: true })) return;
       syncDraftFromForm();
       const character = createCharacter(
         nameInput.value,

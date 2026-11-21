@@ -48,7 +48,7 @@ export const ACTIVITY_REGISTRY = {
   drillCadence: {
     title: 'Close Order Drill',
     subtitle: 'Parade Deck — on the cadence',
-    intro: 'Press the matching key when the command flashes. <strong>L</strong> Left Face · <strong>R</strong> Right Face · <strong>M</strong> March · <strong>H</strong> Halt',
+    intro: 'Press the lit key on the command of execution. <strong>A</strong> Left Face · <strong>D</strong> Right Face · <strong>W</strong> Forward March · <strong>S</strong> Halt',
     run: runDrillCadence
   },
   coreValues: {
@@ -60,19 +60,19 @@ export const ACTIVITY_REGISTRY = {
   ist: {
     title: 'Initial Strength Test',
     subtitle: 'Pull-up Bars — counted reps',
-    intro: 'Press <strong>F</strong> to pull, <strong>J</strong> at chin-over-bar, <strong>K</strong> at full hang.',
+    intro: 'Press <strong>I</strong> to pull, <strong>L</strong> at chin-over-bar, <strong>K</strong> at full hang.',
     run: runIst
   },
   steadyAim: {
     title: 'Snapping In',
     subtitle: 'Rifle Range — steady aim',
-    intro: 'Hold <strong>Space</strong> to steady your breath. Press <strong>F</strong> to fire when the reticle aligns with the ring.',
+    intro: 'Hold <strong>Space</strong> to steady your breath. Press <strong>L</strong> to fire when the reticle aligns with the ring.',
     run: runSteadyAim
   },
   paceRunner: {
     title: 'PFT Baseline',
     subtitle: '400m track — pace run',
-    intro: 'Alternate <strong>J</strong> and <strong>K</strong> to maintain stride in the green band.',
+    intro: '<strong>A</strong> left stride · <strong>D</strong> right stride — stay in step on the cadence.',
     run: runPaceRunner
   },
   fieldStrip: {
@@ -84,13 +84,13 @@ export const ACTIVITY_REGISTRY = {
   swimStrokes: {
     title: 'Swim Qualification',
     subtitle: 'Pool — stroke rhythm',
-    intro: '<strong>F</strong> to stroke · <strong>Space</strong> to breathe at the wall · <strong>T</strong> to turn.',
+    intro: '<strong>L</strong> to stroke · <strong>I</strong> to breathe (head up) · <strong>W</strong> to push off the wall.',
     run: runSwimStrokes
   },
   gearShed: {
     title: 'Gear Shed',
     subtitle: 'Pool — underwater shed',
-    intro: 'Shed gear in the prompted order: H helmet · F flak · B belt · N boots · T trousers · Space surface.',
+    intro: 'Shed gear in the prompted order: <strong>I</strong> helmet · <strong>J</strong> flak · <strong>L</strong> belt · <strong>K</strong> boots and trousers · <strong>W</strong> surface.',
     run: runGearShed
   },
   logTeamLift: {
@@ -102,7 +102,7 @@ export const ACTIVITY_REGISTRY = {
   obstacleRun: {
     title: 'Fire Team Course',
     subtitle: 'Obstacle Course — QTE run',
-    intro: '<strong>V</strong> vault · <strong>C</strong> crawl · <strong>L</strong> climb · <strong>S</strong> swing · <strong>Enter</strong> finish.',
+    intro: '<strong>W</strong> vault · <strong>S</strong> crawl · <strong>I</strong> climb · <strong>L</strong> swing · <strong>Enter</strong> finish.',
     run: runObstacleRun
   },
   landNav: {
@@ -126,13 +126,13 @@ export const ACTIVITY_REGISTRY = {
   pugilDuel: {
     title: 'Pugil Sticks',
     subtitle: 'Thunderdown — duel',
-    intro: 'Read the opponent\'s tell. <strong>H</strong> high block · <strong>L</strong> low block · <strong>D</strong> dodge feint.',
+    intro: 'Read the opponent\'s tell. <strong>I</strong> high block · <strong>K</strong> low block · <strong>A</strong> dodge the feint.',
     run: runPugilDuel
   },
   bayonetCourse: {
     title: 'Bayonet Course',
     subtitle: 'Drill Practice — thrust and slash',
-    intro: '<strong>T</strong> thrust · <strong>S</strong> slash — keep the rhythm down the lane.',
+    intro: '<strong>I</strong> thrust · <strong>L</strong> slash · <strong>Enter</strong> finish — keep the rhythm down the lane.',
     run: runBayonetCourse
   },
   knowledgeExam: {
@@ -150,7 +150,7 @@ export const ACTIVITY_REGISTRY = {
   rifleQual: {
     title: 'Table 1 Qualification',
     subtitle: 'Rifle Range — wind and positions',
-    intro: 'Arrow keys adjust wind. <strong>F</strong> to fire at standing, kneeling, and prone.',
+    intro: 'Arrow keys adjust wind. Press <strong>L</strong> to fire at standing, kneeling, and prone.',
     run: runRifleQual
   },
   nightMove: {
@@ -162,7 +162,7 @@ export const ACTIVITY_REGISTRY = {
   humpPrep: {
     title: 'Full Gear Hike',
     subtitle: 'Trail loop — pace and leadership',
-    intro: '<strong>W</strong> to march. <strong>Space</strong> to help a falling teammate (costs stamina).',
+    intro: 'Hold <strong>W</strong> to march. Press <strong>I</strong> to lift a falling teammate (costs stamina).',
     run: runHumpPrep
   },
   reactionCourse: {
@@ -186,13 +186,13 @@ export const ACTIVITY_REGISTRY = {
   reaperHike: {
     title: 'The Reaper',
     subtitle: 'Crucible Trail — final hike',
-    intro: '<strong>W</strong> to hike. Stamina barely recovers. Finish to earn the title.',
+    intro: 'Hold <strong>W</strong> to hike. Stamina barely recovers. Finish to earn the title.',
     run: runReaperHike
   },
   warriorBreakfast: {
     title: 'Warrior Breakfast',
     subtitle: 'Chow Hall — earned meal',
-    intro: 'Press <strong>Space</strong> when the called item appears on the serving line.',
+    intro: 'Press <strong>L</strong> to grab the called item when it appears on the serving line.',
     run: runWarriorBreakfast
   },
   gearTurnIn: {
@@ -204,7 +204,7 @@ export const ACTIVITY_REGISTRY = {
   finalDrill: {
     title: 'Final Drill Eval',
     subtitle: 'Parade Deck — from memory',
-    intro: 'Execute the full command sequence from memory. L · R · A · M · H.',
+    intro: 'Execute the full command sequence from memory. <strong>A</strong> left face · <strong>D</strong> right face · <strong>S</strong> about face / halt · <strong>W</strong> forward march.',
     run: runFinalDrill
   },
   billetBoard: {
@@ -222,7 +222,7 @@ export const ACTIVITY_REGISTRY = {
   graduationParade: {
     title: 'Graduation Parade',
     subtitle: 'Parade Deck — EGA ceremony',
-    intro: 'Final drill performance. P · O · E · M · H · Enter for the Eagle, Globe, and Anchor.',
+    intro: 'Final drill performance. <strong>I</strong> present arms · <strong>K</strong> order arms · <strong>D</strong> eyes right · <strong>W</strong> march · <strong>S</strong> halt · <strong>Enter</strong> for the Eagle, Globe, and Anchor.',
     run: runGraduationParade
   },
   yellowFootprints: {
@@ -258,7 +258,7 @@ export const ACTIVITY_REGISTRY = {
   nightCleanup: {
     title: 'Night Cleanup',
     subtitle: 'Barracks — firewatch scrub',
-    intro: 'Hold <strong>S</strong> to scrub the quarterdeck. Release when you hear a creak.',
+    intro: 'Hold <strong>L</strong> to scrub the quarterdeck. Release when you hear a creak.',
     run: runNightCleanup
   },
   footlockerInspection: {
@@ -270,19 +270,19 @@ export const ACTIVITY_REGISTRY = {
   highObstacle: {
     title: 'High Obstacle Course',
     subtitle: 'Obstacle Course — climb',
-    intro: '<strong>J</strong>/<strong>K</strong> alternate grips · <strong>Space</strong> pull · <strong>Enter</strong> mount.',
+    intro: '<strong>J</strong> / <strong>L</strong> alternate grips · <strong>I</strong> pull up and mount.',
     run: runHighObstacle
   },
   rappelTower: {
     title: 'Rappelling',
     subtitle: 'Rappell Course — controlled descent',
-    intro: 'Press <strong>B</strong> in the green band on each bounce down the tower.',
+    intro: 'Press <strong>K</strong> (brake hand) in the green band on each bounce down the tower.',
     run: runRappelTower
   },
   gasChamber: {
     title: 'Gas Chamber',
     subtitle: 'Gas Chamber — mask discipline',
-    intro: '<strong>Space</strong> hold breath · <strong>C</strong> clear mask · <strong>B</strong> controlled exhale.',
+    intro: '<strong>Space</strong> hold breath · <strong>J</strong> clear mask · <strong>I</strong> controlled exhale.',
     run: runGasChamber
   },
   mailCall: {
@@ -312,7 +312,7 @@ export const ACTIVITY_REGISTRY = {
   foxholeDig: {
     title: 'Dig In',
     subtitle: 'Foxhole Line — shovel strokes',
-    intro: 'Alternate <strong>J</strong> and <strong>K</strong> to dig your fighting position.',
+    intro: 'Alternate <strong>J</strong> and <strong>L</strong> to dig your fighting position.',
     run: runFoxholeDig
   },
   mortarBracket: {
@@ -324,7 +324,7 @@ export const ACTIVITY_REGISTRY = {
   nightWatch: {
     title: 'Sniper Alley',
     subtitle: 'Jungle Patrol — night watch',
-    intro: 'Press <strong>F</strong> on hostile movement. Do NOT fire on friendlies.',
+    intro: 'Press <strong>L</strong> on hostile movement. Do NOT fire on friendlies.',
     run: runNightWatch
   },
   supplyRun: {
@@ -342,7 +342,7 @@ export const ACTIVITY_REGISTRY = {
   flagRaising: {
     title: 'Raising the Colors',
     subtitle: 'Mt. Suribachi — 23 February 1945',
-    intro: 'Assemble the pipe, attach the flag, and hoist the colors on Suribachi. <strong>Space</strong> on the cadence.',
+    intro: 'Assemble the pipe, attach the flag, and hoist the colors on Suribachi. <strong>I</strong> heave · <strong>K</strong> secure · <strong>Enter</strong> colors up.',
     run: runFlagRaising
   },
   frostbiteCheck: {
@@ -354,13 +354,13 @@ export const ACTIVITY_REGISTRY = {
   weaponsCold: {
     title: 'Frozen Weapons',
     subtitle: 'Warming Tents — keep rifles firing',
-    intro: 'Work the bolt and hand-warm the action. <strong>B</strong> bolt · <strong>H</strong> warm · <strong>D</strong> dry-fire · <strong>C</strong> cycle.',
+    intro: 'Work the bolt and hand-warm the action. <strong>L</strong> bolt / dry-fire · <strong>J</strong> warm · <strong>K</strong> cycle · <strong>Enter</strong> rifle hot.',
     run: runWeaponsCold
   },
   convoyEscort: {
     title: 'Fighting Withdrawal',
     subtitle: 'Frozen Reservoir — attack in a different direction',
-    intro: '<strong>W</strong> to advance the column. Freeze on flares. <strong>Space</strong> to help a straggler.',
+    intro: 'Hold <strong>W</strong> to advance the column. Freeze on flares. Press <strong>I</strong> to lift a straggler.',
     run: runConvoyEscort
   },
   bridgeRepair: {
@@ -372,7 +372,7 @@ export const ACTIVITY_REGISTRY = {
   incomingArtillery: {
     title: 'Incoming Barrage',
     subtitle: 'Trenchline — rockets and mortars',
-    intro: 'Press <strong>D</strong> to dive on INCOMING — hold position on ALL CLEAR.',
+    intro: 'Press <strong>S</strong> to get down on INCOMING — hold position on ALL CLEAR.',
     run: runIncomingArtillery
   },
   bunkerRepair: {
@@ -396,7 +396,7 @@ export const ACTIVITY_REGISTRY = {
   iedSweep: {
     title: 'IED Sweep',
     subtitle: 'Highway 1 — mark suspicious objects',
-    intro: 'Press <strong>M</strong> to mark SUSPICIOUS OBJECT — hold on ROADSIDE CLUTTER.',
+    intro: 'Press <strong>I</strong> to mark SUSPICIOUS OBJECT — hold on ROADSIDE CLUTTER.',
     run: runIedSweep
   },
   turretGunner: {
@@ -420,7 +420,7 @@ export const ACTIVITY_REGISTRY = {
   camelCaravan: {
     title: 'The Caravan',
     subtitle: 'Libyan Desert — grab the lead',
-    intro: 'Press <strong>C</strong> to grab the lead on CAMEL BOLTS — hold on STEADY COLUMN.',
+    intro: 'Press <strong>J</strong> to grab the lead on CAMEL BOLTS — hold on STEADY COLUMN.',
     run: runCamelCaravan
   },
   mutinyParley: {
@@ -450,13 +450,13 @@ export const ACTIVITY_REGISTRY = {
   gasAlarm: {
     title: 'Gas Attack',
     subtitle: 'Belleau Wood — mask up',
-    intro: 'Press <strong>G</strong> to mask on GAS! GAS! GAS! — hold on FALSE ALARM.',
+    intro: 'Press <strong>I</strong> to mask on GAS! GAS! GAS! — hold on FALSE ALARM.',
     run: runGasAlarm
   },
   jungleAmbush: {
     title: 'Jungle Ambush',
     subtitle: 'Nicaragua — return fire on muzzle flash',
-    intro: 'Press <strong>F</strong> on MUZZLE FLASH — hold on VILLAGERS ON THE TRAIL.',
+    intro: 'Press <strong>L</strong> on MUZZLE FLASH — hold on VILLAGERS ON THE TRAIL.',
     run: runJungleAmbush
   },
   crowdControl: {
