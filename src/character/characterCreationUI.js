@@ -158,7 +158,7 @@ export async function showCharacterCreation(slotIndex) {
           </fieldset>
           <div class="builder-actions">
             <button type="button" class="btn btn-secondary" id="btn-back">Back</button>
-            <button type="button" class="btn btn-primary" id="btn-enter" disabled>Visit Recruiter</button>
+            <button type="button" class="btn btn-primary" id="btn-enter" aria-disabled="true">Visit Recruiter</button>
           </div>
         </div>
       </div>
@@ -272,8 +272,14 @@ export async function showCharacterCreation(slotIndex) {
     function validateForm({ showError = nameTouched } = {}) {
       const err = validateCharacterName(nameInput.value);
       nameError.textContent = showError ? err ?? '' : '';
-      enterBtn.disabled = !!err || !draft.backgroundId;
-      return !err;
+      const invalid = !!err || !draft.backgroundId;
+      enterBtn.setAttribute('aria-disabled', String(invalid));
+      return !invalid;
+    }
+
+    function revealNameError() {
+      nameTouched = true;
+      return validateForm({ showError: true });
     }
 
     function cleanup(result) {
@@ -365,8 +371,15 @@ export async function showCharacterCreation(slotIndex) {
 
     overlay.querySelector('#btn-back').addEventListener('click', () => cleanup(null));
 
-    overlay.querySelector('#btn-enter').addEventListener('click', () => {
-      if (!validateForm({ showError: true })) return;
+    enterBtn.addEventListener('pointerenter', revealNameError);
+    enterBtn.addEventListener('focus', revealNameError);
+
+    enterBtn.addEventListener('click', () => {
+      if (!revealNameError()) {
+        nameInput.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        nameInput.focus({ preventScroll: true });
+        return;
+      }
       syncDraftFromForm();
       const character = createCharacter(
         nameInput.value,

@@ -5,6 +5,7 @@ import {
 } from '../lib/minigameKit.js';
 import { runSteadyAim } from './phaseAGames.js';
 import { runLandNav } from './phaseBGames.js';
+import { escapeHtml } from '../../../ui/html.js';
 
 export async function runHumpPrep(container, character) {
   return new Promise(resolve => {
@@ -217,6 +218,56 @@ export async function runFamilyDay(container, character) {
       resolve(buildActivityResult(0.9, ['leadership'], { narrative: true }));
     }, { once: true });
   });
+}
+
+/**
+ * Field-campaign narrative beat: the day's briefing told as a story.
+ * @param {HTMLElement} container
+ * @param {object} character
+ * @param {{ title?: string, briefing?: string, locationName?: string }} [dayMeta]
+ */
+export async function runMissionBriefing(container, character, dayMeta = {}) {
+  const story = (dayMeta.briefing ?? '').replace(/^Report to [^.]*\.\s*/, '')
+    || 'The unit gathers. Word comes down the line about what happens next.';
+  const readiness = character.campaign?.readiness ?? 0;
+  return new Promise(resolve => {
+    const overlay = document.createElement('div');
+    overlay.className = 'menu-overlay';
+    overlay.innerHTML = `
+      <div class="menu-panel schedule-panel">
+        <h2 class="menu-title">${escapeHtml(dayMeta.title ?? 'Mission Briefing')}</h2>
+        <p class="menu-subtitle">${escapeHtml(character.name)} — ${escapeHtml(dayMeta.locationName ?? 'Command Post')}</p>
+        <p class="recruiter-copy">${escapeHtml(story)}</p>
+        <p class="recruiter-copy">The Marines around you have been through it together. Unit readiness: ${readiness}%.</p>
+        <div class="schedule-actions">
+          <button type="button" class="btn btn-primary" id="briefing-ok">Carry On</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
+    overlay.querySelector('#briefing-ok').addEventListener('click', () => {
+      overlay.remove();
+      resolve(buildActivityResult(0.9, ['leadership'], { narrative: true }));
+    }, { once: true });
+  });
+}
+
+/** Field-campaign finale: honors formation, then the battle streamer goes on the colors. */
+export async function runCampaignHonors(container, character) {
+  const prompts = [
+    { label: 'PRESENT ARMS' },
+    { label: 'ORDER ARMS' },
+    { label: 'EYES RIGHT' },
+    { label: 'FORWARD MARCH' },
+    { label: 'HALT' },
+    { label: 'STREAMER CEREMONY' }
+  ];
+  const r = await runQTESequence(container, character, {
+    prompts,
+    statKeys: ['leadership'],
+    title: 'Honors Formation',
+    hint: 'Honors formation — then the battle streamer goes on the colors'
+  });
+  return buildActivityResult(Math.max(0.85, r.score), ['leadership'], r);
 }
 
 export async function runGraduationParade(container, character) {

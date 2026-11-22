@@ -35,7 +35,9 @@ function createDefaultMeta() {
     grit: 0,
     perks: {},
     runsCompleted: 0,
-    bestReadiness: 0
+    bestReadiness: 0,
+    /** Highest pay grade (E-1..E-5) earned in any run; deployments start at it. */
+    careerGrade: 1
   };
 }
 

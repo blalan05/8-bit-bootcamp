@@ -171,7 +171,7 @@ export const WWII_OPERATIONS = [
         title: 'Mail from Home',
         briefing: 'Report to the Command Tent. Letters from home hit different out here. Choose how you handle what arrives.',
         locationName: 'Command Tent',
-        activityId: 'writeLetter',
+        activityId: 'mailCall',
         stats: ['leadership', 'intelligence']
       },
       {
@@ -195,7 +195,7 @@ export const WWII_OPERATIONS = [
       {
         id: 'o6d1',
         title: 'Final Push',
-        briefing: 'Report to the Ridge. Final assault to clear the Japanese positions. Adjust for wind and qualify across three firing positions.',
+        briefing: 'Report to the Ridge. Final assault to clear the Japanese positions. Adjust for wind and engage from standing, kneeling, and prone.',
         locationName: 'Ridge',
         activityId: 'rifleQual',
         stats: ['dexterity', 'intelligence']
@@ -205,7 +205,7 @@ export const WWII_OPERATIONS = [
         title: 'Army Relief',
         briefing: 'Report to the Command Tent. Army units are arriving to relieve the division. Debrief with your officers on what you endured.',
         locationName: 'Command Tent',
-        activityId: 'familyDay',
+        activityId: 'missionBriefing',
         stats: ['leadership']
       },
       {
@@ -213,7 +213,7 @@ export const WWII_OPERATIONS = [
         title: 'Guadalcanal Honors',
         briefing: 'Report to Henderson Field. Formation on the airstrip. The division held Guadalcanal — new orders will come soon.',
         locationName: 'Henderson Field',
-        activityId: 'graduationParade',
+        activityId: 'campaignHonors',
         stats: ['leadership']
       }
     ]
@@ -379,7 +379,7 @@ export const WWII_OPERATIONS = [
       {
         id: 'o12d1',
         title: 'Final Clearing',
-        briefing: 'Report to Motoyama Airfield. Last Japanese holdouts on the island. Adjust for wind and qualify across three firing positions.',
+        briefing: 'Report to Motoyama Airfield. Last Japanese holdouts on the island. Adjust for wind and engage from standing, kneeling, and prone.',
         locationName: 'Motoyama Airfield',
         activityId: 'rifleQual',
         stats: ['dexterity', 'intelligence']
@@ -389,7 +389,7 @@ export const WWII_OPERATIONS = [
         title: 'After Action',
         briefing: 'Report to the Command Post. Officers debrief the battle. The flag on Suribachi is already an icon — tell them what it cost.',
         locationName: 'Command Post',
-        activityId: 'familyDay',
+        activityId: 'missionBriefing',
         stats: ['leadership']
       },
       {
@@ -397,7 +397,7 @@ export const WWII_OPERATIONS = [
         title: 'Pacific Victory',
         briefing: 'Report to Mt. Suribachi Summit. Formation below the flag. Guadalcanal to Iwo Jima — earn your campaign honors.',
         locationName: 'Mt. Suribachi Summit',
-        activityId: 'graduationParade',
+        activityId: 'campaignHonors',
         stats: ['leadership']
       }
     ]

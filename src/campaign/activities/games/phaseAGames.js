@@ -126,32 +126,53 @@ export async function runGearShed(container, character) {
   return buildActivityResult(r.score, ['dexterity', 'endurance'], r);
 }
 
+/** Seconds per teammate bob (bottom → top → bottom) */
+const LOG_BOB_SECONDS = 1.6;
+/** The team falls back into step every this many seconds, always at the top of a bob */
+const LOG_SYNC_SECONDS = LOG_BOB_SECONDS * 2;
+/** How far (radians) each teammate drifts out of step between syncs */
+const LOG_TEAM_DRIFT = [0, 1.1, -1.4, 2.0];
+
 export async function runLogTeamLift(container, character) {
   return new Promise(resolve => {
-    const ui = mountGame(container, { title: 'Log Team Lift', hint: 'Press <kbd>Space</kbd> when all markers align in the green zone' });
+    const ui = mountGame(container, { title: 'Log Team Lift', hint: 'Press <kbd>Space</kbd> when all four teammates are in the green zone together' });
     let lifts = 0;
     let hits = 0;
+    let lockedUntil = 0;
+    let elapsedSec = 0;
     const total = 8;
-    const markers = [0, 0, 0, 0];
-    const window = 15 + avgStatT(character, ['leadership']) * 10;
+    /** Fraction of lane height (from the top) that counts as "up" */
+    const zone = 0.25 + avgStatT(character, ['leadership']) * 0.12;
+    const heights = LOG_TEAM_DRIFT.map(() => 0);
 
-    ui.main.innerHTML = `<div class="mg-log-lane">${markers.map((_, i) =>
-      `<div class="mg-log-marker" id="m${i}"></div>`).join('')}</div><div class="mg-log-zone"></div>`;
+    ui.main.innerHTML = `
+      <div class="mg-log-lane" id="mg-log-lane">
+        <div class="mg-log-zone" id="mg-log-zone" style="height:${zone * 100}%"></div>
+        ${heights.map((_, i) => `<div class="mg-log-col"><div class="mg-log-marker" id="m${i}"></div></div>`).join('')}
+      </div>`;
+    const zoneEl = ui.main.querySelector('#mg-log-zone');
+    const markerEls = heights.map((_, i) => ui.main.querySelector(`#m${i}`));
+
+    const allUp = () => heights.every(h => h >= 1 - zone);
 
     const loop = createLoop({
-      onTick: () => {
-        markers.forEach((_, i) => {
-          markers[i] = (markers[i] + 2 + i * 0.3) % 100;
-          const el = ui.main.querySelector(`#m${i}`);
-          if (el) el.style.left = `${markers[i]}%`;
+      onTick: (_, elapsed) => {
+        elapsedSec = elapsed / 1000;
+        const bob = (elapsedSec / LOG_BOB_SECONDS) * Math.PI * 2;
+        const spread = Math.abs(Math.sin((elapsedSec / LOG_SYNC_SECONDS) * Math.PI));
+        LOG_TEAM_DRIFT.forEach((drift, i) => {
+          heights[i] = 0.5 + 0.5 * Math.cos(bob + drift * spread);
+          markerEls[i].style.bottom = `calc(${heights[i]} * (100% - 20px))`;
         });
+        zoneEl.classList.toggle('mg-log-zone--ready', allUp());
       }
     });
 
     const unbind = bindKeys(['Space'], () => {
-      const aligned = markers.every(m => m > 40 && m < 40 + window);
+      if (elapsedSec < lockedUntil) return;
+      lockedUntil = elapsedSec + 0.4;
       lifts++;
-      if (aligned) { hits++; flashResult(ui, 'hit'); } else flashResult(ui, 'miss');
+      if (allUp()) { hits++; flashResult(ui, 'hit', 'HEAVE!'); } else flashResult(ui, 'miss', 'OUT OF STEP');
       setProgress(ui, lifts, total);
       if (lifts >= total) {
         loop.stop();

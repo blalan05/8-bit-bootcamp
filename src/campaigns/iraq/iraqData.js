@@ -192,7 +192,7 @@ export const IRAQ_OPERATIONS = [
       {
         id: 'i6d3',
         title: 'Overwatch the Advance',
-        briefing: 'Report to the Rooftop OP. Adjust for wind and qualify across three firing positions.',
+        briefing: 'Report to the Rooftop OP. Adjust for wind and engage from standing, kneeling, and prone.',
         locationName: 'Rooftop OP',
         activityId: 'rifleQual',
         stats: ['dexterity', 'intelligence']
@@ -334,7 +334,7 @@ export const IRAQ_OPERATIONS = [
       {
         id: 'i11d1',
         title: 'Final Clearance',
-        briefing: 'Report to the Grand Mosque. Final push to clear the city. Adjust for wind and qualify across three positions.',
+        briefing: 'Report to the Grand Mosque. Final push to clear the city. Adjust for wind and engage from standing, kneeling, and prone.',
         locationName: 'Grand Mosque',
         activityId: 'rifleQual',
         stats: ['dexterity', 'intelligence']
@@ -344,7 +344,7 @@ export const IRAQ_OPERATIONS = [
         title: 'After Action',
         briefing: 'Report to the Command Post. Officers debrief the battle for Fallujah. Tell them what Phantom Fury cost.',
         locationName: 'Command Post',
-        activityId: 'familyDay',
+        activityId: 'missionBriefing',
         stats: ['leadership']
       },
       {
@@ -352,7 +352,7 @@ export const IRAQ_OPERATIONS = [
         title: 'Campaign Honors',
         briefing: 'Report to Phase Line Fran. Formation at the phase line. Baghdad to Fallujah — earn your campaign honors.',
         locationName: 'Phase Line Fran',
-        activityId: 'graduationParade',
+        activityId: 'campaignHonors',
         stats: ['leadership']
       }
     ]

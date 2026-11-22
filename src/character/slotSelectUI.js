@@ -3,6 +3,7 @@ import { getBackgroundById } from './createCharacter.js';
 import { getMeta } from '../campaign/metaProgress.js';
 import { showLocker } from '../campaign/lockerUI.js';
 import { getCampaignForCharacter } from '../campaigns/campaignRegistry.js';
+import { rankedName } from '../campaign/rank.js';
 
 function createConfirmDialog(message, { confirmLabel = 'Confirm', cancelLabel = 'Cancel' } = {}) {
   return new Promise(resolve => {
@@ -129,7 +130,7 @@ export function showSlotSelect() {
           <div class="slot-row${selected}">
             <button type="button" class="slot-card slot-card--filled" data-slot="${i}" role="option">
               <span class="slot-label">Slot ${i + 1} ${modeBadge(char)} ${campaignBadge(char)}</span>
-              <span class="slot-name">${char.name}</span>
+              <span class="slot-name">${rankedName(char)}</span>
               <span class="slot-meta">${progress} · ${bg.name}</span>
             </button>
             <button type="button" class="btn btn-danger slot-reset-btn" data-slot="${i}" aria-label="Reset save slot ${i + 1}">Reset</button>

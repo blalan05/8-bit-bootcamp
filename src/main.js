@@ -4,12 +4,13 @@ import { installErrorListener, setPlayContext } from './telemetry.js';
 
 installErrorListener();
 registerSW({ immediate: true });
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import Stats from 'three/addons/libs/stats.module.js';
 import mapsConfig from './maps/maps.json';
 import { TileLoader } from './maps/tileLoader.js';
 import { getTileKeyAtPosition } from './maps/mapParser.js';
 import { Player } from './playerCharacter/player.js';
+import { CameraRig } from './playerCharacter/cameraRig.js';
+import { QuestIndicator } from './ui/questIndicator.js';
 import { showSlotSelect } from './character/slotSelectUI.js';
 import { showCharacterCreation } from './character/characterCreationUI.js';
 import { showRecruiterVisit } from './recruiter/recruiterVisitUI.js';
@@ -41,7 +42,8 @@ const SHOW_PERF_STATS = new URLSearchParams(location.search).has('debug');
 let renderer;
 let scene;
 let camera;
-let controls;
+let cameraRig;
+let questIndicator;
 let player;
 let tileLoader;
 let recruitHUD;
@@ -54,7 +56,48 @@ let gameMenu;
 const clock = new THREE.Clock();
 let sessionEndCallback = null;
 
+/**
+ * Dev only: `?play=<activityId>` loops one mini-game with a throwaway recruit and no saves.
+ * Add `&campaign=<id>` to play it as that campaign's first day using the activity, and
+ * `&rank=<pvt|pfc|lcpl|cpl|sgt>` to try rank perks.
+ */
+async function playActivityDirect(activityId, campaignId, rankId) {
+  const [{ createDraftCharacter, createCharacter, getAllBackgrounds }, { runActivity }, { getActivity }, { getCampaignWeeks }] = await Promise.all([
+    import('./character/createCharacter.js'),
+    import('./campaign/runActivity.js'),
+    import('./campaign/activityRegistry.js'),
+    import('./campaigns/campaignRegistry.js')
+  ]);
+  if (!getActivity(activityId)) {
+    document.body.insertAdjacentHTML('beforeend', `<p class="recruiter-copy" style="padding:24px">Unknown activity "${activityId}".</p>`);
+    return;
+  }
+  const draft = createDraftCharacter(getAllBackgrounds()[0].id);
+  const recruit = createCharacter('Dev Recruit', draft.backgroundId, draft.appearance, 0, draft.coreStats, {
+    mode: 'sandbox',
+    difficulty: 'story',
+    perkStat: null
+  });
+  let dayMeta = {};
+  if (rankId) {
+    recruit.mode = 'campaign';
+    recruit.campaign = { ...recruit.campaign, rankId };
+  }
+  if (campaignId) {
+    recruit.campaign = { ...recruit.campaign, campaignId };
+    const day = getCampaignWeeks(recruit).flatMap(w => w.days ?? []).find(d => d.activityId === activityId);
+    if (day) dayMeta = { title: day.title, briefing: day.briefing, locationName: day.locationName, stats: day.stats };
+  }
+  while (true) {
+    await runActivity(recruit, activityId, { ...dayMeta, dayId: `dev-${activityId}` });
+  }
+}
+
 async function boot() {
+  const params = import.meta.env.DEV ? new URLSearchParams(location.search) : null;
+  const devActivity = params?.get('play');
+  if (devActivity) return playActivityDirect(devActivity, params.get('campaign'), params.get('rank'));
+
   while (true) {
     const result = await showSlotSelect();
 
@@ -121,8 +164,10 @@ function endGameSession() {
   player = null;
 
   tileLoader = null;
-  controls?.dispose();
-  controls = null;
+  cameraRig?.dispose();
+  cameraRig = null;
+  questIndicator?.dispose();
+  questIndicator = null;
 
   recruitHUD?.element?.remove();
   recruitHUD = null;
@@ -179,8 +224,6 @@ function startGame(character) {
 
   camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 200);
   fitFrustum();
-  controls = new OrbitControls(camera, renderer.domElement);
-  controls.enableRotate = false;
 
   const sun = new THREE.DirectionalLight();
   sun.intensity = 3;
@@ -231,6 +274,9 @@ function startGame(character) {
     const centerX = newBounds.width / 2;
     const centerZ = newBounds.height / 2;
     player.position.set(centerX, 0, centerZ);
+    player.target = null;
+    cameraRig?.setBounds(newBounds);
+    cameraRig?.snapTo(centerX, centerZ);
     tileLoader.setMap(newMapName);
     scene.background = new THREE.Color(getMapBackground(newMapName));
     hydrationSystem?.updateBounds?.(newBounds);
@@ -289,9 +335,28 @@ function startGame(character) {
 
   const horizontal = 40;
   const offset = horizontal * Math.SQRT1_2;
-  controls.target.set(startX, 0, startZ);
   camera.position.set(startX + offset, horizontal * Math.tan(ISO_PITCH), startZ + offset);
-  controls.update();
+
+  const worldInputReady = () => player.inputEnabled && !player.paused
+    && !gameController.busy && !gameController.runEnded
+    && !document.querySelector('.menu-overlay');
+
+  cameraRig = new CameraRig({
+    camera,
+    domElement: renderer.domElement,
+    player,
+    bounds,
+    canControl: worldInputReady
+  });
+  cameraRig.update(0);
+
+  questIndicator = new QuestIndicator({
+    camera,
+    player,
+    getParsedMap: () => tileLoader.getParsedMap(),
+    getObjective: () => (gameController.awaitingProximity ? gameController.currentDayDef : null),
+    canShow: worldInputReady
+  });
 
   renderer.setAnimationLoop(animate);
   window.addEventListener('resize', onResize);
@@ -304,7 +369,8 @@ function animate() {
   gameController?.updateProximity();
   tileLoader.update();
   exploration?.update();
-  controls.update();
+  cameraRig.update(dt);
+  questIndicator.update();
   perfStats?.update();
 
   const parsedMap = tileLoader.getParsedMap();

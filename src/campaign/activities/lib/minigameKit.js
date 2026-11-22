@@ -100,12 +100,44 @@ export function bindKeys(codes, handler) {
   };
 }
 
+/** @type {string | null} */
+let titleOverride = null;
+
+/**
+ * Show this title on every mini-game shell until cleared. Field campaigns reuse depot
+ * mini-games, so they show the mission name instead of e.g. "Pugil Duel".
+ * @param {string | null} title
+ */
+export function setGameTitleOverride(title) {
+  titleOverride = title || null;
+}
+
+/** @type {{ intel: string | null }} */
+let assist = { intel: null };
+
+/**
+ * Turn on rank intel (the Lance Corporal Underground) for kit games until cleared:
+ * a struck-out wrong answer, the first correct step marked, and longer press windows.
+ * @param {string | null} intelName label shown in game, e.g. "Scuttlebutt"; null turns it off
+ */
+export function setGameAssist(intelName) {
+  assist = { intel: intelName || null };
+}
+
+/** Press windows run this much longer with intel. */
+const INTEL_WINDOW_BONUS = 1.2;
+
+function appendIntel(ui, text) {
+  if (!assist.intel) return;
+  ui.hint.insertAdjacentHTML('beforeend', `<div class="mg-hint-intel">${assist.intel}: ${text}</div>`);
+}
+
 /** Build standard mini-game DOM shell. Opens the touch pad (touch devices only) until dispose. */
 export function mountGame(container, { title = '', hint = '' } = {}) {
   const closePad = openTouchPad(container);
   container.innerHTML = `
     <div class="mg-scene">
-      <div class="mg-title" id="mg-title">${title}</div>
+      <div class="mg-title" id="mg-title">${titleOverride ?? title}</div>
       <div class="mg-main" id="mg-main"></div>
       <div class="mg-hud">
         <span id="mg-progress"></span>
@@ -323,7 +355,8 @@ export function runQTESequence(container, character, {
   return new Promise(resolve => {
     const ui = mountGame(container, { title, hint });
     appendRule(ui);
-    const windowMs = windowMsFor(character, statKeys, ...windowRange);
+    appendIntel(ui, 'word is they call this one slow. Extra time on every command.');
+    const windowMs = Math.round(windowMsFor(character, statKeys, ...windowRange) * (assist.intel ? INTEL_WINDOW_BONUS : 1));
     const codes = [...new Set(steps.map(s => s.code))];
     let index = 0;
     let hits = 0;
@@ -453,7 +486,8 @@ export function runWatchRounds(container, character, {
   return new Promise(resolve => {
     const ui = mountGame(container, { title, hint });
     appendRule(ui, 'STAND BY = do not press yet · act only when the key lights · hold when it says HOLD');
-    const windowMs = windowMsFor(character, statKeys, ...windowRange);
+    appendIntel(ui, 'word is they call this one slow. Extra time to react.');
+    const windowMs = Math.round(windowMsFor(character, statKeys, ...windowRange) * (assist.intel ? INTEL_WINDOW_BONUS : 1));
     const codes = [...new Set(stimuli.map(s => s.code).filter(Boolean))];
     const totalWeight = stimuli.reduce((a, s) => a + s.weight, 0);
     let rounds = 0;
@@ -548,10 +582,12 @@ export function runClickSequence(container, { items, correctOrder, timeMs, title
     const status = ui.main.ownerDocument.createElement('div');
     status.className = 'mg-seq-status';
 
-    ui.main.innerHTML = `<div class="mg-seq-btns">${shuffled.map((item, i) =>
-      `<button type="button" class="btn btn-secondary mg-seq-btn" data-i="${i}">${item}</button>`
-    ).join('')}</div>`;
+    ui.main.innerHTML = `<div class="mg-seq-btns">${shuffled.map((item, i) => {
+      const tip = assist.intel && item === correctOrder[0] ? ' mg-seq-btn--intel' : '';
+      return `<button type="button" class="btn btn-secondary mg-seq-btn${tip}" data-i="${i}">${item}</button>`;
+    }).join('')}</div>`;
     ui.main.prepend(status);
+    appendIntel(ui, 'the first step is marked.');
 
     const updateStatus = () => {
       status.textContent = started
@@ -769,6 +805,7 @@ export function runInspectionBoard(container, character, {
 export function runChoiceRounds(container, { rounds, title, hint }) {
   return new Promise(resolve => {
     const ui = mountGame(container, { title, hint });
+    appendIntel(ui, 'one wrong answer is struck out each round.');
     let index = 0;
     let correct = 0;
 
@@ -780,16 +817,21 @@ export function runChoiceRounds(container, { rounds, title, hint }) {
       }
       const r = rounds[index];
       const choices = [...r.choices].sort(() => Math.random() - 0.5);
+      const wrong = r.choices.map((_, i) => i).filter(i => i !== r.answer);
+      const struck = assist.intel && wrong.length > 1 ? wrong[Math.floor(Math.random() * wrong.length)] : -1;
       ui.main.innerHTML = `
         <div class="mg-prompt">${r.prompt}</div>
-        <div class="mg-choices">${choices.map((c, i) =>
-          `<button type="button" class="btn btn-secondary mg-choice" data-i="${r.choices.indexOf(c)}">${c}</button>`
-        ).join('')}</div>`;
+        <div class="mg-choices">${choices.map(c => {
+          const i = r.choices.indexOf(c);
+          return i === struck
+            ? `<button type="button" class="btn btn-secondary mg-choice mg-choice--struck" disabled>${c}</button>`
+            : `<button type="button" class="btn btn-secondary mg-choice" data-i="${i}">${c}</button>`;
+        }).join('')}</div>`;
       setProgress(ui, index + 1, rounds.length);
 
       ui.main.onclick = (e) => {
         const btn = e.target.closest('.mg-choice');
-        if (!btn) return;
+        if (!btn || btn.disabled) return;
         ui.main.onclick = null;
         if (Number(btn.dataset.i) === r.answer) correct++;
         index++;

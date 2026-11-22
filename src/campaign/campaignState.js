@@ -35,6 +35,8 @@ export function createInitialCampaign(overrides = {}) {
     explored: {},
     /** Side quest choices made: { [questId]: { choice: string, response?: string } } */
     lessons: {},
+    /** One-time tutorial briefings already shown: { [key]: true } */
+    briefed: {},
     ...overrides
   };
 }
@@ -55,7 +57,20 @@ export function ensureCampaign(character) {
       sideQuests: { ...campaign.sideQuests },
       itUsed: { ...campaign.itUsed },
       explored: { ...campaign.explored },
-      lessons: { ...campaign.lessons }
+      lessons: { ...campaign.lessons },
+      briefed: { ...campaign.briefed }
+    }
+  };
+}
+
+/** Record that a one-time briefing was shown so it never repeats on this save. */
+export function markBriefed(character, key) {
+  const characterWithCampaign = ensureCampaign(character);
+  return {
+    ...characterWithCampaign,
+    campaign: {
+      ...characterWithCampaign.campaign,
+      briefed: { ...characterWithCampaign.campaign.briefed, [key]: true }
     }
   };
 }
@@ -179,7 +194,7 @@ export function applyActivityResult(character, dayId, result) {
   campaign.readiness = Math.min(100, campaign.readiness + readinessDelta);
   campaign.completed = {
     ...campaign.completed,
-    [dayId]: { grade: result.grade, score: result.score }
+    [dayId]: { grade: result.grade, score: result.score, ...(result.via ? { via: result.via } : {}) }
   };
 
   const statDeltas = {};

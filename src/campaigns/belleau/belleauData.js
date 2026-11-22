@@ -142,7 +142,7 @@ export const BELLEAU_OPERATIONS = [
       {
         id: 'b5d1',
         title: 'Final Assault',
-        briefing: 'Report to Lucy-le-Bocage. Final push to clear the wood. Qualify across three positions.',
+        briefing: 'Report to Lucy-le-Bocage. Final push to clear the wood. Engage from standing, kneeling, and prone.',
         locationName: 'Lucy-le-Bocage',
         activityId: 'rifleQual',
         stats: ['dexterity', 'intelligence']
@@ -160,7 +160,7 @@ export const BELLEAU_OPERATIONS = [
         title: 'Campaign Honors',
         briefing: 'Report to The Wheat Field. Formation in the field. Teufel Hunden — earn your expedition honors.',
         locationName: 'The Wheat Field',
-        activityId: 'graduationParade',
+        activityId: 'campaignHonors',
         stats: ['leadership']
       }
     ]

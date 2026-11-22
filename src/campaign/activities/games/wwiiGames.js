@@ -17,7 +17,7 @@ export async function runShipOut(container, character) {
     prompts: SHIP_OUT_COMMANDS,
     statKeys: ['leadership', 'intelligence'],
     title: 'Ship Out',
-    hint: 'Execute every command before the Higgins boats launch'
+    hint: 'Execute every command before the unit moves out'
   });
   return buildActivityResult(r.score, ['leadership', 'intelligence'], r);
 }
@@ -174,7 +174,7 @@ export async function runNightWatch(container, character) {
 const SUPPLY_RUN_STEPS = [
   'Ammo crates',
   'Water cans',
-  'K-rations',
+  'Rations',
   'Medical kit',
   'Bandoliers',
   'Mortar rounds'

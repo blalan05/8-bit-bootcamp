@@ -4,10 +4,11 @@ import {
   isIronman,
   isSandbox,
   setHydration,
-  applyHeatExhaustionPenalty
+  applyHeatExhaustionPenalty,
+  markBriefed
 } from './campaignState.js';
 import { getHydrationDrainMultiplier } from './metaProgress.js';
-import { showHeatExhaustion } from './scheduleUI.js';
+import { showHeatExhaustion, showSurvivalBriefing } from './scheduleUI.js';
 import { getCampaignClimate } from '../campaigns/campaignRegistry.js';
 
 const DRAIN_SECONDS = 240;
@@ -16,18 +17,51 @@ const PICKUPS_PER_DAY = 3;
 const REFILL_AMOUNT = 40;
 const ENDURANCE_ACTIVITY_PENALTY = 15;
 
+/** USGI 1-quart canteen: OD green body, ridged screw cap, keeper strap, embossed lettering. */
+const CANTEEN_PIXELS = [
+  '......oooo......',
+  '.....oCcCco.....',
+  '.....oCcCco.....',
+  '..sssoooooo.....',
+  '.s..oHBBBBSo....',
+  '.s.oHBBBBBBSo...',
+  '..oHBBBBBBBBSo..',
+  '..oHBeeeeeBBSo..',
+  '..oHBBBBBBBBSo..',
+  '..oHBeeeeBBBSo..',
+  '..oHBBBBBBBBSo..',
+  '..oHBBBBBBBBSo..',
+  '..oHBBBBBBBSSo..',
+  '..oBBBBBBBBSSo..',
+  '...oSBBBBBSSo...',
+  '....oooooooo....'
+];
+const CANTEEN_COLORS = {
+  o: '#232a1a',
+  C: '#3f4a30',
+  c: '#6b7856',
+  s: '#56633f',
+  B: '#66734c',
+  H: '#84926a',
+  S: '#4a5536',
+  e: '#76845a'
+};
+
 function createCanteenTexture() {
   const canvas = document.createElement('canvas');
   canvas.width = 16;
   canvas.height = 16;
   const ctx = canvas.getContext('2d');
-  ctx.fillStyle = '#3d6b8a';
-  ctx.fillRect(4, 2, 8, 12);
-  ctx.fillStyle = '#6db8e8';
-  ctx.fillRect(5, 4, 6, 8);
-  ctx.fillStyle = '#8b6914';
-  ctx.fillRect(6, 0, 4, 3);
+  CANTEEN_PIXELS.forEach((row, y) => {
+    [...row].forEach((ch, x) => {
+      const color = CANTEEN_COLORS[ch];
+      if (!color) return;
+      ctx.fillStyle = color;
+      ctx.fillRect(x, y, 1, 1);
+    });
+  });
   const tex = new THREE.CanvasTexture(canvas);
+  tex.colorSpace = THREE.SRGBColorSpace;
   tex.magFilter = THREE.NearestFilter;
   tex.minFilter = THREE.NearestFilter;
   return tex;
@@ -199,6 +233,23 @@ export class HydrationSystem {
   onNewDay() {
     if (!this.isActive) return;
     this.spawnPickups();
+  }
+
+  /** First patrol with this pickup type on this save: explain the meter and how to refill it. */
+  async showBriefingIfNeeded() {
+    if (!this.isActive) return;
+    const key = `survival_${this.climate.pickupStyle}`;
+    if (this.character.campaign.briefed?.[key]) return;
+
+    await showSurvivalBriefing(this.character, {
+      iconUrl: this.getPickupTexture().image.toDataURL(),
+      refill: REFILL_AMOUNT,
+      perDay: PICKUPS_PER_DAY,
+      ironman: isIronman(this.character)
+    });
+    const updated = markBriefed(this.character, key);
+    this.character = updated;
+    this.onCharacterUpdate(updated);
   }
 
   /** Extra drain after endurance-tagged activities. */

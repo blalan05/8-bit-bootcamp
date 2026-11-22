@@ -4,6 +4,7 @@ import {
   windowMsFor, runQTESequence, runClickSequence, runChoiceRounds, runInspectionBoard, declarePadKeys, touchCopy,
   PREP_MS, RESULT_PAUSE_MS
 } from '../lib/minigameKit.js';
+import { isFieldCampaign } from '../../../campaigns/campaignRegistry.js';
 
 const DRESS_MIN_MS = 2200;
 
@@ -249,8 +250,32 @@ const LETTER_ROUNDS = [
   }
 ];
 
+/** Letters from a deployment: OPSEC and honesty instead of boot camp and the D.I. */
+const FIELD_LETTER_ROUNDS = [
+  {
+    prompt: 'How do you tell them where you are?',
+    choices: ['Somewhere far from home. No names, no places.', 'Name the unit, the town, and where you move next.', 'Sketch them a map so they can follow along.'],
+    answer: 0
+  },
+  {
+    prompt: 'What do you tell them about the fighting?',
+    choices: ['It\'s hard, but the Marines around you are the best people you know.', 'Every detail of the last fight and who didn\'t make it.', 'Nothing. Tell them it\'s a vacation.'],
+    answer: 0
+  },
+  {
+    prompt: 'How do you close?',
+    choices: ['Love you. I\'ll write again as soon as I can.', 'Don\'t expect me back.', 'Sign off without a word about home.'],
+    answer: 0
+  }
+];
+
 export async function runWriteLetter(container, character) {
-  const r = await runChoiceRounds(container, { rounds: LETTER_ROUNDS, title: 'Letter Home', hint: 'Compose your first letter — tone matters' });
+  const field = isFieldCampaign(character);
+  const r = await runChoiceRounds(container, {
+    rounds: field ? FIELD_LETTER_ROUNDS : LETTER_ROUNDS,
+    title: 'Letter Home',
+    hint: field ? 'Write home — tone matters, and loose lips sink ships' : 'Compose your first letter — tone matters'
+  });
   return buildActivityResult(Math.max(0.6, r.score), ['intelligence'], r);
 }
 
@@ -272,8 +297,32 @@ const MAIL_ROUNDS = [
   }
 ];
 
+/** Mail reaching a unit in the field. */
+const FIELD_MAIL_ROUNDS = [
+  {
+    prompt: 'A parcel from home arrives. Your fire team is watching.',
+    choices: ['Split it with the fire team.', 'Stash it in your pack and eat alone.', 'Leave it behind. No room to carry it.'],
+    answer: 0
+  },
+  {
+    prompt: 'A letter says things at home are falling apart.',
+    choices: ['Read it, put it away, and talk to your squad leader tonight.', 'Stop eating and sleeping over it.', 'Read it aloud to the whole line.'],
+    answer: 0
+  },
+  {
+    prompt: 'One Marine in your squad got no mail at all.',
+    choices: ['Share yours and read him the funny parts.', 'Wave your letters around.', 'Not your problem.'],
+    answer: 0
+  }
+];
+
 export async function runMailCall(container, character) {
-  const r = await runChoiceRounds(container, { rounds: MAIL_ROUNDS, title: 'Mail Call', hint: 'Packages and letters after the Crucible' });
+  const field = isFieldCampaign(character);
+  const r = await runChoiceRounds(container, {
+    rounds: field ? FIELD_MAIL_ROUNDS : MAIL_ROUNDS,
+    title: 'Mail Call',
+    hint: field ? 'Word from home — handle what arrives like a Marine' : 'Packages and letters after the Crucible'
+  });
   return buildActivityResult(Math.max(0.65, r.score), ['leadership'], r);
 }
 
@@ -376,8 +425,12 @@ const IT_COMMANDS = [
 ];
 
 export async function runIncentiveTraining(container, character) {
+  const field = isFieldCampaign(character);
   return new Promise(resolve => {
-    const ui = mountGame(container, { title: 'Incentive Training', hint: 'Quarterdeck — keep pace in the red zone' });
+    const ui = mountGame(container, {
+      title: field ? 'Remedial PT' : 'Incentive Training',
+      hint: field ? 'Squad leader\'s orders — keep pace in the red zone' : 'Quarterdeck — keep pace in the red zone'
+    });
     let cmd = 0;
     let pace = 50;
     let hits = 0;

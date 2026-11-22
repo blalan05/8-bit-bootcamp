@@ -160,7 +160,7 @@ export const SOMALIA_OPERATIONS = [
         title: 'Expedition Honors',
         briefing: 'Report to Green Ramp. Formation on the ramp. Restore Hope — earn your expedition honors.',
         locationName: 'Green Ramp',
-        activityId: 'graduationParade',
+        activityId: 'campaignHonors',
         stats: ['leadership']
       }
     ]

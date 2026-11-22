@@ -90,7 +90,7 @@ export const TRIPOLI_OPERATIONS = [
         title: 'Share the Rations',
         briefing: 'Report to the Supply Cache. Issue gear in the correct order before the column moves again.',
         locationName: 'Supply Cache',
-        activityId: 'gearShed',
+        activityId: 'supplyRun',
         stats: ['intelligence']
       },
       {
@@ -132,7 +132,7 @@ export const TRIPOLI_OPERATIONS = [
         title: 'Eaton\'s Resolve',
         briefing: 'Report to Command Tent. General Eaton addresses the column — five hundred miles and the fortress awaits.',
         locationName: 'Command Tent',
-        activityId: 'familyDay',
+        activityId: 'missionBriefing',
         stats: ['leadership']
       }
     ],
@@ -218,7 +218,7 @@ export const TRIPOLI_OPERATIONS = [
       {
         id: 't7d2',
         title: 'Hold the Ramparts',
-        briefing: 'Report to Ramparts. Adjust for wind and qualify across three firing positions.',
+        briefing: 'Report to Ramparts. Adjust for wind and engage from standing, kneeling, and prone.',
         locationName: 'Ramparts',
         activityId: 'rifleQual',
         stats: ['dexterity', 'intelligence']
@@ -313,7 +313,7 @@ export const TRIPOLI_OPERATIONS = [
         title: 'Ration the Garrison',
         briefing: 'Report to Command Tent. Issue gear in the correct order — every ration counts.',
         locationName: 'Command Tent',
-        activityId: 'gearShed',
+        activityId: 'supplyRun',
         stats: ['intelligence']
       },
       {
@@ -334,7 +334,7 @@ export const TRIPOLI_OPERATIONS = [
       {
         id: 't11d1',
         title: 'Final Defense',
-        briefing: 'Report to Flag Bastion. Final push to hold Derne. Adjust for wind and qualify across three positions.',
+        briefing: 'Report to Flag Bastion. Final push to hold Derne. Adjust for wind and engage from standing, kneeling, and prone.',
         locationName: 'Flag Bastion',
         activityId: 'rifleQual',
         stats: ['dexterity', 'intelligence']
@@ -352,7 +352,7 @@ export const TRIPOLI_OPERATIONS = [
         title: 'Campaign Honors',
         briefing: 'Report to Governor\'s Palace. Formation in the courtyard. Alexandria to Derne — earn your campaign honors.',
         locationName: 'Governor\'s Palace',
-        activityId: 'graduationParade',
+        activityId: 'campaignHonors',
         stats: ['leadership']
       }
     ]

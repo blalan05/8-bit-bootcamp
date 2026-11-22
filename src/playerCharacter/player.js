@@ -6,6 +6,8 @@ import { ISO_YAW } from '../art/assetLoader.js';
 /** Base world units per second at average dexterity (10) */
 const BASE_WALK_SPEED = 14;/** Stop moving when within this distance of the target */
 const ARRIVAL_THRESHOLD = 0.05;
+/** Pointer travel (CSS px) beyond which a press counts as a pan drag, not a walk click */
+const TAP_SLOP = 8;
 
 export class Player extends THREE.Group {
   raycaster = new THREE.Raycaster();
@@ -27,9 +29,15 @@ export class Player extends THREE.Group {
     this.inputEnabled = true;
     /** Set while an in-game menu (map, journal, sheet) is open; independent of inputEnabled. */
     this.paused = false;
+    /** Bumped on every walkTo so the camera can tell a new walk order apart from an ongoing one. */
+    this.walkOrder = 0;
+    /** @type {{ id: number, x: number, y: number } | null} */
+    this._press = null;
 
-    this._onMouseDown = this.onMouseDown.bind(this);
-    window.addEventListener('mousedown', this._onMouseDown);
+    this._onPointerDown = this.onPointerDown.bind(this);
+    this._onPointerUp = this.onPointerUp.bind(this);
+    window.addEventListener('pointerdown', this._onPointerDown);
+    window.addEventListener('pointerup', this._onPointerUp);
   }
 
   updateAppearance() {
@@ -73,10 +81,24 @@ export class Player extends THREE.Group {
     const clampedX = Math.max(0, Math.min(this.bounds.width, x));
     const clampedZ = Math.max(0, Math.min(this.bounds.height, z));
     this.target = new THREE.Vector3(clampedX, 0, clampedZ);
+    this.walkOrder++;
   }
 
-  onMouseDown(event) {
-    if (!this.inputEnabled || this.paused || event.button !== 0) return;
+  onPointerDown(event) {
+    if (!event.isPrimary || event.button !== 0 || !event.target?.closest?.('.game-canvas')) {
+      this._press = null;
+      return;
+    }
+    this._press = { id: event.pointerId, x: event.clientX, y: event.clientY };
+  }
+
+  /** A press that ends near where it started is a walk order; anything longer was a pan drag. */
+  onPointerUp(event) {
+    const press = this._press;
+    this._press = null;
+    if (!press || press.id !== event.pointerId) return;
+    if (!this.inputEnabled || this.paused) return;
+    if (Math.hypot(event.clientX - press.x, event.clientY - press.y) > TAP_SLOP) return;
 
     const coords = new THREE.Vector2(
       (event.clientX / window.innerWidth) * 2 - 1,
@@ -93,6 +115,7 @@ export class Player extends THREE.Group {
   }
 
   dispose() {
-    window.removeEventListener('mousedown', this._onMouseDown);
+    window.removeEventListener('pointerdown', this._onPointerDown);
+    window.removeEventListener('pointerup', this._onPointerUp);
   }
 }

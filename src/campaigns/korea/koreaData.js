@@ -124,7 +124,7 @@ export const KOREA_OPERATIONS = [
       {
         id: 'k4d3',
         title: 'Rooftop Marksman',
-        briefing: 'Report to Seoul Streets. North Korean snipers on the rooftops. Adjust for wind and qualify across three positions.',
+        briefing: 'Report to Seoul Streets. North Korean snipers on the rooftops. Adjust for wind and engage from standing, kneeling, and prone.',
         locationName: 'Seoul Streets',
         activityId: 'rifleQual',
         stats: ['dexterity', 'intelligence']
@@ -144,7 +144,7 @@ export const KOREA_OPERATIONS = [
         title: 'Mail from Home',
         briefing: 'Report to the Command Post. Letters from home before the march north. Choose how you handle what arrives.',
         locationName: 'Command Post',
-        activityId: 'writeLetter',
+        activityId: 'mailCall',
         stats: ['leadership', 'intelligence']
       },
       {
@@ -160,7 +160,7 @@ export const KOREA_OPERATIONS = [
         title: 'First Snow',
         briefing: 'Report to the Command Post. Officers brief the division on what waits at the Chosin Reservoir. Winter is coming.',
         locationName: 'Command Post',
-        activityId: 'familyDay',
+        activityId: 'missionBriefing',
         stats: ['leadership']
       }
     ]
@@ -319,7 +319,7 @@ export const KOREA_OPERATIONS = [
       {
         id: 'k10d3',
         title: 'Final Ridge Fight',
-        briefing: 'Report to Fox Hill. Last ridge before Hungnam. Adjust for wind and qualify across three firing positions.',
+        briefing: 'Report to Fox Hill. Last ridge before Hungnam. Adjust for wind and engage from standing, kneeling, and prone.',
         locationName: 'Fox Hill',
         activityId: 'rifleQual',
         stats: ['dexterity', 'intelligence']
@@ -344,7 +344,7 @@ export const KOREA_OPERATIONS = [
         title: 'After Action',
         briefing: 'Report to the Command Post. Officers debrief the breakout. Tell them what the Chosin cost.',
         locationName: 'Command Post',
-        activityId: 'familyDay',
+        activityId: 'missionBriefing',
         stats: ['leadership']
       },
       {
@@ -352,7 +352,7 @@ export const KOREA_OPERATIONS = [
         title: 'Campaign Honors',
         briefing: 'Report to Hungnam Docks. Formation on the pier. Inchon to Chosin — earn your campaign honors.',
         locationName: 'Hungnam Docks',
-        activityId: 'graduationParade',
+        activityId: 'campaignHonors',
         stats: ['leadership']
       }
     ]

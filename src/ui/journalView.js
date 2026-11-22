@@ -16,7 +16,8 @@ function renderOrders(character, objective) {
   }
   if (isGraduated(character)) {
     const campaign = getCampaignForCharacter(character);
-    return `<p class="recruiter-copy">${escapeHtml(campaign.completion?.title ?? 'Campaign')} complete. You earned the title <strong>${escapeHtml(character.honorsTitle ?? 'Marine')}</strong>.</p>`;
+    const earned = campaign.usesRecruiter === false ? 'Campaign honors:' : 'You earned the title';
+    return `<p class="recruiter-copy">${escapeHtml(campaign.completion?.title ?? 'Campaign')} complete. ${earned} <strong>${escapeHtml(character.honorsTitle ?? 'Marine')}</strong>.</p>`;
   }
   if (!objective) {
     return '<p class="recruiter-copy recruiter-copy--small">Stand by for orders.</p>';

@@ -13,7 +13,7 @@ import {
 import {
   runHumpPrep, runReactionCourse, runCrucibleDay, runCrucibleNight,
   runReaperHike, runWarriorBreakfast, runGearTurnIn, runFinalDrill,
-  runBilletBoard, runFamilyDay, runGraduationParade
+  runBilletBoard, runFamilyDay, runGraduationParade, runMissionBriefing, runCampaignHonors
 } from './activities/games/phaseCGames.js';
 import {
   runYellowFootprints, runProcessing, runBlackFriday
@@ -42,6 +42,11 @@ import {
 import {
   runGasAlarm, runJungleAmbush, runCrowdControl
 } from './activities/games/expeditionGames.js';
+import { runFireteamOrders, runSquadOrders } from './activities/games/leadershipGames.js';
+import {
+  runPointMan, runSentryPost, runCarryWounded, runNewGuy, runRunner, runActingTeamLeader,
+  runSectorsOfFire, runBoundingOverwatch, runHeadCount, runSquadAttack, runSetDefense, runBriefTheSquad
+} from './activities/games/rankDutyGames.js';
 
 /** @type {Record<string, { title: string, subtitle: string, intro: string, run: Function }>} */
 export const ACTIVITY_REGISTRY = {
@@ -225,6 +230,102 @@ export const ACTIVITY_REGISTRY = {
     intro: 'Final drill performance. <strong>I</strong> present arms · <strong>K</strong> order arms · <strong>D</strong> eyes right · <strong>W</strong> march · <strong>S</strong> halt · <strong>Enter</strong> for the Eagle, Globe, and Anchor.',
     run: runGraduationParade
   },
+  missionBriefing: {
+    title: 'Mission Briefing',
+    subtitle: 'Command Post — word from the line',
+    intro: 'The unit gathers. Hear what comes next.',
+    run: runMissionBriefing
+  },
+  campaignHonors: {
+    title: 'Campaign Honors',
+    subtitle: 'Honors Formation — battle streamer',
+    intro: 'Final formation. <strong>I</strong> present arms · <strong>K</strong> order arms · <strong>D</strong> eyes right · <strong>W</strong> march · <strong>S</strong> halt · <strong>Enter</strong> as the streamer goes on the colors.',
+    run: runCampaignHonors
+  },
+  fireteamOrders: {
+    title: 'Take the Fireteam',
+    subtitle: 'Fireteam Leader — three Marines',
+    intro: 'You\'re a Corporal now. Make the calls a fireteam leader makes.',
+    run: runFireteamOrders
+  },
+  squadOrders: {
+    title: 'Take the Squad',
+    subtitle: 'Squad Leader — three fireteams',
+    intro: 'You\'re a Sergeant now. Twelve Marines, three team leaders, one plan.',
+    run: runSquadOrders
+  },
+  pointMan: {
+    title: 'Walk Point',
+    subtitle: 'Rifleman duty — lead the column',
+    intro: 'You\'re on point. Press <strong>S</strong> to halt the column on danger signs. Keep moving on a clear trail.',
+    run: runPointMan
+  },
+  sentryPost: {
+    title: 'Stand Your Post',
+    subtitle: 'Rifleman duty — night sentry',
+    intro: 'The line sleeps while you watch. Handle what comes to your post.',
+    run: runSentryPost
+  },
+  carryWounded: {
+    title: 'Carry the Wounded',
+    subtitle: 'Rifleman duty — casualty carry',
+    intro: 'A Marine is down. <strong>I</strong> lift · <strong>W</strong> move · <strong>S</strong> get down · <strong>K</strong> set him down at the aid station.',
+    run: runCarryWounded
+  },
+  newGuy: {
+    title: 'Square Away the New Guy',
+    subtitle: 'Senior Marine duty — mentor a replacement',
+    intro: 'A replacement just joined. Keep him alive long enough to learn.',
+    run: runNewGuy
+  },
+  runner: {
+    title: 'Runner',
+    subtitle: 'Senior Marine duty — carry the message',
+    intro: 'The word has to get through. Memorize the message, then deliver it word for word.',
+    run: runRunner
+  },
+  actingTeamLeader: {
+    title: 'Acting Team Leader',
+    subtitle: 'Senior Marine duty — step up',
+    intro: 'Your team leader is hit. Take charge on the command of execution.',
+    run: runActingTeamLeader
+  },
+  sectorsOfFire: {
+    title: 'Sectors of Fire',
+    subtitle: 'Fireteam leader duty — site your Marines',
+    intro: 'Place your three Marines so the team covers its sector with no gaps.',
+    run: runSectorsOfFire
+  },
+  boundingOverwatch: {
+    title: 'Bounding Overwatch',
+    subtitle: 'Fireteam leader duty — fire and movement',
+    intro: 'Move your fireteam in pairs: one covers, one moves. <strong>L</strong> fire · <strong>W</strong> move · <strong>S</strong> get down · <strong>K</strong> secure.',
+    run: runBoundingOverwatch
+  },
+  headCount: {
+    title: 'After Contact',
+    subtitle: 'Fireteam leader duty — consolidate',
+    intro: 'The shooting stopped. Consolidate your fireteam and report in the correct order.',
+    run: runHeadCount
+  },
+  squadAttack: {
+    title: 'Squad Attack',
+    subtitle: 'Squad leader duty — three fireteams',
+    intro: 'Take the hill with base of fire and maneuver.',
+    run: runSquadAttack
+  },
+  setDefense: {
+    title: 'Set the Defense',
+    subtitle: 'Squad leader duty — build the position',
+    intro: 'Night is coming. Build the squad\'s defense in the right order.',
+    run: runSetDefense
+  },
+  briefTheSquad: {
+    title: 'Brief the Squad',
+    subtitle: 'Squad leader duty — pass the order',
+    intro: 'The platoon commander gives you the order once. Twelve Marines need it exactly.',
+    run: runBriefTheSquad
+  },
   yellowFootprints: {
     title: 'Yellow Footprints',
     subtitle: 'Receiving Barracks — first formation',
@@ -253,6 +354,8 @@ export const ACTIVITY_REGISTRY = {
     title: 'Letter Home',
     subtitle: 'Barracks — first letter',
     intro: 'Compose your first letter home. Your tone and honesty matter.',
+    fieldTagline: 'letter home',
+    fieldIntro: 'Write home between missions. Be honest, be kind, and give nothing away to the enemy.',
     run: runWriteLetter
   },
   nightCleanup: {
@@ -289,6 +392,7 @@ export const ACTIVITY_REGISTRY = {
     title: 'Mail Call',
     subtitle: 'Barracks — letters and packages',
     intro: 'Packages and letters from home. Choose how you handle what arrives.',
+    fieldIntro: 'Mail catches up with the unit. Choose how you handle what arrives.',
     run: runMailCall
   },
   fieldDay: {
@@ -300,7 +404,7 @@ export const ACTIVITY_REGISTRY = {
   shipOut: {
     title: 'Ship Out',
     subtitle: 'Transport Ship — boats away',
-    intro: 'Execute every command before the Higgins boats launch for Guadalcanal.',
+    intro: 'Execute every command before the unit moves out.',
     run: runShipOut
   },
   beachLanding: {

@@ -160,7 +160,7 @@ export const VIETNAM_OPERATIONS = [
         title: 'Word of Tet',
         briefing: 'Report to the Command Post. Officers brief the company — Tet is coming. Everything is about to change.',
         locationName: 'Command Post',
-        activityId: 'familyDay',
+        activityId: 'missionBriefing',
         stats: ['leadership']
       }
     ]
@@ -254,7 +254,7 @@ export const VIETNAM_OPERATIONS = [
       {
         id: 'v8d3',
         title: 'Covering Fire',
-        briefing: 'Report to the Treasury Building. Adjust for wind and qualify across three firing positions.',
+        briefing: 'Report to the Treasury Building. Adjust for wind and engage from standing, kneeling, and prone.',
         locationName: 'Treasury Building',
         activityId: 'rifleQual',
         stats: ['dexterity', 'intelligence']
@@ -334,7 +334,7 @@ export const VIETNAM_OPERATIONS = [
       {
         id: 'v11d1',
         title: 'Final Assault',
-        briefing: 'Report to the Citadel Gate. Final push to clear the Citadel. Adjust for wind and qualify across three positions.',
+        briefing: 'Report to the Citadel Gate. Final push to clear the Citadel. Adjust for wind and engage from standing, kneeling, and prone.',
         locationName: 'Citadel Gate',
         activityId: 'rifleQual',
         stats: ['dexterity', 'intelligence']
@@ -344,7 +344,7 @@ export const VIETNAM_OPERATIONS = [
         title: 'After Action',
         briefing: 'Report to the Command Post. Officers debrief the battle for Hue. Tell them what Tet cost.',
         locationName: 'Command Post',
-        activityId: 'familyDay',
+        activityId: 'missionBriefing',
         stats: ['leadership']
       },
       {
@@ -352,7 +352,7 @@ export const VIETNAM_OPERATIONS = [
         title: 'Campaign Honors',
         briefing: 'Report to the Citadel Wall. Formation below the ramparts. Khe Sanh to Hue — earn your campaign honors.',
         locationName: 'Citadel Wall',
-        activityId: 'graduationParade',
+        activityId: 'campaignHonors',
         stats: ['leadership']
       }
     ]

@@ -16,11 +16,19 @@ import {
   isCampaignComplete,
   findLocation
 } from './campaignData.js';
-import { showSchedule, showWeekComplete, showComingSoon, showGraduation, showRecycled, showRunEnd, showTheaterTransition } from './scheduleUI.js';
-import { getCampaignMapName, getCampaignMapNameForWeek, getTheaterTransitionForWeek } from '../campaigns/campaignRegistry.js';
+import {
+  showSchedule, showWeekComplete, showComingSoon, showGraduation, showRecycled, showRunEnd,
+  showTheaterTransition, showPromotion, showMeritoriousBoard
+} from './scheduleUI.js';
+import { getCampaignMapName, getCampaignMapNameForWeek, getTheaterTransitionForWeek, getCampaignForCharacter } from '../campaigns/campaignRegistry.js';
 import { runActivity } from './runActivity.js';
 import { offerSideQuest } from './sideQuests/sideQuestRegistry.js';
 import { awardGrit } from './metaProgress.js';
+import { ensureRank, evaluateOperationPromotion, evaluateMeritoriousPfc, getRankDuty } from './rank.js';
+import { getActivity } from './activityRegistry.js';
+
+/** Leadership event run right after pinning on NCO rank. */
+const PROMOTION_EVENTS = { cpl: 'fireteamOrders', sgt: 'squadOrders' };
 
 export const PROXIMITY_THRESHOLD = 8;
 
@@ -40,7 +48,7 @@ export class CampaignController {
    * @param {(mapName: string) => object | Promise<object>} [options.onMapChange]
    */
   constructor({ character, slotIndex, player, parsedMap, recruitHUD, hydrationSystem, onRunEnd, onMapChange }) {
-    this.character = ensureCampaign(character);
+    this.character = ensureRank(ensureCampaign(character));
     this.slotIndex = slotIndex ?? character.slotIndex ?? 0;
     this.player = player;
     this.parsedMap = parsedMap;
@@ -95,6 +103,11 @@ export class CampaignController {
   }
 
   async handleGraduation() {
+    if (getCampaignForCharacter(this.character).usesRecruiter) {
+      const board = evaluateMeritoriousPfc(this.character);
+      this.updateCharacter(board.character);
+      await showMeritoriousBoard(this.character, board);
+    }
     const graduated = graduateCampaign(this.character);
     awardGrit(graduated, { graduated: true });
     await showGraduation(graduated);
@@ -167,6 +180,7 @@ export class CampaignController {
 
     await showSchedule(this.character, dayDef, weekDef);
     this.hydrationSystem?.onNewDay();
+    await this.hydrationSystem?.showBriefingIfNeeded();
 
     this.currentDayDef = dayDef;
     this.awaitingProximity = true;
@@ -192,10 +206,45 @@ export class CampaignController {
       }
     }
 
+    if (this.character.campaign.dayInWeek >= weekDef.days.length) {
+      const ended = await this.runRankDuty(weekDef);
+      if (ended) return;
+    }
+
     const weekComplete = this.advanceDay(weekDef);
     if (weekComplete) {
       await showWeekComplete(weekDef, this.character);
+      await this.maybePromote(weekDef);
       await this.maybeTransitionMap(weekDef.id);
+    }
+  }
+
+  /** End-of-operation duty for the Marine's billet. Returns true if an Ironman run ended. */
+  async runRankDuty(weekDef) {
+    const duty = getRankDuty(this.character, weekDef.id);
+    if (!duty) return false;
+    const updated = await runActivity(this.character, duty.activityId, {
+      dayId: duty.dayId,
+      title: `${duty.billet} Duty: ${getActivity(duty.activityId).title}`,
+      stats: []
+    });
+    this.updateCharacter(updated);
+    if (isIronman(this.character) && updated._lastResult?.grade === 'unsat') {
+      return this.handleRunFailure('performance');
+    }
+    return false;
+  }
+
+  async maybePromote(weekDef) {
+    const { character, promotion } = evaluateOperationPromotion(this.character, weekDef);
+    if (!promotion) return;
+    this.updateCharacter(character);
+    await showPromotion(this.character, promotion);
+
+    const eventId = PROMOTION_EVENTS[promotion.to.id];
+    if (eventId) {
+      const updated = await runActivity(this.character, eventId, { dayId: `promo_${eventId}` });
+      this.updateCharacter(updated);
     }
   }
 
@@ -273,7 +322,9 @@ export class CampaignController {
       {
         dayId: dayDef.id,
         title: dayDef.title,
-        stats: dayDef.stats
+        stats: dayDef.stats,
+        briefing: dayDef.briefing,
+        locationName: dayDef.locationName
       }
     );
 

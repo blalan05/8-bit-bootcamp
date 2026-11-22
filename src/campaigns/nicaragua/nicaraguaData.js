@@ -152,7 +152,7 @@ export const NICARAGUA_OPERATIONS = [
         title: 'After Action',
         briefing: 'Report to Command Post. Officers debrief the Nicaragua deployment.',
         locationName: 'Command Post',
-        activityId: 'familyDay',
+        activityId: 'missionBriefing',
         stats: ['leadership']
       },
       {
@@ -160,7 +160,7 @@ export const NICARAGUA_OPERATIONS = [
         title: 'Expedition Honors',
         briefing: 'Report to Managua Barracks. Formation at the barracks. Earn your expedition honors.',
         locationName: 'Managua Barracks',
-        activityId: 'graduationParade',
+        activityId: 'campaignHonors',
         stats: ['leadership']
       }
     ]

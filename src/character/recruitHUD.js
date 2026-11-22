@@ -2,6 +2,7 @@ import { STAT_KEYS, formatStatLabel, STAT_TOOLTIPS } from './stats.js';
 import { getBackgroundById } from './createCharacter.js';
 import { isSandbox } from '../campaign/campaignState.js';
 import { getCampaignForCharacter, getCampaignClimate } from '../campaigns/campaignRegistry.js';
+import { rankedName } from '../campaign/rank.js';
 
 export function createRecruitHUD(character) {
   const el = document.createElement('div');
@@ -56,7 +57,7 @@ export function createRecruitHUD(character) {
         : '';
 
     el.innerHTML = `
-      <div class="recruit-hud-name">${character.name} ${modeBadge}</div>
+      <div class="recruit-hud-name">${rankedName(character)} ${modeBadge}</div>
       <div class="recruit-hud-meta">${weekMeta} · ${bg.name} ${tokenBadge}</div>
       ${hydrationBar}
       <div class="recruit-hud-stats">${statRows}</div>

@@ -16,7 +16,9 @@ export const DEFAULT_CLIMATE = {
   exhaustionTitle: 'Heat Exhaustion',
   exhaustionCopy: 'You collapsed from dehydration. Corpsman revived you — readiness -5, hydration refilled to 50%.',
   pickupHint: 'Find canteens on the map before your next patrol.',
-  casualtyLabel: 'Heat Casualty'
+  casualtyLabel: 'Heat Casualty',
+  pickupName: 'canteen',
+  briefingTitle: 'Hydrate or Die'
 };
 
 export const MAP_BACKGROUNDS = {
@@ -126,7 +128,9 @@ export const CAMPAIGNS = {
       exhaustionTitle: 'Frostbite',
       exhaustionCopy: 'You went down in the snow. Corpsman got you to a warming tent — readiness -5, warmth restored to 50%.',
       pickupHint: 'Find warming fires on the map before your next patrol.',
-      casualtyLabel: 'Cold Casualty'
+      casualtyLabel: 'Cold Casualty',
+      pickupName: 'warming fire',
+      briefingTitle: 'Stay Warm or Freeze'
     },
     briefing: {
       officer: 'Col. Puller',
@@ -182,7 +186,9 @@ export const CAMPAIGNS = {
       exhaustionTitle: 'Immersion Foot',
       exhaustionCopy: 'Weeks of monsoon rot took you down. Corpsman dried you out in the rear — readiness -5, morale restored to 50%.',
       pickupHint: 'Find dry ponchos on the map before your next patrol.',
-      casualtyLabel: 'Monsoon Casualty'
+      casualtyLabel: 'Monsoon Casualty',
+      pickupName: 'dry poncho',
+      briefingTitle: 'Keep Your Feet Dry'
     },
     briefing: {
       officer: 'Capt. Reyes',
@@ -238,7 +244,8 @@ export const CAMPAIGNS = {
       exhaustionTitle: 'Heat Casualty',
       exhaustionCopy: '120 degrees in full battle rattle. Corpsman got an IV in you in the shade of the ampitrac — readiness -5, water restored to 50%.',
       pickupHint: 'Find bottled water on the map before your next patrol.',
-      casualtyLabel: 'Heat Casualty'
+      casualtyLabel: 'Heat Casualty',
+      pickupName: 'water bottle'
     },
     briefing: {
       officer: 'Maj. Torres',
@@ -294,7 +301,8 @@ export const CAMPAIGNS = {
       exhaustionTitle: 'Desert Thirst',
       exhaustionCopy: 'Five hundred miles of Libyan desert took you down. The caravan shared its last skins — readiness -5, water restored to 50%.',
       pickupHint: 'Find water skins on the map before the column moves again.',
-      casualtyLabel: 'Desert Casualty'
+      casualtyLabel: 'Desert Casualty',
+      pickupName: 'water skin'
     },
     briefing: {
       officer: 'Lt. O\'Bannon',
@@ -445,6 +453,15 @@ export function getCampaignDef(campaignId = DEFAULT_CAMPAIGN_ID) {
 export function getCampaignForCharacter(character) {
   const id = character?.campaign?.campaignId ?? DEFAULT_CAMPAIGN_ID;
   return getCampaignDef(id);
+}
+
+/**
+ * Deployed (war or expedition) campaign rather than the recruit depot. Depot-only
+ * concepts such as D.I.s, graduation, and Family Day do not exist here.
+ * @param {object} [character]
+ */
+export function isFieldCampaign(character) {
+  return getCampaignForCharacter(character).usesRecruiter === false;
 }
 
 /**

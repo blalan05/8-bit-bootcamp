@@ -4,6 +4,7 @@
  */
 
 import { getCampaignForCharacter, getCampaignWeeks } from '../campaigns/campaignRegistry.js';
+import { dutyActivityId } from './rank.js';
 
 /**
  * Era-neutral notes keyed by activityId. Activities are reused across campaigns,
@@ -172,10 +173,74 @@ export const FIELD_NOTES = {
     text: 'Rapid-fire knowledge questions from senior officers. Bearing matters as much as the answer: stay composed, eyes forward.'
   },
   familyDay: {
+    topic: 'Family Day',
+    text: 'The day before graduation, new Marines get on-base liberty with their families. For many families, it is the first time they have seen their Marine in three months.'
+  },
+  graduationParade: {
+    topic: 'Eagle, Globe, and Anchor',
+    text: 'The emblem was adopted in 1868. The eagle stands for the nation, the globe for worldwide service, and the anchor for the Corps\'s naval roots.'
+  },
+  fireteamOrders: {
+    topic: 'The Fireteam',
+    text: 'The Marine Corps built its rifle squad around four-Marine fireteams during WWII: a team leader, an automatic rifleman, an assistant, and a rifleman. A Corporal leads it.'
+  },
+  squadOrders: {
+    topic: 'The Rifle Squad',
+    text: 'Three fireteams and a squad leader, usually a Sergeant. Small-unit leaders make the decisions that win fights, because the officer is rarely standing next to them.'
+  },
+  pointMan: {
+    topic: 'Walking Point',
+    text: 'The point man leads the column and sees danger first. He watches the ground for signs, not the horizon, and halts the column at anything wrong.'
+  },
+  sentryPost: {
+    topic: 'The Sentry',
+    text: 'A sentry challenges anyone approaching and does not quit the post until properly relieved. The General Orders a recruit memorizes exist for this moment.'
+  },
+  carryWounded: {
+    topic: 'Casualty Carry',
+    text: 'Marines don\'t leave their wounded behind. Move the casualty from cover to cover, and get down when fire comes in. A second casualty helps no one.'
+  },
+  newGuy: {
+    topic: 'Replacements',
+    text: 'Replacements who arrived mid-campaign were most at risk in their first days. Veterans who took them under their wing saved lives.'
+  },
+  runner: {
+    topic: 'Runners',
+    text: 'Before radios reached every squad, and whenever they failed, orders traveled on foot. A runner who garbled the message could lose the fight.'
+  },
+  actingTeamLeader: {
+    topic: 'Billets Above Rank',
+    text: 'Junior Marines routinely fill the billet above their rank when leaders fall. Every Marine trains to take over the job of the Marine above him.'
+  },
+  sectorsOfFire: {
+    topic: 'Sectors of Fire',
+    text: 'Each Marine is assigned a sector that overlaps his neighbor\'s, so the whole front is covered with no gaps for an enemy to slip through.'
+  },
+  boundingOverwatch: {
+    topic: 'Fire and Movement',
+    text: 'One element fires to keep the enemy\'s heads down while the other moves. Then they swap. Nobody moves without someone covering.'
+  },
+  headCount: {
+    topic: 'Consolidation',
+    text: 'After contact, leaders account for every Marine, treat the wounded, redistribute ammunition, and report up before anyone relaxes.'
+  },
+  squadAttack: {
+    topic: 'Base of Fire and Maneuver',
+    text: 'A squad leader fixes the enemy with one fireteam while the others maneuver to the flank. Fire shifts away from the objective just before the assault.'
+  },
+  setDefense: {
+    topic: 'Priorities of Work',
+    text: 'In the defense, security goes out first. Then sectors, weapons, fighting holes, and a watch plan. The position improves as long as you hold it.'
+  },
+  briefTheSquad: {
+    topic: 'Passing the Order',
+    text: 'An order is only as good as the last Marine to hear it. Squad leaders repeat the situation, the mission, and the plan until every Marine can say it back.'
+  },
+  missionBriefing: {
     topic: 'After Action Review',
     text: 'What was supposed to happen? What happened? Why? What do we do next time? A debrief is about lessons, not blame.'
   },
-  graduationParade: {
+  campaignHonors: {
     topic: 'Battle Streamers',
     text: 'Every campaign a unit fights in earns a streamer on its colors. The Marine Corps colors carry more than fifty.'
   },
@@ -299,14 +364,6 @@ export const FIELD_NOTES = {
  */
 export const CAMPAIGN_FIELD_NOTES = {
   bootcamp: {
-    familyDay: {
-      topic: 'Family Day',
-      text: 'The day before graduation, new Marines get on-base liberty with their families. For many families, it is the first time they have seen their Marine in three months.'
-    },
-    graduationParade: {
-      topic: 'Eagle, Globe, and Anchor',
-      text: 'The emblem was adopted in 1868. The eagle stands for the nation, the globe for worldwide service, and the anchor for the Corps\'s naval roots.'
-    },
     writeLetter: {
       topic: 'Letters Home',
       text: 'Apart from a short, scripted call on arrival, letters are a recruit\'s only link home. Write often, because your family is counting the days too.'
@@ -356,6 +413,9 @@ export function getLearnedFieldNotes(character) {
 
   for (const dayId of Object.keys(completed)) {
     if (dayId.startsWith('sandbox_')) add(dayId.slice('sandbox_'.length), 'Sandbox');
+    if (dayId.startsWith('promo_')) add(dayId.slice('promo_'.length), 'Promotion');
+    const dutyId = dutyActivityId(dayId);
+    if (dutyId) add(dutyId, 'Rank duty');
   }
 
   return notes;

@@ -12,6 +12,7 @@ import { isSandbox, isIronman, isGraduated } from '../campaign/campaignState.js'
 import { getCampaignForCharacter, getCampaignClimate } from '../campaigns/campaignRegistry.js';
 import { getTotalWeeks } from '../campaign/campaignData.js';
 import { escapeHtml } from './html.js';
+import { getRank, getPerks, perkName, perkUsesLeft, perkUsesPerOperation, describeNextPromotion, rankedName, billetName, PERK_INFO } from '../campaign/rank.js';
 
 const STAT_NAMES = {
   strength: 'Strength',
@@ -47,9 +48,12 @@ export function renderCharacterSheet(container, ctx) {
   const campaign = character.campaign ?? {};
   const bg = getBackgroundById(character.backgroundId);
   const sandbox = isSandbox(character);
-  const unitLabel = isGraduated(character)
-    ? (character.honorsTitle ?? 'Marine')
-    : (campaignDef.unitLabel ?? 'Recruit');
+  const baseUnit = campaignDef.unitLabel ?? 'Recruit';
+  const unitLabel = !isGraduated(character)
+    ? baseUnit
+    : campaignDef.usesRecruiter === false
+      ? `${baseUnit} · ${character.honorsTitle ?? 'Campaign Honors'}`
+      : (character.honorsTitle ?? 'Marine');
 
   const statRows = STAT_KEYS.map(key => {
     const value = character.stats?.[key] ?? 10;
@@ -99,11 +103,29 @@ export function renderCharacterSheet(container, ctx) {
       ${isIronman(character) ? row('Recycle tokens', campaign.recycleTokens ?? 0) : ''}
     `;
 
+  const rank = getRank(character);
+  const nextPromotion = describeNextPromotion(character);
+  const perkLines = getPerks(character).map(perk => {
+    const perOp = perkUsesPerOperation(character, perk);
+    const uses = perk === 'underground' ? '' : ` (${perkUsesLeft(character, perk)}/${perOp} this ${periodLabel.toLowerCase()})`;
+    return `<p class="recruiter-copy recruiter-copy--small promotion-perk"><strong>${perkName(character, perk)}</strong>${uses} — ${PERK_INFO[perk].description}</p>`;
+  }).join('');
+  const rankSection = rank
+    ? `
+        <h3 class="sheet-heading">Rank</h3>
+        <div class="sheet-record">
+          ${row('Grade', `<span class="rank-insignia">${rank.abbr}</span>${rank.title} (E-${rank.grade})`)}
+          ${billetName(character) ? row('Billet', `${billetName(character)} · rank duty each ${periodLabel.toLowerCase()}`) : ''}
+        </div>
+        ${perkLines}
+        ${nextPromotion ? `<p class="recruiter-copy recruiter-copy--small">Next: ${nextPromotion}</p>` : ''}`
+    : '';
+
   container.innerHTML = `
     <div class="sheet">
       <div class="sheet-portrait-col">
         <div class="sheet-portrait" id="sheet-portrait"></div>
-        <p class="sheet-name">${escapeHtml(character.name)}</p>
+        <p class="sheet-name">${escapeHtml(rankedName(character))}</p>
         <p class="sheet-rank">${escapeHtml(unitLabel)}</p>
         <p class="sheet-campaign">${campaignDef.title}<br>${campaignDef.subtitle ?? ''}</p>
       </div>
@@ -115,6 +137,8 @@ export function renderCharacterSheet(container, ctx) {
         <h3 class="sheet-heading">Attributes</h3>
         <div class="sheet-stats">${statRows}</div>
         <p class="sheet-derived">Walk speed ${walkPct}% (from DEX)</p>
+
+        ${rankSection}
 
         <h3 class="sheet-heading">Service Record</h3>
         <div class="sheet-record">${record}</div>
